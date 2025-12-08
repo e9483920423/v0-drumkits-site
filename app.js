@@ -9,14 +9,6 @@ const ITEMS_PER_PAGE = 6
 let allDownloads = []
 let currentPage = 1
 
-// Helper: Convert title to slug
-function titleToSlug(title) {
-  return title
-    .toLowerCase()           // lowercase
-    .replace(/\s+/g, "_")    // spaces → underscores
-    .replace(/[^\w_]/g, ""); // remove non-alphanumeric chars except "_"
-}
-
 async function loadDownloads() {
   try {
     const response = await fetch("dl-data/dl-data.json")
@@ -55,7 +47,6 @@ function renderDownloads(downloads) {
     card.className = "download-item"
 
     const imageUrl = getItemImageUrl(item.id)
-    const slug = titleToSlug(item.title) // generate slug from title
 
     card.innerHTML = `
       <div class="item-image">
@@ -74,7 +65,7 @@ function renderDownloads(downloads) {
             <span>${escapeHtml(item.updateDate)}</span>
           </div>
         </div>
-        <a href="/${slug}" class="download-btn">View Details</a>
+        <a href="kit-page/?slug=${encodeURIComponent(item.slug)}" class="download-btn">View Details</a>
       </div>
     `
 
@@ -148,38 +139,3 @@ function escapeHtml(text) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
-
-// ---------- Kit Page Script for Pretty URL Rendering ----------
-document.addEventListener("DOMContentLoaded", async () => {
-  const pathSlug = window.location.pathname.slice(1); // remove leading "/"
-  if (!pathSlug) return; // do nothing if on homepage
-
-  const response = await fetch("/dl-data/dl-data.json");
-  if (!response.ok) {
-    document.body.innerHTML = "<p>Failed to load items.</p>";
-    return;
-  }
-
-  const allDownloads = await response.json();
-  const item = allDownloads.find(i => titleToSlug(i.title) === pathSlug);
-
-  if (!item) {
-    document.body.innerHTML = "<p>Item not found.</p>";
-    return;
-  }
-
-  const container = document.getElementById("itemDetails");
-  if (!container) {
-    console.error("Missing container with id 'itemDetails'");
-    return;
-  }
-
-  container.innerHTML = `
-    <h1>${item.title}</h1>
-    <img src="${getItemImageUrl(item.id)}" alt="${item.title}">
-    <p>${item.description}</p>
-    <p>File Size: ${item.fileSize}</p>
-    <p>Updated: ${item.updateDate}</p>
-    <a href="${item.download}" target="_blank" class="download-btn">Download</a>
-  `;
-});
