@@ -7,7 +7,7 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch("../dl-data/dl-data.json")
+    const response = await fetch("/dl-data/dl-data.json")
     if (!response.ok) throw new Error("Failed to load downloads")
     allDownloads = await response.json()
     displayItem()
@@ -20,6 +20,10 @@ async function loadDownloads() {
 function getSlugFromUrl() {
   // Get slug from path (last segment)
   let slug = window.location.pathname.split("/").filter(Boolean).pop()
+
+  // TEMP DEBUGGING - remove once working
+  console.log("DEBUG: Full pathname:", window.location.pathname)
+  console.log("DEBUG: Extracted slug:", slug)
 
   // Normalize the slug to handle any encoding issues
   if (slug) {
