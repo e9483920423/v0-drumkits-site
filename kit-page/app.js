@@ -18,13 +18,23 @@ async function loadDownloads() {
 }
 
 function displayItem() {
-  const params = new URLSearchParams(window.location.search)
-  const slug = params.get("slug")
+  // Get slug from path (last segment)
+  let slug = window.location.pathname.split("/").filter(Boolean).pop()
+
+  // If slug is missing, try query string (old links)
+  if (!slug) {
+    const params = new URLSearchParams(window.location.search)
+    slug = params.get("slug")
+  }
 
   if (!slug) {
     showError("No item specified. Please return to the home page.")
     return
   }
+
+  // Optional: clean URL in the browser
+  const newUrl = `${window.location.origin}/${slug}`
+  window.history.replaceState({}, "", newUrl)
 
   const item = allDownloads.find((d) => d.slug === slug)
 
