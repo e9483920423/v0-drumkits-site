@@ -1,3 +1,5 @@
+// INITIAL TEST - if you see this in console, the file is loading
+console.log("KIT-PAGE LOADED: Starting drum kit detail page...")
 let allDownloads = []
 
 function getItemImageUrl(id) {
