@@ -55,16 +55,6 @@ function renderDownloads(downloads) {
       <div class="item-content">
         <h3 class="item-title">${escapeHtml(item.title)}</h3>
         <p class="item-description">${escapeHtml(item.description)}</p>
-        <div class="item-meta">
-          <div class="meta-row">
-            <span>File Size:</span>
-            <span>${escapeHtml(item.fileSize)}</span>
-          </div>
-          <div class="meta-row">
-            <span>Updated:</span>
-            <span>${escapeHtml(item.updateDate)}</span>
-          </div>
-        </div>
         <a href="/${item.slug}" class="download-btn">View Details</a>
       </div>
     `
