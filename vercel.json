@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    {
-      "source": "/:slug",
-      "destination": "/kit-page/?slug=:slug"
-    }
+    { "source": "/:slug", "destination": "/kit-page/index.html" }
   ]
 }
