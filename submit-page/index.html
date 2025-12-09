@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Collection - DRUMKITS.SITE</title>
+    <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/global.css">
+    <link rel="stylesheet" href="/submit-page/submit-page.css">
+</head>
+<body>
+    <!-- Header placeholder for dynamic loading -->
+    <header id="header-placeholder"></header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="submit-page-title">
+            <h1>Submit a New Collection</h1>
+            <p>Share your drum kit collections - submit download links and I'll review them for the site.</p>
+        </div>
+
+        <div class="submit-form-container">
+            <form id="submitForm" class="submit-form">
+                <div class="form-group">
+                    <label for="downloadLink">Download Link</label>
+                    <input
+                        type="url"
+                        id="downloadLink"
+                        name="downloadLink"
+                        placeholder="https://example.com/download.zip"
+                        required
+                        pattern="https?://.*"
+                    >
+                    <small class="form-help">Enter a direct download link to your drum kit collection</small>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Submit for Review
+                </button>
+            </form>
+
+            <div id="submitStatus" class="submit-status"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 DRUMKITS.SITE by kits4leaks. All rights reserved.</p>
+    </footer>
+
+    <!-- Load header before main app -->
+    <script src="/header-loader.js"></script>
+    <script src="/submit-page/app.js"></script>
+</body>
+</html>
