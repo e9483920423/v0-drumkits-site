@@ -1,5 +1,3 @@
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1447775203454357625/zY9OAL8eL5yVzgdXGMn1WIGq_Y03tyew5pRXvTQP1I1spJJGvkSe34ZZGoLF3F3Cei0P";
-
 function showStatus(message, type = "info") {
   const statusDiv = document.getElementById("submitStatus");
 
@@ -55,52 +53,25 @@ function validateUrl(url) {
   }
 }
 
-async function submitToDiscord(downloadLink) {
-  const webhookData = {
-    content: `**New Drum Kit Submission**`,
-    embeds: [{
-      title: "DRUMKITS.SITE",
-      description: "A new drum kit has been submitted for review.",
-      color: 0x00ff00,
-      fields: [
-        {
-          name: "📎",
-          value: downloadLink,
-          inline: false
-        },
-        {
-          name: "Date",
-          value: new Date().toLocaleString(),
-          inline: true
-        },
-        {
-          name: "Download Source",
-          value: "DRUMKITS.SITE Submission Page",
-          inline: true
-        }
-      ],
-      footer: {
-        text: "Ready for manual review."
-      }
-    }]
-  };
-
+async function submitToApi(downloadLink) {
   try {
-    const response = await fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
+    const response = await fetch('/api/submit', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(webhookData)
+      body: JSON.stringify({ downloadLink })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error(`Hook failed: ${response.status}`);
+      throw new Error(data.error || 'Submission failed');
     }
 
-    return { success: true };
+    return { success: true, message: data.message };
   } catch (error) {
-    console.error("Hook error:", error);
+    console.error("API submission error:", error);
     return { success: false, error: error.message };
   }
 }
@@ -132,17 +103,17 @@ function handleFormSubmission() {
     showStatus("Sending...", "info");
 
     try {
-      const result = await submitToDiscord(downloadLink);
+      const result = await submitToApi(downloadLink);
 
       if (result.success) {
-        showStatus("Submission sent! Your kit will be reviewed.", "success");
+        showStatus(result.message || "Submission sent! Your kit will be reviewed.", "success");
         form.reset();
       } else {
-        showStatus("Failed. Please try again later.", "error");
+        showStatus(result.error || "Failed. Please try again later.", "error");
       }
     } catch (error) {
       console.error("Submission error:", error);
-      showStatus("Network error.", "error");
+      showStatus("Network error. Please check your connection.", "error");
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalBtnText;
