@@ -1,5 +1,3 @@
-// INITIAL TEST - if you see this in console, the file is loading
-console.log("KIT-PAGE LOADED: Starting drum kit detail page...")
 let allDownloads = []
 
 function getItemImageUrl(id) {
@@ -22,10 +20,6 @@ async function loadDownloads() {
 function getSlugFromUrl() {
   // Get slug from path (last segment)
   let slug = window.location.pathname.split("/").filter(Boolean).pop()
-
-  // TEMP DEBUGGING - remove once working
-  console.log("DEBUG: Full pathname:", window.location.pathname)
-  console.log("DEBUG: Extracted slug:", slug)
 
   // Normalize the slug to handle any encoding issues
   if (slug) {
