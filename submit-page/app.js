@@ -31,7 +31,6 @@ function showStatus(message, type = "info") {
 
   statusDiv.style.display = "block";
 
-  // Auto-hide after 10 seconds for success/error
   if (type !== "info") {
     setTimeout(() => {
       statusDiv.style.display = "none";
@@ -43,12 +42,10 @@ function validateUrl(url) {
   try {
     const parsedUrl = new URL(url);
 
-    // Check if it's HTTP or HTTPS
     if (!["http:", "https:"].includes(parsedUrl.protocol)) {
       return false;
     }
 
-    // Basic check for common file extensions or hosting sites
     const lowerUrl = url.toLowerCase();
     const fileIndicators = ['.zip', '.rar', '.7z', '.tar.gz', '.tgz', '/download/', 'drive.google.com', 'mega.nz', 'pixeldrain.com', 'mediafire.com'];
 
@@ -60,30 +57,30 @@ function validateUrl(url) {
 
 async function submitToDiscord(downloadLink) {
   const webhookData = {
-    content: ` **New Drum Kit Submission!**`,
+    content: `**New Drum Kit Submission**`,
     embeds: [{
-      title: "🔗 Collection Submission",
-      description: "A new drum kit collection has been submitted for review.",
+      title: "DRUMKITS.SITE",
+      description: "A new drum kit has been submitted for review.",
       color: 0x00ff00,
       fields: [
         {
-          name: "📎 Download Link",
+          name: "📎",
           value: downloadLink,
           inline: false
         },
         {
-          name: "⏰ Submitted",
+          name: "Date",
           value: new Date().toLocaleString(),
           inline: true
         },
         {
-          name: "🌐 Source",
-          value: "DRUMKITS.SITE Submission Form",
+          name: "Download Source",
+          value: "DRUMKITS.SITE Submission Page",
           inline: true
         }
       ],
       footer: {
-        text: "Ready for manual review and addition to the collection."
+        text: "Ready for manual review."
       }
     }]
   };
@@ -98,12 +95,12 @@ async function submitToDiscord(downloadLink) {
     });
 
     if (!response.ok) {
-      throw new Error(`Discord webhook failed: ${response.status}`);
+      throw new Error(`Hook failed: ${response.status}`);
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Discord webhook error:", error);
+    console.error("Hook error:", error);
     return { success: false, error: error.message };
   }
 }
@@ -119,7 +116,6 @@ function handleFormSubmission() {
     const formData = new FormData(form);
     const downloadLink = formData.get("downloadLink").trim();
 
-    // Validate URL
     if (!downloadLink) {
       showStatus("Please enter a download link.", "error");
       return;
@@ -130,30 +126,24 @@ function handleFormSubmission() {
       return;
     }
 
-    // Disable button and show loading
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
-    // Show submission in progress
-    showStatus("Sending to Discord for review...", "info");
+    showStatus("Sending...", "info");
 
     try {
-      // Submit to Discord
       const result = await submitToDiscord(downloadLink);
 
       if (result.success) {
-        showStatus("✅ Submission sent! Your drum kit will be reviewed and may be added to the collection.", "success");
-
-        // Clear form
+        showStatus("Submission sent! Your kit will be reviewed.", "success");
         form.reset();
       } else {
-        showStatus("❌ Submission failed. Please try again later or contact support.", "error");
+        showStatus("Failed. Please try again later.", "error");
       }
     } catch (error) {
       console.error("Submission error:", error);
-      showStatus("❌ Network error. Please check your connection and try again.", "error");
+      showStatus("Network error.", "error");
     } finally {
-      // Re-enable button
       submitBtn.disabled = false;
       submitBtn.textContent = originalBtnText;
     }
