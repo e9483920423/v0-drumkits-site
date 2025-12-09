@@ -1,8 +1,8 @@
 let allDownloads = []
 
 function getItemImageUrl(id) {
-  const accountHash = "7c6fd4db724f0766281331cc84d29df8"
-  return `https://kit-files.${accountHash}.r2.cloudflarestorage.com/${id}.jpg`
+  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+  return `${PUB_URL}/${id}.jpg`
 }
 
 async function loadDownloads() {
