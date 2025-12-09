@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/:slug",
-      "destination": "/kit-page/index.html?slug=:slug"
+      "destination": "/kit-page/?slug=:slug"
     }
   ]
 }
