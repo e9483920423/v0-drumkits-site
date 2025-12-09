@@ -137,7 +137,11 @@ main {
   margin-bottom: 1rem;
   line-height: 1.5;
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 
 .item-meta {
   font-size: 0.85rem;
@@ -177,7 +181,7 @@ main {
   background-color: #a93226;
 }
 
-/* added pagination container styling */
+/* pagination container styling */
 .pagination-container {
   display: flex;
   justify-content: center;

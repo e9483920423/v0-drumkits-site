@@ -3,9 +3,7 @@ async function loadHeader() {
   if (!headerPlaceholder) return
 
   try {
-    // Determine the correct path based on current location
-    const isKitPage = window.location.pathname.includes("kit-page")
-    const headerPath = isKitPage ? "../header.html" : "header.html"
+    const headerPath = "/header.html"
 
     const response = await fetch(headerPath)
     if (!response.ok) throw new Error("Failed to load header")
