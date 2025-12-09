@@ -41,6 +41,9 @@
   font-size: 1.1rem;
   margin-bottom: 2rem;
   line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .item-specs {
@@ -102,6 +105,8 @@
   background-color: #111;
   color: #fff;
   border: 1px solid #222;
+  margin: 0 auto;
+  display: block;
 }
 
 .back-btn:hover {
