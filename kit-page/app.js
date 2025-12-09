@@ -17,9 +17,26 @@ async function loadDownloads() {
   }
 }
 
-function displayItem() {
+function getSlugFromUrl() {
   // Get slug from path (last segment)
   let slug = window.location.pathname.split("/").filter(Boolean).pop()
+
+  // Normalize the slug to handle any encoding issues
+  if (slug) {
+    try {
+      slug = decodeURIComponent(slug)
+    } catch (e) {
+      // If decoding fails, use the original slug
+      console.warn("Could not decode slug, using original:", slug)
+    }
+  }
+
+  return slug
+}
+
+function displayItem() {
+  // Get slug using improved extraction method
+  let slug = getSlugFromUrl()
 
   // If slug is missing, try query string (old links)
   if (!slug) {
