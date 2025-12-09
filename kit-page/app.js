@@ -7,7 +7,7 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch("/dl-data/dl-data.json")
+    const response = await fetch("../dl-data/dl-data.json")
     if (!response.ok) throw new Error("Failed to load downloads")
     allDownloads = await response.json()
     displayItem()

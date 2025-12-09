@@ -65,7 +65,7 @@ function renderDownloads(downloads) {
             <span>${escapeHtml(item.updateDate)}</span>
           </div>
         </div>
-        <a href="/${encodeURIComponent(item.slug)}" class="download-btn">View Details</a>
+        <a href="kit-page/?slug=${encodeURIComponent(item.slug)}" class="download-btn">View Details</a>
       </div>
     `
 
