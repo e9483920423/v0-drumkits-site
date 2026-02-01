@@ -70,7 +70,7 @@ function displayItem() {
   mainContent.innerHTML = `
     <div class="item-hero">
       <div class="item-image-wrapper">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}">
+        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" onerror="this.src='/errors/default.jpg'">
       </div>
       <div class="item-details">
         <h1 class="item-title">${escapeHtml(item.title)}</h1>

@@ -1,0 +1,19 @@
+/* Search Results Page Styles */
+
+.search-results-title {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.search-results-title h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.search-results-title p {
+  font-size: 1rem;
+  color: #999;
+  margin-top: 0.5rem;
+}

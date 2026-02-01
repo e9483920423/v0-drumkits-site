@@ -54,7 +54,7 @@ function renderDownloads(downloads) {
     card.innerHTML = `
   <div class="item-image">
     <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
-         onerror="this.src='/placeholder.jpg'">
+         onerror="this.src='/errors/default.jpg'">
   </div>
   <div class="item-content">
     <h3 class="item-title">${escapeHtml(item.title)}</h3>
