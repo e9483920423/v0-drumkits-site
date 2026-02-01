@@ -1,7 +1,3 @@
-// Supabase configuration
-const SUPABASE_URL = "https://jdianavibwqbxgjkzniq.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamt6bmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMjM4NTEsImV4cCI6MjA4MDc5OTg1MX0.qafIxFwH1w0c6zWb69G6226pyfUPINx7I4_idyiGPs8"
-
 let allDownloads = []
 
 function getItemImageUrl(id) {
@@ -11,27 +7,9 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/drum_kits?select=*&order=id.asc`, {
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    })
+    const response = await fetch("/dl-data/dl-data.json")
     if (!response.ok) throw new Error("Failed to load downloads")
-    
-    const data = await response.json()
-    // Map Supabase column names to expected format
-    allDownloads = data.map(item => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      fileSize: item.file_size,
-      updateDate: item.update_date,
-      download: item.download,
-      category: item.category,
-      src: item.src
-    }))
+    allDownloads = await response.json()
     displayItem()
   } catch (error) {
     console.error("Error loading downloads:", error)
