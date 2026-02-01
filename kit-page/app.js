@@ -78,12 +78,14 @@ function displayItem() {
         <div class="item-specs">
           <div class="spec-row">
             <span class="spec-label">File Size:</span>
-            <span class="spec-value">${escapeHtml(item.fileSize)}</span>
+            <span class="spec-value">${escapeHtml(item.fileSize || 'N/A')}</span>
           </div>
+          ${item.updateDate ? `
           <div class="spec-row">
             <span class="spec-label">Last Updated:</span>
             <span class="spec-value">${escapeHtml(item.updateDate)}</span>
           </div>
+          ` : ''}
         </div>
         <div class="action-buttons">
           <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
@@ -105,6 +107,11 @@ function showError(message) {
 }
 
 function escapeHtml(text) {
+  // Handle null, undefined, or non-string values
+  if (text == null) return ''
+  if (typeof text !== 'string') {
+    text = String(text)
+  }
   const map = {
     "&": "&amp;",
     "<": "&lt;",
