@@ -1,6 +1,6 @@
 async function loadFooter() {
-  const footerPlaceholder = document.getElementById("footer-placeholder")
-  if (!footerPlaceholder) return
+  const footer = document.querySelector("footer")
+  if (!footer) return
 
   try {
     const footerPath = "/footer.html"
@@ -9,7 +9,7 @@ async function loadFooter() {
     if (!response.ok) throw new Error("Failed to load footer")
 
     const footerContent = await response.text()
-    footerPlaceholder.innerHTML = footerContent
+    footer.innerHTML = footerContent
   } catch (error) {
     console.error("Error loading footer:", error)
   }
