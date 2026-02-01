@@ -37,5 +37,29 @@
     <script src="header-loader.js"></script>
     <script src="footer-loader.js"></script>
     <script src="app.js"></script>
+
+    <!-- === 50/50 DirectLink rotation (loads ONE network per page view) === -->
+    <script>
+    (function () {
+      var rand = Math.random();
+
+      if (rand < 0.5) {
+        // Network A: vigorousescape
+        var s1 = document.createElement("script");
+        s1.src = "https://vigorousescape.com/bb3.VC0bP/3Tp/vpb-m-V/JbZ/D/0m2ENAzMYeySNCzEMu5pLeT/Yd3hNMjPI/3yN/DvAr";
+        s1.async = true;
+        s1.referrerPolicy = "no-referrer-when-downgrade";
+        document.body.appendChild(s1);
+      } else {
+        // Network B: plumprush
+        var s2 = document.createElement("script");
+        s2.src = "//plumprush.com/cbDu9W6mb.2R5slpSbWMQ/9wNjj-cg2/M/jZcRz/OnSB0I2LNgzyYyyvNLz/Qawo";
+        s2.async = true;
+        s2.referrerPolicy = "no-referrer-when-downgrade";
+        document.body.appendChild(s2);
+      }
+    })();
+    </script>
+
 </body>
 </html>
