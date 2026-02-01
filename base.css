@@ -20,7 +20,7 @@ body {
 
 /* Header & Navigation */
 header {
-  background-color: #000;
+  background-color: #0a0a0a;
   border-bottom: 1px solid #222;
   padding: 1.5rem 0;
   position: sticky;
@@ -51,7 +51,7 @@ nav a {
 }
 
 nav a:hover {
-  color: #e74c3c;
+  color: #ff0043;
 }
 
 /* Search Form */
@@ -95,7 +95,7 @@ nav a:hover {
 }
 
 .search-btn:hover {
-  background-color: #e74c3c;
+  background-color: #ff0043;
 }
 
 @media (max-width: 768px) {
@@ -141,7 +141,7 @@ main {
 }
 
 .page-title p a {
-  color: #e74c3c;
+  color: #ff0043;
   text-decoration: none;
   font-weight: 500;
 }
@@ -169,7 +169,7 @@ main {
 }
 
 .download-item:hover {
-  border-color: #e74c3c;
+  border-color: #ff0043;
   transform: translateY(-4px);
 }
 
@@ -232,7 +232,7 @@ main {
 
 .download-btn {
   display: inline-block;
-  background-color: #e74c3c;
+  background-color: #ff0043;
   color: #fff;
   padding: 0.75rem 1.5rem;
   text-decoration: none;
@@ -276,13 +276,13 @@ main {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  border-color: #ff0043;
+  color: #ff0043;
 }
 
 .pagination-btn.active {
-  background-color: #e74c3c;
-  border-color: #e74c3c;
+  background-color: #ff0043;
+  border-color: #ff0043;
   color: #fff;
 }
 
