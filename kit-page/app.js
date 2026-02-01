@@ -78,12 +78,12 @@ function displayItem() {
         <div class="item-specs">
           <div class="spec-row">
             <span class="spec-label">File Size:</span>
-            <span class="spec-value">${escapeHtml(item.fileSize || 'N/A')}</span>
+            <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
           </div>
-          ${item.updateDate ? `
+          ${item.update_date ? `
           <div class="spec-row">
             <span class="spec-label">Last Updated:</span>
-            <span class="spec-value">${escapeHtml(item.updateDate)}</span>
+            <span class="spec-value">${escapeHtml(item.update_date)}</span>
           </div>
           ` : ''}
         </div>
