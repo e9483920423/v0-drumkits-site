@@ -11,10 +11,13 @@ let currentPage = 1
 
 async function loadDownloads() {
   try {
-    const response = await fetch("dl-data/dl-data.json")
-    if (!response.ok) throw new Error("Failed to load downloads")
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
 
-    allDownloads = await response.json()
+    if (error) throw error
+
+    allDownloads = data || []
     currentPage = 1
     renderCurrentPage()
     renderPagination()
@@ -49,16 +52,21 @@ function renderDownloads(downloads) {
     const imageUrl = getItemImageUrl(item.id)
 
     card.innerHTML = `
-      <div class="item-image">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='/placeholder.jpg'">
-      </div>
-      <div class="item-content">
-        <h3 class="item-title">${escapeHtml(item.title)}</h3>
-        <p class="item-description">${escapeHtml(item.description)}</p>
-        <a href="/${item.slug}" class="download-btn">View Details</a>
-      </div>
-    `
+  <div class="item-image">
+    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
+         onerror="this.src='/placeholder.jpg'">
+  </div>
+  <div class="item-content">
+    <h3 class="item-title">${escapeHtml(item.title)}</h3>
 
+    ${item.description && item.description !== "null"
+      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+      : ''
+    }
+
+    <a href="/${item.slug}" class="download-btn">View Details</a>
+  </div>
+  `;
     list.appendChild(card)
   })
 }

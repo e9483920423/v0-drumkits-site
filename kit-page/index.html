@@ -22,7 +22,9 @@
         <p>&copy; 2025 Download Index. All rights reserved.</p>
     </footer>
 
-    <!-- Load header before page-specific script -->
+    <!-- Load Supabase library, config, header, then page-specific script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script src="/supabase-config.js"></script>
     <script src="/header-loader.js"></script>
     <script src="/kit-page/app.js"></script>
 </body>

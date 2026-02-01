@@ -7,9 +7,13 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch("/dl-data/dl-data.json")
-    if (!response.ok) throw new Error("Failed to load downloads")
-    allDownloads = await response.json()
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+
+    if (error) throw error
+
+    allDownloads = data || []
     displayItem()
   } catch (error) {
     console.error("Error loading downloads:", error)

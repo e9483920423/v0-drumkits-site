@@ -15,7 +15,7 @@
     <main>
         <div class="page-title">
             <!-- <h1>Download Collection</h1> -->
-            <p>EXAMPLE EXAMPLE EXAMPLE EXAMPLE.</p>
+            <p>Index of drum kits by <a href="https://www.drumkits4.me/" target="_blank" rel="noopener noreferrer">kits4leaks</a></p>
         </div>
 
         <div class="downloads-grid" id="downloadsList">
@@ -31,7 +31,9 @@
         <p>&copy; 2025 Download Index. All rights reserved.</p>
     </footer>
 
-    <!-- Load header before main app -->
+    <!-- Load Supabase library, config, header, then main app -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <script src="supabase-config.js"></script>
     <script src="header-loader.js"></script>
     <script src="app.js"></script>
 </body>
