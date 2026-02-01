@@ -93,7 +93,7 @@
 }
 
 .download-btn {
-  background-color: #e74c3c;
+  background-color: #ff0043
   color: #fff;
 }
 
@@ -110,13 +110,13 @@
 }
 
 .back-btn:hover {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  border-color: #ff0043
+  color: #ff0043
 }
 
 .error-message {
   background-color: #111;
-  border: 1px solid #e74c3c;
+  border: 1px solid #ff0043
   color: #fff;
   padding: 2rem;
   border-radius: 6px;
@@ -124,7 +124,7 @@
 }
 
 .error-message a {
-  color: #e74c3c;
+  color: #ff0043
   text-decoration: none;
 }
 
