@@ -1,6 +1,6 @@
 // Supabase configuration
 const SUPABASE_URL = "https://jdianavibwqbxgjkzniq.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamtabmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc2NjQ2NTgsImV4cCI6MjA1MzI0MDY1OH0.sYBk_X-LyGBHF8hYjFzpfpGDiuKSNBHazfmb8_VVdbc"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamt6bmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMjM4NTEsImV4cCI6MjA4MDc5OTg1MX0.qafIxFwH1w0c6zWb69G6226pyfUPINx7I4_idyiGPs8"
 
 let allDownloads = []
 
