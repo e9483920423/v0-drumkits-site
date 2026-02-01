@@ -57,7 +57,7 @@
 .spec-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 0;
+  padding: 0.8rem;
   border-bottom: 1px solid #222;
 }
 
