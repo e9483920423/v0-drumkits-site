@@ -40,6 +40,7 @@ async function performSearch() {
       .from('drum_kits')
       .select('*')
       .ilike('title', `%${searchQuery}%`)
+      .order('id', { ascending: false })
 
     if (error) throw error
 

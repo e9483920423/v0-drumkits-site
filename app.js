@@ -14,6 +14,7 @@ async function loadDownloads() {
     const { data, error } = await supabaseClient
       .from('drum_kits')
       .select('*')
+      .order('id', { ascending: false })
 
     if (error) throw error
 
