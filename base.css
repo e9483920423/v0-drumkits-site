@@ -22,7 +22,7 @@ body {
 header {
   background-color: #0a0a0a;
   border-bottom: 1px solid #222;
-  padding: 1.5rem 0;
+  padding: 0.7rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -35,6 +35,23 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.main-nav {
+  padding: 16px 24px; /* space around the nav */
+}
+
+.main-nav a {
+  padding: 8px 12px; /* space around each link */
+  text-decoration: none;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #222;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  /*! font-size: 0.9rem; */
+  transition: all 0.2s;
 }
 
 .logo {
@@ -247,11 +264,11 @@ main {
 }
 
 .download-btn:hover {
-  background-color: #c0392b;
+  background-color: #8a072a;
 }
 
 .download-btn:active {
-  background-color: #a93226;
+  background-color: #ff0043;
 }
 
 /* pagination container styling */
