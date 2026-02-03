@@ -9,10 +9,8 @@
     <link rel="stylesheet" href="/search-page/search-page.css">
 </head>
 <body>
-    <!-- Header placeholder for dynamic loading -->
     <header id="header-placeholder"></header>
 
-    <!-- Main Content -->
     <main>
         <div class="search-results-title">
             <h1 id="searchQueryTitle">Search Results</h1>
@@ -23,14 +21,11 @@
             <p class="loading">Searching...</p>
         </div>
 
-        <!-- Pagination controls container -->
         <div class="pagination-container" id="paginationContainer"></div>
     </main>
 
-    <!-- Footer -->
     <footer></footer>
 
-    <!-- Load Supabase library, config, header, footer, then search script -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="/supabase-config.js"></script>
     <script src="/header-loader.js"></script>

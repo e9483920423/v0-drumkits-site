@@ -55,7 +55,7 @@
 
 .submit-form input[type="url"]:focus {
   outline: none;
-  border-color: #e74c3c;
+  border-color: #ff0043;
   box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
 }
 
@@ -67,7 +67,7 @@
 }
 
 .submit-btn {
-  background-color: #e74c3c;
+  background-color: #ff0043;
   color: #fff;
   border: none;
   border-radius: 4px;
