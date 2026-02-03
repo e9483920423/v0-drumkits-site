@@ -1,7 +1,3 @@
-// Supabase configuration
-const SUPABASE_URL = "https://jdianavibwqbxgjkzniq.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamtabmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc2NjQ2NTgsImV4cCI6MjA1MzI0MDY1OH0.sYBk_X-LyGBHF8hYjFzpfpGDiuKSNBHazfmb8_VVdbc"
-
 //Public Development URL
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
@@ -15,27 +11,14 @@ let currentPage = 1
 
 async function loadDownloads() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/drum_kits?select=*&order=id.asc`, {
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    })
-    if (!response.ok) throw new Error("Failed to load downloads")
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
 
-    const data = await response.json()
-    // Map Supabase column names to expected format
-    allDownloads = data.map(item => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      fileSize: item.file_size,
-      updateDate: item.update_date,
-      download: item.download,
-      category: item.category,
-      src: item.src
-    }))
+    if (error) throw error
+
+    allDownloads = data || []
     currentPage = 1
     renderCurrentPage()
     renderPagination()
@@ -70,16 +53,21 @@ function renderDownloads(downloads) {
     const imageUrl = getItemImageUrl(item.id)
 
     card.innerHTML = `
-      <div class="item-image">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.src='/placeholder.jpg'">
-      </div>
-      <div class="item-content">
-        <h3 class="item-title">${escapeHtml(item.title)}</h3>
-        <p class="item-description">${escapeHtml(item.description)}</p>
-        <a href="/${item.slug}" class="download-btn">View Details</a>
-      </div>
-    `
+  <div class="item-image">
+    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
+         onerror="this.src='/errors/default.jpg'">
+  </div>
+  <div class="item-content">
+    <h3 class="item-title">${escapeHtml(item.title)}</h3>
 
+    ${item.description && item.description !== "null"
+      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+      : ''
+    }
+
+    <a href="/${item.slug}" class="download-btn">View Details</a>
+  </div>
+  `;
     list.appendChild(card)
   })
 }
@@ -139,6 +127,11 @@ function renderPagination() {
 }
 
 function escapeHtml(text) {
+  // Handle null, undefined, or non-string values
+  if (text == null) return ''
+  if (typeof text !== 'string') {
+    text = String(text)
+  }
   const map = {
     "&": "&amp;",
     "<": "&lt;",

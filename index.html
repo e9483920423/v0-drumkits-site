@@ -1,38 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kit Index</title>
-    <link rel="stylesheet" href="base.css">
-    <link rel="stylesheet" href="global.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <meta name="16b45b3064a1e27249d07141ffc5433a6b9d70db" content="16b45b3064a1e27249d07141ffc5433a6b9d70db" />
+  <title>Kit Index</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="global.css">
 </head>
 <body>
-    <!-- Header placeholder for dynamic loading -->
-    <header id="header-placeholder"></header>
+  <header id="header-placeholder"></header>
 
-    <!-- Main Content -->
-    <main>
-        <div class="page-title">
-            <!-- <h1>Download Collection</h1> -->
-            <p>EXAMPLE EXAMPLE EXAMPLE EXAMPLE.</p>
-        </div>
+  <main>
+    <div class="page-title">
+      <p>Index of drum kits by <a href="https://www.drumkits4.me/" target="_blank" rel="noopener noreferrer">kits4leaks</a></p>
+    </div>
 
-        <div class="downloads-grid" id="downloadsList">
-            <p class="loading">Loading downloads...</p>
-        </div>
+    <div class="downloads-grid" id="downloadsList">
+      <p class="loading">Loading downloads...</p>
+    </div>
 
-        <!-- Pagination controls container -->
-        <div class="pagination-container" id="paginationContainer"></div>
-    </main>
+    <div class="pagination-container" id="paginationContainer"></div>
+  </main>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Download Index. All rights reserved.</p>
-    </footer>
+  <footer></footer>
 
-    <!-- Load header before main app -->
-    <script src="header-loader.js"></script>
-    <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="header-loader.js"></script>
+  <script src="footer-loader.js"></script>
+  <script src="app.js"></script>
+
+  <!-- DirectLink (plumprush) -->
+  <script>
+  (function(opku){
+    var d = document,
+        s = d.createElement('script'),
+        l = d.scripts[d.scripts.length - 1];
+    s.settings = opku || {};
+    s.src = "//plumprush.com/cbDu9W6mb.2R5slpSbWMQ/9wNjj-cg2/M/jZcRz/OnSB0I2LNgzyYyyvNLz/Qawo";
+    s.async = true;
+    s.referrerPolicy = 'no-referrer-when-downgrade';
+    l.parentNode.insertBefore(s, l);
+  })({})
+  </script>
+
 </body>
 </html>

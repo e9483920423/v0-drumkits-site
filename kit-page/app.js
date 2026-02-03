@@ -1,7 +1,3 @@
-// Supabase configuration
-const SUPABASE_URL = "https://jdianavibwqbxgjkzniq.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamt6bmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMjM4NTEsImV4cCI6MjA4MDc5OTg1MX0.qafIxFwH1w0c6zWb69G6226pyfUPINx7I4_idyiGPs8"
-
 let allDownloads = []
 
 function getItemImageUrl(id) {
@@ -11,27 +7,14 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/drum_kits?select=*&order=id.asc`, {
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    })
-    if (!response.ok) throw new Error("Failed to load downloads")
-    
-    const data = await response.json()
-    // Map Supabase column names to expected format
-    allDownloads = data.map(item => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      fileSize: item.file_size,
-      updateDate: item.update_date,
-      download: item.download,
-      category: item.category,
-      src: item.src
-    }))
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
+
+    if (error) throw error
+
+    allDownloads = data || []
     displayItem()
   } catch (error) {
     console.error("Error loading downloads:", error)
@@ -88,7 +71,7 @@ function displayItem() {
   mainContent.innerHTML = `
     <div class="item-hero">
       <div class="item-image-wrapper">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}">
+        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" onerror="this.src='/errors/default.jpg'">
       </div>
       <div class="item-details">
         <h1 class="item-title">${escapeHtml(item.title)}</h1>
@@ -96,12 +79,14 @@ function displayItem() {
         <div class="item-specs">
           <div class="spec-row">
             <span class="spec-label">File Size:</span>
-            <span class="spec-value">${escapeHtml(item.fileSize)}</span>
+            <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
           </div>
+          ${item.update_date ? `
           <div class="spec-row">
             <span class="spec-label">Last Updated:</span>
-            <span class="spec-value">${escapeHtml(item.updateDate)}</span>
+            <span class="spec-value">${escapeHtml(item.update_date)}</span>
           </div>
+          ` : ''}
         </div>
         <div class="action-buttons">
           <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
@@ -123,6 +108,11 @@ function showError(message) {
 }
 
 function escapeHtml(text) {
+  // Handle null, undefined, or non-string values
+  if (text == null) return ''
+  if (typeof text !== 'string') {
+    text = String(text)
+  }
   const map = {
     "&": "&amp;",
     "<": "&lt;",
