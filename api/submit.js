@@ -16,36 +16,36 @@ function validateUrl(url) {
 }
 
 async function submitToDiscord(downloadLink) {
-  const webhookData = {
-    content: `🎵 **New Drum Kit Submission!**`,
-    embeds: [{
-      title: "Kit Submitted",
-      description: "New  kit has been submitted for review",
-      color: 0x00ff00,
-      fields: [
-        {
-          name: "Link",
-          value: downloadLink,
-          inline: false
-        },
-        {
-          name: "Submitted",
-          value: new Date().toLocaleString(),
-          inline: true
-        },
-        {
-          name: "Source",
-          value: "DRUMKITS.SITE",
-          inline: true
+    const webhookData = {
+      content: `🎵 **New Drum Kit Submission!**`,
+      embeds: [{
+        title: "Kit Submitted",
+        description: "New  kit has been submitted for review",
+        color: 0x00ff00,
+        fields: [
+          {
+            name: "Link",
+            value: downloadLink,
+            inline: false
+          },
+          {
+            name: "Submitted",
+            value: new Date().toLocaleString(),
+            inline: true
+          },
+          {
+            name: "Source",
+            value: "DRUMKITS.SITE",
+            inline: true
+          }
+        ],
+        footer: {
+          text: "Ready for manual review."
         }
-      ],
-      footer: {
-        text: "Ready for manual review."
-      }
-    }]
-  };
+      }]
+    };
 
-  try {
+    try {
     const response = await fetch(DISCORD_WEBHOOK_URL, {
       method: "POST",
       headers: {
@@ -88,7 +88,6 @@ export default async function handler(req, res) {
 
     await submitToDiscord(trimmedLink);
 
-    // Success response
     res.status(200).json({
       success: true,
       message: 'Submission sent.'
@@ -97,7 +96,6 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('API Error:', error);
 
-    // Return error response
     res.status(500).json({
       error: 'Failed to submit.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
