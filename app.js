@@ -1,3 +1,4 @@
+//Public Development URL
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
   return `${PUB_URL}/${id}.jpg`

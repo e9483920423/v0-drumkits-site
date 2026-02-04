@@ -23,12 +23,15 @@ async function loadDownloads() {
 }
 
 function getSlugFromUrl() {
+  // Get slug from path (last segment)
   let slug = window.location.pathname.split("/").filter(Boolean).pop()
 
+  // Normalize the slug to handle any encoding issues
   if (slug) {
     try {
       slug = decodeURIComponent(slug)
     } catch (e) {
+      // If decoding fails, use the original slug
       console.warn("Could not decode slug, using original:", slug)
     }
   }
@@ -37,8 +40,10 @@ function getSlugFromUrl() {
 }
 
 function displayItem() {
+  // Get slug using improved extraction method
   let slug = getSlugFromUrl()
 
+  // If slug is missing, try query string (old links)
   if (!slug) {
     const params = new URLSearchParams(window.location.search)
     slug = params.get("slug")
@@ -49,6 +54,7 @@ function displayItem() {
     return
   }
 
+  // Optional: clean URL in the browser
   const newUrl = `${window.location.origin}/${slug}`
   window.history.replaceState({}, "", newUrl)
 
@@ -102,15 +108,16 @@ function showError(message) {
 }
 
 function escapeHtml(text) {
+  // Handle null, undefined, or non-string values
   if (text == null) return ''
   if (typeof text !== 'string') {
     text = String(text)
   }
   const map = {
-    "&": "&",
-    "<": "<",
-    ">": ">",
-    '"': """,
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
     "'": "&#039;",
   }
   return text.replace(/[&<>"']/g, (m) => map[m])
