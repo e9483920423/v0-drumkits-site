@@ -1,13 +1,46 @@
-//Public Development URL
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
   return `${PUB_URL}/${id}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
+const PAGINATION_LIMIT = 6 
 
 let allDownloads = []
 let currentPage = 1
+
+function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
+  if (total <= limit) {
+    const all = []
+    for (let i = 1; i <= total; i++) all.push(i)
+    return { pages: all, showLeftDots: false, showRightDots: false, showFirst: false, showLast: false }
+  }
+
+  const windowSize = Math.max(1, limit - 2)
+  const half = Math.floor(windowSize / 2)
+
+  let start = current - half
+  let end = current + (windowSize - half - 1)
+  if (start < 2) {
+    start = 2
+    end = start + windowSize - 1
+  }
+  if (end > total - 1) {
+    end = total - 1
+    start = end - windowSize + 1
+  }
+
+  const pages = []
+  for (let i = start; i <= end; i++) pages.push(i)
+
+  return {
+    pages,
+    showFirst: true,
+    showLast: true,
+    showLeftDots: start > 2,
+    showRightDots: end < total - 1,
+  }
+}
 
 async function loadDownloads() {
   try {
@@ -33,7 +66,6 @@ function renderCurrentPage() {
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE
   const endIdx = startIdx + ITEMS_PER_PAGE
   const pageItems = allDownloads.slice(startIdx, endIdx)
-
   renderDownloads(pageItems)
 }
 
@@ -53,21 +85,21 @@ function renderDownloads(downloads) {
     const imageUrl = getItemImageUrl(item.id)
 
     card.innerHTML = `
-  <div class="item-image">
-    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
-         onerror="this.src='/errors/default.jpg'">
-  </div>
-  <div class="item-content">
-    <h3 class="item-title">${escapeHtml(item.title)}</h3>
+      <div class="item-image">
+        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
+            onerror="this.src='/errors/default.jpg'">
+      </div>
+      <div class="item-content">
+        <h3 class="item-title">${escapeHtml(item.title)}</h3>
 
-    ${item.description && item.description !== "null"
-      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-      : ''
-    }
+        ${item.description && item.description !== "null"
+          ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+          : ''
+        }
 
-    <a href="/${item.slug}" class="download-btn">View Details</a>
-  </div>
-  `;
+        <a href="/${item.slug}" class="download-btn">View Details</a>
+      </div>
+    `
     list.appendChild(card)
   })
 }
@@ -76,61 +108,78 @@ function renderPagination() {
   const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
   const container = document.getElementById("paginationContainer")
 
+  if (!container) return
+
   if (totalPages <= 1) {
     container.innerHTML = ""
     return
   }
 
+  currentPage = Math.min(Math.max(currentPage, 1), totalPages)
+
   container.innerHTML = ""
 
-  const prevBtn = document.createElement("button")
-  prevBtn.className = "pagination-btn"
-  prevBtn.textContent = "← Previous"
-  prevBtn.disabled = currentPage === 1
-  prevBtn.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--
-      renderCurrentPage()
-      renderPagination()
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
+  const goTo = (page) => {
+    if (page < 1 || page > totalPages) return
+    currentPage = page
+    renderCurrentPage()
+    renderPagination()
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
-  container.appendChild(prevBtn)
 
-  for (let i = 1; i <= totalPages; i++) {
+  const makeBtn = (label, page, { active = false, disabled = false } = {}) => {
     const btn = document.createElement("button")
     btn.className = "pagination-btn"
-    if (i === currentPage) btn.classList.add("active")
-    btn.textContent = i
-    btn.onclick = () => {
-      currentPage = i
-      renderCurrentPage()
-      renderPagination()
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
-    container.appendChild(btn)
+    if (active) btn.classList.add("active")
+    btn.textContent = label
+    btn.disabled = disabled
+    btn.onclick = () => goTo(page)
+    return btn
   }
 
-  const nextBtn = document.createElement("button")
-  nextBtn.className = "pagination-btn"
-  nextBtn.textContent = "Next →"
-  nextBtn.disabled = currentPage === totalPages
-  nextBtn.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++
-      renderCurrentPage()
-      renderPagination()
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
+  const makeDots = () => {
+    const dots = document.createElement("span")
+    dots.className = "pagination-dots"
+    dots.textContent = "…"
+    return dots
   }
-  container.appendChild(nextBtn)
+
+  container.appendChild(
+    makeBtn("← Previous", currentPage - 1, { disabled: currentPage === 1 })
+  )
+
+  const range = getPaginationRange(currentPage, totalPages, PAGINATION_LIMIT)
+  
+  if (range.showFirst) {
+    container.appendChild(makeBtn("1", 1, { active: currentPage === 1 }))
+  }
+
+  if (range.showLeftDots) {
+    container.appendChild(makeDots())
+  }
+
+  range.pages.forEach((p) => {
+    container.appendChild(makeBtn(String(p), p, { active: p === currentPage }))
+  })
+
+  if (range.showRightDots) {
+    container.appendChild(makeDots())
+  }
+
+  if (range.showLast) {
+    container.appendChild(
+      makeBtn(String(totalPages), totalPages, { active: currentPage === totalPages })
+    )
+  }
+
+  container.appendChild(
+    makeBtn("Next →", currentPage + 1, { disabled: currentPage === totalPages })
+  )
 }
 
 function escapeHtml(text) {
   if (text == null) return ''
-  if (typeof text !== 'string') {
-    text = String(text)
-  }
+  if (typeof text !== 'string') text = String(text)
   const map = {
     "&": "&amp;",
     "<": "&lt;",
