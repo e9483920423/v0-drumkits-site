@@ -184,7 +184,6 @@ function renderPagination() {
       for (let p = 2; p < firstVisible; p++) {
         container.appendChild(makeBtn(String(p), p, { active: p === currentPage }))
       }
-      // clicking dots again collapses
       container.appendChild(makeDotsBtn("left", 2, range.pages[0] - 1))
     } else {
       container.appendChild(makeDotsBtn("left", 2, range.pages[0] - 1))
