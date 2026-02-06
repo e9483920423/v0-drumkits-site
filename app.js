@@ -123,14 +123,22 @@ function renderPagination() {
   container.innerHTML = ""
 
   const goTo = (page) => {
-    if (page < 1 || page > totalPages) return
-    currentPage = page
-    expandLeft = false
-    expandRight = false
-    renderCurrentPage()
-    renderPagination()
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+  if (page < 1 || page > totalPages) return
+  const paginationEl = document.getElementById("paginationContainer")
+  const y =
+    paginationEl ? (paginationEl.getBoundingClientRect().top + window.scrollY) : window.scrollY
+
+  currentPage = page
+  expandLeft = false
+  expandRight = false
+
+  renderCurrentPage()
+  renderPagination()
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: y, behavior: "auto" })
+  })
+}
+
 
   const makeBtn = (label, page, { active = false, disabled = false } = {}) => {
     const btn = document.createElement("button")
