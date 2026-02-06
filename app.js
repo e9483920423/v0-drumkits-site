@@ -12,6 +12,36 @@ let currentPage = 1
 
 let expandLeft = false
 let expandRight = false
+
+const preloadedImageIds = new Set()
+
+function preloadPageImages(page) {
+  const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
+  if (!Number.isFinite(page) || page < 1 || page > totalPages) return
+
+  const startIdx = (page - 1) * ITEMS_PER_PAGE
+  const endIdx = startIdx + ITEMS_PER_PAGE
+  const items = allDownloads.slice(startIdx, endIdx)
+
+  for (const item of items) {
+    if (!item || item.id == null) continue
+    const id = String(item.id)
+    if (preloadedImageIds.has(id)) continue
+    preloadedImageIds.add(id)
+
+    const img = new Image()
+    img.decoding = "async"
+    img.loading = "eager"
+    img.src = getItemImageUrl(item.id)
+  }
+}
+
+function setListLoading(isLoading) {
+  const list = document.getElementById("downloadsList")
+  if (!list) return
+  if (isLoading) list.classList.add("is-loading")
+  else list.classList.remove("is-loading")
+}
 function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
   if (total <= limit) {
     const all = []
@@ -55,6 +85,9 @@ async function loadDownloads() {
     if (error) throw error
 
     allDownloads = data || []
+    preloadedImageIds.clear()
+    preloadPageImages(1)
+    preloadPageImages(2)
     currentPage = 1
     renderCurrentPage()
     renderPagination()
@@ -66,20 +99,40 @@ async function loadDownloads() {
 }
 
 function renderCurrentPage() {
+  const list = document.getElementById("downloadsList")
+  let prevMinHeight = ""
+  if (list) {
+    prevMinHeight = list.style.minHeight || ""
+    const h = list.getBoundingClientRect().height
+    if (h > 0) list.style.minHeight = `${Math.ceil(h)}px`
+  }
+
+  setListLoading(true)
+
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE
   const endIdx = startIdx + ITEMS_PER_PAGE
   const pageItems = allDownloads.slice(startIdx, endIdx)
+
   renderDownloads(pageItems)
+
+  preloadPageImages(currentPage + 1)
+
+  requestAnimationFrame(() => {
+    setListLoading(false)
+    if (list) list.style.minHeight = prevMinHeight
+  })
 }
 
 function renderDownloads(downloads) {
   const list = document.getElementById("downloadsList")
-  list.innerHTML = ""
+  if (!list) return
 
-  if (downloads.length === 0) {
+  if (!downloads || downloads.length === 0) {
     list.innerHTML = '<p class="loading">No downloads available.</p>'
     return
   }
+
+  const frag = document.createDocumentFragment()
 
   downloads.forEach((item) => {
     const card = document.createElement("div")
@@ -89,8 +142,14 @@ function renderDownloads(downloads) {
 
     card.innerHTML = `
       <div class="item-image">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
-            onerror="this.src='/errors/default.jpg'">
+        <img
+          src="${imageUrl}"
+          alt="${escapeHtml(item.title)}"
+          loading="lazy"
+          decoding="async"
+          width="320"
+          height="320"
+          onerror="this.src='/errors/default.jpg'">
       </div>
       <div class="item-content">
         <h3 class="item-title">${escapeHtml(item.title)}</h3>
@@ -103,8 +162,10 @@ function renderDownloads(downloads) {
         <a href="/${item.slug}" class="download-btn">View Details</a>
       </div>
     `
-    list.appendChild(card)
+    frag.appendChild(card)
   })
+
+  list.replaceChildren(frag)
 }
 
 function renderPagination() {
