@@ -123,6 +123,25 @@ function renderCurrentPage() {
   })
 }
 
+function createSmartImage(imageUrl, altText) {
+  const img = document.createElement("img")
+  img.src = "/errors/default.jpg"
+  img.alt = altText
+  img.loading = "lazy"
+  img.decoding = "async"
+  img.width = 320
+  img.height = 320
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+  }
+  probe.src = imageUrl
+
+  return img
+}
+
 function renderDownloads(downloads) {
   const list = document.getElementById("downloadsList")
   if (!list) return
@@ -131,7 +150,7 @@ function renderDownloads(downloads) {
     list.innerHTML = '<p class="loading">No downloads available.</p>'
     return
   }
-
+  
   const frag = document.createDocumentFragment()
 
   downloads.forEach((item) => {
@@ -140,28 +159,25 @@ function renderDownloads(downloads) {
 
     const imageUrl = getItemImageUrl(item.id)
 
-    card.innerHTML = `
-      <div class="item-image">
-        <img
-          src="${imageUrl}"
-          alt="${escapeHtml(item.title)}"
-          loading="lazy"
-          decoding="async"
-          width="320"
-          height="320"
-          onerror="this.src='/errors/default.jpg'">
-      </div>
-      <div class="item-content">
-        <h3 class="item-title">${escapeHtml(item.title)}</h3>
+    const imageWrap = document.createElement("div")
+    imageWrap.className = "item-image"
+    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
 
-        ${item.description && item.description !== "null"
-          ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-          : ''
-        }
+    const content = document.createElement("div")
+    content.className = "item-content"
+    content.innerHTML = `
+      <h3 class="item-title">${escapeHtml(item.title)}</h3>
 
-        <a href="/${item.slug}" class="download-btn">View Details</a>
-      </div>
+      ${item.description && item.description !== "null"
+        ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+        : ''
+      }
+
+      <a href="/${item.slug}" class="download-btn">View Details</a>
     `
+
+    card.appendChild(imageWrap)
+    card.appendChild(content)
     frag.appendChild(card)
   })
 
