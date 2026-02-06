@@ -9,6 +9,9 @@ const PAGINATION_LIMIT = 6
 let allDownloads = []
 let currentPage = 1
 
+
+let expandLeft = false
+let expandRight = false
 function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
   if (total <= limit) {
     const all = []
@@ -122,6 +125,8 @@ function renderPagination() {
   const goTo = (page) => {
     if (page < 1 || page > totalPages) return
     currentPage = page
+    expandLeft = false
+    expandRight = false
     renderCurrentPage()
     renderPagination()
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -137,11 +142,22 @@ function renderPagination() {
     return btn
   }
 
-  const makeDots = () => {
-    const dots = document.createElement("span")
-    dots.className = "pagination-dots"
-    dots.textContent = "…"
-    return dots
+  const makeDotsBtn = (side, from, to) => {
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "pagination-btn pagination-dots-btn"
+    btn.textContent = "…"
+    btn.title = "Show more pages"
+
+    btn.onclick = () => {
+      if (side === "left") expandLeft = !expandLeft
+      if (side === "right") expandRight = !expandRight
+      renderPagination()
+    }
+
+    if (from > to) btn.disabled = true
+
+    return btn
   }
 
   container.appendChild(
@@ -149,13 +165,22 @@ function renderPagination() {
   )
 
   const range = getPaginationRange(currentPage, totalPages, PAGINATION_LIMIT)
-  
+
   if (range.showFirst) {
     container.appendChild(makeBtn("1", 1, { active: currentPage === 1 }))
   }
 
   if (range.showLeftDots) {
-    container.appendChild(makeDots())
+    if (expandLeft) {
+      const firstVisible = range.pages[0]
+      for (let p = 2; p < firstVisible; p++) {
+        container.appendChild(makeBtn(String(p), p, { active: p === currentPage }))
+      }
+      // clicking dots again collapses
+      container.appendChild(makeDotsBtn("left", 2, range.pages[0] - 1))
+    } else {
+      container.appendChild(makeDotsBtn("left", 2, range.pages[0] - 1))
+    }
   }
 
   range.pages.forEach((p) => {
@@ -163,7 +188,17 @@ function renderPagination() {
   })
 
   if (range.showRightDots) {
-    container.appendChild(makeDots())
+    const lastVisible = range.pages[range.pages.length - 1]
+
+    if (expandRight) {
+      container.appendChild(makeDotsBtn("right", lastVisible + 1, totalPages - 1))
+
+      for (let p = lastVisible + 1; p <= totalPages - 1; p++) {
+        container.appendChild(makeBtn(String(p), p, { active: p === currentPage }))
+      }
+    } else {
+      container.appendChild(makeDotsBtn("right", lastVisible + 1, totalPages - 1))
+    }
   }
 
   if (range.showLast) {
@@ -171,7 +206,6 @@ function renderPagination() {
       makeBtn(String(totalPages), totalPages, { active: currentPage === totalPages })
     )
   }
-
   container.appendChild(
     makeBtn("Next →", currentPage + 1, { disabled: currentPage === totalPages })
   )
