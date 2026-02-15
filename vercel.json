@@ -21,12 +21,13 @@
     { "source": "/submit-page/:path*", "destination": "/", "permanent": false },
     { "source": "/306392b042.php",              "destination": "/", "permanent": false },
     { "source": "/16b45b3064a1e27249d0.txt",    "destination": "/", "permanent": false },
-    { "source": "/supabase-config.js",          "destination": "/", "permanent": false }  // especially if it has any keys
+    { "source": "/supabase-config.js",          "destination": "/", "permanent": false } 
   ],
   "rewrites": [
     { "source": "/submit", "destination": "/submit-page/index.html" },
     { "source": "/search", "destination": "/search-page/index.html" },
     { "source": "/:slug",  "destination": "/kit-page/index.html" }
-    // { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+
