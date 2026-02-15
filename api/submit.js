@@ -1,4 +1,53 @@
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1447775203454357625/zY9OAL8eL5yVzgdXGMn1WIGq_Y03tyew5pRXvTQP1I1spJJGvkSe34ZZGoLF3F3Cei0P";
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 8;
+const ipRequestLog = new Map();
+
+const ALLOWED_HOSTS = [
+  "drive.google.com",
+  "mega.nz",
+  "pixeldrain.com",
+  "mediafire.com"
+];
+
+function getClientIp(req) {
+  const forwardedFor = req.headers["x-forwarded-for"];
+
+  if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
+    return forwardedFor.split(",")[0].trim();
+  }
+
+  return req.socket?.remoteAddress || "unknown";
+}
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+
+  const recentRequests = (ipRequestLog.get(ip) || []).filter((ts) => ts > windowStart);
+
+  if (recentRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
+    ipRequestLog.set(ip, recentRequests);
+    return true;
+  }
+
+  recentRequests.push(now);
+  ipRequestLog.set(ip, recentRequests);
+
+  if (ipRequestLog.size > 10000) {
+    for (const [storedIp, timestamps] of ipRequestLog.entries()) {
+      const cleaned = timestamps.filter((ts) => ts > windowStart);
+      if (cleaned.length === 0) {
+        ipRequestLog.delete(storedIp);
+      } else {
+        ipRequestLog.set(storedIp, cleaned);
+      }
+    }
+  }
+
+  return false;
+}
 
 function validateUrl(url) {
   try {
@@ -6,21 +55,26 @@ function validateUrl(url) {
     if (!["http:", "https:"].includes(parsedUrl.protocol)) {
       return false;
     }
+
+    const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
+    const isAllowedHost = ALLOWED_HOSTS.some((allowedHost) => hostname === allowedHost || hostname.endsWith(`.${allowedHost}`));
+
     const lowerUrl = url.toLowerCase();
     const fileIndicators = ['.zip', '.rar', '.7z', '.tar.gz', '.tgz', '/download/', 'drive.google.com', 'mega.nz', 'pixeldrain.com', 'mediafire.com'];
+    const hasFileIndicator = fileIndicators.some(indicator => lowerUrl.includes(indicator));
 
-    return fileIndicators.some(indicator => lowerUrl.includes(indicator));
+    return isAllowedHost || hasFileIndicator;
   } catch (e) {
     return false;
   }
 }
 
-async function submitToDiscord(downloadLink) {
+async function submitToDiscord(downloadLink, webhookUrl) {
   const webhookData = {
-    content: `🎵 **New Drum Kit Submission!**`,
+    content: `**Kit**`,
     embeds: [{
-      title: "Kit Submitted",
-      description: "New  kit has been submitted for review",
+      title: "Submitted",
+      description: "ready for review",
       color: 0x00ff00,
       fields: [
         {
@@ -46,7 +100,7 @@ async function submitToDiscord(downloadLink) {
   };
 
   try {
-    const response = await fetch(DISCORD_WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -67,11 +121,24 @@ async function submitToDiscord(downloadLink) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
+    res.setHeader("Allow", "POST");
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!DISCORD_WEBHOOK_URL) {
+    console.error("DISCORD_WEBHOOK_URL is not configured.");
+    return res.status(500).json({ error: "Server configuration error." });
+  }
+
+  const ip = getClientIp(req);
+  if (isRateLimited(ip)) {
+    return res.status(429).json({
+      error: "Too many submissions. Please wait a minute and try again."
+    });
+  }
+
   try {
-    const { downloadLink } = req.body;
+    const { downloadLink } = req.body || {};
 
 
     if (!downloadLink || typeof downloadLink !== 'string') {
@@ -86,7 +153,7 @@ export default async function handler(req, res) {
       });
     }
 
-    await submitToDiscord(trimmedLink);
+    await submitToDiscord(trimmedLink, DISCORD_WEBHOOK_URL);
 
     // Success response
     res.status(200).json({

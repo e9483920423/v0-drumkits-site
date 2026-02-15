@@ -15,4 +15,13 @@ async function loadHeader() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadHeader)
+function blockRightClick() {
+  document.addEventListener("contextmenu", (event) => {
+    event.preventDefault()
+  })
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  blockRightClick()
+  loadHeader()
+})
