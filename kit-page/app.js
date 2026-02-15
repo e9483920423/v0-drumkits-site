@@ -133,7 +133,6 @@ function renderRandomItems(currentSlug) {
 
   section.innerHTML = `
     <div class="random-items-inner">
-      <h2 class="random-items-heading">You may also like</h2>
       <div class="random-items-grid">
         ${cardsHtml}
       </div>
