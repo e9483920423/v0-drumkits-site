@@ -88,6 +88,57 @@ function displayItem() {
       </div>
     </div>
   `
+
+  renderRandomItems(item.slug)
+}
+
+function getRandomItems(excludeSlug, count = 4) {
+  const pool = allDownloads.filter((d) => d && d.slug && d.slug !== excludeSlug)
+
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = pool[i]
+    pool[i] = pool[j]
+    pool[j] = temp
+  }
+
+  return pool.slice(0, count)
+}
+
+function renderRandomItems(currentSlug) {
+  const section = document.getElementById("randomItemsSection")
+  if (!section) return
+
+  const randomItems = getRandomItems(currentSlug, 4)
+
+  if (randomItems.length === 0) {
+    section.innerHTML = ""
+    return
+  }
+
+  const cardsHtml = randomItems
+    .map((item) => {
+      const imageUrl = getItemImageUrl(item.id)
+      return `
+        <article class="random-item-card">
+          <a href="/${escapeHtml(item.slug)}" class="random-item-image-wrap" aria-label="View ${escapeHtml(item.title)}">
+            <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onerror="this.src='/errors/default.jpg'">
+          </a>
+          <h3 class="random-item-title">${escapeHtml(item.title)}</h3>
+          <a href="/${escapeHtml(item.slug)}" class="random-item-link">View Details</a>
+        </article>
+      `
+    })
+    .join("")
+
+  section.innerHTML = `
+    <div class="random-items-inner">
+      <h2 class="random-items-heading">You may also like</h2>
+      <div class="random-items-grid">
+        ${cardsHtml}
+      </div>
+    </div>
+  `
 }
 
 function showError(message) {
@@ -98,6 +149,9 @@ function showError(message) {
       <p style="margin-top: 1rem;"><a href="/">← Return to home</a></p>
     </div>
   `
+
+  const randomSection = document.getElementById("randomItemsSection")
+  if (randomSection) randomSection.innerHTML = ""
 }
 
 function escapeHtml(text) {
