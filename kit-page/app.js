@@ -47,7 +47,6 @@ function displayItem() {
     return
   }
 
-  // Optional: clean URL in the browser
   const newUrl = `${window.location.origin}/${slug}`
   window.history.replaceState({}, "", newUrl)
 
@@ -167,5 +166,30 @@ function escapeHtml(text) {
   }
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
+
+const HILLTOP_DIRECT_URL = "https://amazing-population.com/b.3FVX0YP/3Hp/v/b/m/V/J/ZsDP0/2sNnzbYQylNvzjMa5oLUTlYr3GNPjhIw3-NsDaAN";
+const HILLTOP_MODE = "item"; 
+
+function hilltopKeyForSlug(slug) {
+  if (HILLTOP_MODE === "session") return "hta_fired_session";
+  return `hta_fired_item_${slug || "unknown"}`;
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("a.download-btn");
+  if (!btn) return;
+  const slug = getSlugFromUrl() || "";
+  const key = hilltopKeyForSlug(slug);
+  if (sessionStorage.getItem(key) === "1") {
+    return;
+  }
+  e.preventDefault();
+  sessionStorage.setItem(key, "1");
+  window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
+  setTimeout(() => {
+    window.open(btn.href, "_blank", "noopener,noreferrer");
+  }, 250);
+}, true);
+
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
