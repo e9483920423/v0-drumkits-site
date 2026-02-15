@@ -11,23 +11,9 @@
       ]
     }
   ],
-  "redirects": [
-    { "source": "/admin/:path*",       "destination": "/", "permanent": false },
-    { "source": "/api/:path*",         "destination": "/", "permanent": false },
-    { "source": "/dl-data/:path*",     "destination": "/", "permanent": false },
-    { "source": "/errors/:path*",      "destination": "/", "permanent": false },
-    { "source": "/kit-page/:path*",    "destination": "/", "permanent": false },
-    { "source": "/search-page/:path*", "destination": "/", "permanent": false },
-    { "source": "/submit-page/:path*", "destination": "/", "permanent": false },
-    { "source": "/306392b042.php",              "destination": "/", "permanent": false },
-    { "source": "/16b45b3064a1e27249d0.txt",    "destination": "/", "permanent": false },
-    { "source": "/supabase-config.js",          "destination": "/", "permanent": false } 
-  ],
   "rewrites": [
     { "source": "/submit", "destination": "/submit-page/index.html" },
     { "source": "/search", "destination": "/search-page/index.html" },
-    { "source": "/:slug",  "destination": "/kit-page/index.html" }
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/:slug", "destination": "/kit-page/index.html" }
   ]
 }
-
