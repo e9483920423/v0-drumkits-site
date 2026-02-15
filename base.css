@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --transition: all 0.3s ease;
+}
+
 html {
   font-size: 16px;
 }
@@ -39,11 +43,11 @@ header {
 }
 
 .main-nav {
-  padding: 16px 24px; /* space around the nav */
+  padding: 16px 24px;
 }
 
 .main-nav a {
-  padding: 8px 12px; /* space around each link */
+  padding: 8px 12px;
   text-decoration: none;
   background-color: #111;
   color: #fff;
@@ -51,7 +55,6 @@ header {
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
   cursor: pointer;
-  /*! font-size: 0.9rem; */
   transition: all 0.2s;
 }
 
@@ -166,7 +169,6 @@ main {
   text-decoration: underline;
 }
 
-
 .downloads-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -236,7 +238,6 @@ main {
   100% { background-position: 0% 50%; }
 }
 
-
 .item-image {
   width: 100%;
   height: 200px;
@@ -247,12 +248,24 @@ main {
   color: #666;
   font-size: 0.9rem;
   overflow: hidden;
+  position: relative;
 }
 
 .item-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  transition: var(--transition);
+  position: relative;
+  z-index: 2;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: transform;
+}
+
+.download-item:hover .item-image img {
+  transform: scale(1.02);
 }
 
 .item-content {
@@ -279,7 +292,6 @@ main {
   text-overflow: ellipsis;
 }
 
-
 .item-meta {
   font-size: 0.85rem;
   color: #666;
@@ -305,20 +317,21 @@ main {
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: background-color 0.2s;
+  transition: var(--transition);
   text-align: center;
   width: 100%;
 }
 
 .download-btn:hover {
   background-color: #8a072a;
+  transform: translateY(-1px);
 }
 
 .download-btn:active {
   background-color: #ff0043;
+  transform: translateY(0);
 }
 
-/* pagination container styling */
 .pagination-container {
   display: flex;
   justify-content: center;
@@ -362,7 +375,6 @@ main {
   grid-column: 1 / -1;
 }
 
-/* Footer */
 footer {
   background-color: #0a0a0a;
   border-top: 1px solid #222;
@@ -373,7 +385,6 @@ footer {
   margin-top: auto;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .header-container {
     padding: 0 1rem;
