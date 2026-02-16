@@ -24,24 +24,26 @@ async function loadDownloads() {
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
+  img.style.visibility = "hidden"
   if (width) img.width = width
   if (height) img.height = height
   img.onerror = () => {
-    if (!img.src.endsWith('/errors/default.jpg')) {
-      img.src = "/errors/default.jpg"
-    }
+    img.src = "/errors/default.jpg"
+    img.style.visibility = "visible"
   }
 
   const probe = new Image()
   probe.decoding = "async"
   probe.onload = () => {
     img.src = imageUrl
+    img.style.visibility = "visible"
   }
   probe.onerror = () => {
+    img.src = "/errors/default.jpg"
+    img.style.visibility = "visible"
   }
   probe.src = imageUrl
 
