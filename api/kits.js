@@ -27,6 +27,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(getSupabaseRestUrl(), {
+      cache: "no-store",
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -40,8 +41,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-
-    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=86400");
+    res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({ data: data || [] });
   } catch (error) {
     console.error("/api/kits failed:", error);
