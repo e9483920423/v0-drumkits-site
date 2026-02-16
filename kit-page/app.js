@@ -1,36 +1,51 @@
 let allDownloads = []
-let activeSlug = ""
+
+function getItemImageUrl(id) {
+  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+  return `${PUB_URL}/${id}.jpg`
+}
 
 async function loadDownloads() {
-  const { getCachedKitsSync, getAllKits } = window.DrumkitDataStore
-
-  const cached = getCachedKitsSync({ allowStale: true })
-  if (cached && cached.length > 0) {
-    allDownloads = cached
-    displayItem()
-  }
-
   try {
-    const latest = await getAllKits({ allowStale: true, revalidate: true })
-    if (!cached || latest !== cached) {
-      allDownloads = latest
-      displayItem()
-    }
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
+
+    if (error) throw error
+
+    allDownloads = data || []
+    displayItem()
   } catch (error) {
     console.error("Error loading downloads:", error)
-    if (!cached || cached.length === 0) {
-      showError("Failed to load item data. Please try again.")
-    }
+    showError("Failed to load item data. Please try again.")
   }
 }
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
-  const { createKitImage } = window.DrumkitAssets
-  return createKitImage(imageUrl, altText, {
-    loading: "eager",
-    width,
-    height,
-  })
+  const img = document.createElement("img")
+  img.src = "/errors/default.jpg"
+  img.alt = altText
+  img.loading = "eager"
+  img.decoding = "async"
+  if (width) img.width = width
+  if (height) img.height = height
+  img.onerror = () => {
+    if (!img.src.endsWith('/errors/default.jpg')) {
+      img.src = "/errors/default.jpg"
+    }
+  }
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+  }
+  probe.onerror = () => {
+  }
+  probe.src = imageUrl
+
+  return img
 }
 
 function getSlugFromUrl() {
@@ -47,16 +62,11 @@ function getSlugFromUrl() {
 }
 
 function displayItem() {
-  const { getKitImageUrl } = window.DrumkitAssets
-  const { escapeHtml } = window.DrumkitUtils
-
   let slug = getSlugFromUrl()
   if (!slug) {
     const params = new URLSearchParams(window.location.search)
     slug = params.get("slug")
   }
-
-  activeSlug = slug
 
   if (!slug) {
     showError("No item specified. Please return to the home page.")
@@ -73,7 +83,7 @@ function displayItem() {
     return
   }
 
-  const imageUrl = getKitImageUrl(item.id)
+  const imageUrl = getItemImageUrl(item.id)
 
   const mainContent = document.getElementById("mainContent")
   
@@ -130,9 +140,6 @@ function getRandomItems(excludeSlug, count = 4) {
 }
 
 function renderRandomItems(currentSlug) {
-  const { getKitImageUrl } = window.DrumkitAssets
-  const { escapeHtml } = window.DrumkitUtils
-
   const section = document.getElementById("randomItemsSection")
   if (!section) return
 
@@ -147,7 +154,7 @@ function renderRandomItems(currentSlug) {
   grid.className = "random-items-grid"
   
   randomItems.forEach((item) => {
-    const imageUrl = getKitImageUrl(item.id)
+    const imageUrl = getItemImageUrl(item.id)
     
     const card = document.createElement("article")
     card.className = "random-item-card"
@@ -183,8 +190,6 @@ function renderRandomItems(currentSlug) {
 }
 
 function showError(message) {
-  const { escapeHtml } = window.DrumkitUtils
-
   const mainContent = document.getElementById("mainContent")
   mainContent.innerHTML = `
     <div class="error-message">
@@ -195,6 +200,21 @@ function showError(message) {
 
   const randomSection = document.getElementById("randomItemsSection")
   if (randomSection) randomSection.innerHTML = ""
+}
+
+function escapeHtml(text) {
+  if (text == null) return ''
+  if (typeof text !== 'string') {
+    text = String(text)
+  }
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }
+  return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
 const HILLTOP_DIRECT_URL =
@@ -277,17 +297,3 @@ document.addEventListener(
 );
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
-
-window.addEventListener("drumkits:data-updated", (event) => {
-  const latest = event?.detail?.data
-  if (!Array.isArray(latest) || latest.length === 0) return
-
-  allDownloads = latest
-  if (!activeSlug) {
-    displayItem()
-    return
-  }
-
-  const exists = allDownloads.some((d) => d?.slug === activeSlug)
-  if (exists) displayItem()
-})
