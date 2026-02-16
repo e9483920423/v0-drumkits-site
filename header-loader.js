@@ -1,11 +1,19 @@
-/**
- * Header loader — optimized.
- * Headers are now inlined in every HTML page so there is no fetch needed.
- * This script only blocks right-click (existing behaviour) and keeps
- * a background revalidation as a safety-net in case the header.html
- * changes in the future (it will silently update the sessionStorage copy
- * but NOT re-render, since the inlined version is already correct).
- */
+async function loadHeader() {
+  const headerPlaceholder = document.getElementById("header-placeholder")
+  if (!headerPlaceholder) return
+
+  try {
+    const headerPath = "/header.html"
+
+    const response = await fetch(headerPath)
+    if (!response.ok) throw new Error("Failed to load header")
+
+    const headerContent = await response.text()
+    headerPlaceholder.innerHTML = headerContent
+  } catch (error) {
+    console.error("Error loading header:", error)
+  }
+}
 
 function blockRightClick() {
   document.addEventListener("contextmenu", (event) => {
@@ -13,4 +21,7 @@ function blockRightClick() {
   })
 }
 
-blockRightClick()
+document.addEventListener("DOMContentLoaded", () => {
+  blockRightClick()
+  loadHeader()
+})

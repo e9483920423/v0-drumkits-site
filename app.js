@@ -1,6 +1,10 @@
+function getItemImageUrl(id) {
+  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+  return `${PUB_URL}/${id}.jpg`
+}
+
 const ITEMS_PER_PAGE = 6
 const PAGINATION_LIMIT = 6 
-const HOME_PAGE_STATE_KEY = "drumkits:home:page:v1"
 
 let allDownloads = []
 let currentPage = 1
@@ -11,48 +15,7 @@ let expandRight = false
 
 const preloadedImageIds = new Set()
 
-function readSavedHomePage() {
-  try {
-    const raw = sessionStorage.getItem(HOME_PAGE_STATE_KEY)
-    const parsed = Number(raw)
-    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1
-  } catch {
-    return 1
-  }
-}
-
-function saveHomePage(page) {
-  try {
-    sessionStorage.setItem(HOME_PAGE_STATE_KEY, String(page))
-  } catch {
-  }
-}
-
-function clampCurrentPage(totalPages) {
-  currentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1))
-}
-
-function applyDownloads(downloads, { keepPage = true } = {}) {
-  allDownloads = Array.isArray(downloads) ? downloads : []
-
-  const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
-  if (!keepPage) {
-    currentPage = readSavedHomePage()
-  }
-  clampCurrentPage(totalPages)
-
-  preloadedImageIds.clear()
-  preloadPageImages(currentPage)
-  preloadPageImages(currentPage + 1)
-
-  renderCurrentPage()
-  renderPagination()
-  saveHomePage(currentPage)
-}
-
 function preloadPageImages(page) {
-  const { getKitImageUrl } = window.DrumkitAssets
-
   const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
   if (!Number.isFinite(page) || page < 1 || page > totalPages) return
 
@@ -69,7 +32,7 @@ function preloadPageImages(page) {
     const img = new Image()
     img.decoding = "async"
     img.loading = "eager"
-    img.src = getKitImageUrl(item.id)
+    img.src = getItemImageUrl(item.id)
   }
 }
 
@@ -113,26 +76,25 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 }
 
 async function loadDownloads() {
-  const { getCachedKitsSync, getAllKits } = window.DrumkitDataStore
-
-  const cached = getCachedKitsSync({ allowStale: true })
-  if (cached && cached.length > 0) {
-    currentPage = readSavedHomePage()
-    applyDownloads(cached, { keepPage: true })
-  }
-
   try {
-    const latest = await getAllKits({ allowStale: true, revalidate: true })
-    if (!cached || latest !== cached) {
-      if (!cached) currentPage = readSavedHomePage()
-      applyDownloads(latest, { keepPage: true })
-    }
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
+
+    if (error) throw error
+
+    allDownloads = data || []
+    preloadedImageIds.clear()
+    preloadPageImages(1)
+    preloadPageImages(2)
+    currentPage = 1
+    renderCurrentPage()
+    renderPagination()
   } catch (error) {
     console.error("Error loading downloads:", error)
-    if (!cached || cached.length === 0) {
-      const list = document.getElementById("downloadsList")
-      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
-    }
+    const list = document.getElementById("downloadsList")
+    list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
   }
 }
 
@@ -161,10 +123,26 @@ function renderCurrentPage() {
   })
 }
 
-function renderDownloads(downloads) {
-  const { getKitImageUrl, createKitImage } = window.DrumkitAssets
-  const { escapeHtml } = window.DrumkitUtils
+function createSmartImage(imageUrl, altText) {
+  const img = document.createElement("img")
+  img.src = "/errors/default.jpg"
+  img.alt = altText
+  img.loading = "lazy"
+  img.decoding = "async"
+  img.width = 320
+  img.height = 320
 
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+  }
+  probe.src = imageUrl
+
+  return img
+}
+
+function renderDownloads(downloads) {
   const list = document.getElementById("downloadsList")
   if (!list) return
 
@@ -179,17 +157,11 @@ function renderDownloads(downloads) {
     const card = document.createElement("div")
     card.className = "download-item"
 
-    const imageUrl = getKitImageUrl(item.id)
+    const imageUrl = getItemImageUrl(item.id)
 
     const imageWrap = document.createElement("div")
     imageWrap.className = "item-image"
-    imageWrap.appendChild(
-      createKitImage(imageUrl, escapeHtml(item.title), {
-        loading: "lazy",
-        width: 320,
-        height: 320,
-      })
-    )
+    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
 
     const content = document.createElement("div")
     content.className = "item-content"
@@ -234,7 +206,6 @@ function renderPagination() {
     paginationEl ? (paginationEl.getBoundingClientRect().top + window.scrollY) : window.scrollY
 
   currentPage = page
-  saveHomePage(currentPage)
   expandLeft = false
   expandRight = false
 
@@ -324,10 +295,17 @@ function renderPagination() {
   )
 }
 
-document.addEventListener("DOMContentLoaded", loadDownloads)
+function escapeHtml(text) {
+  if (text == null) return ''
+  if (typeof text !== 'string') text = String(text)
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }
+  return text.replace(/[&<>"']/g, (m) => map[m])
+}
 
-window.addEventListener("drumkits:data-updated", (event) => {
-  const latest = event?.detail?.data
-  if (!Array.isArray(latest) || latest.length === 0) return
-  applyDownloads(latest, { keepPage: true })
-})
+document.addEventListener("DOMContentLoaded", loadDownloads)

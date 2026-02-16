@@ -1,51 +1,33 @@
+//Public Development URL
+function getItemImageUrl(id) {
+  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+  return `${PUB_URL}/${id}.jpg`
+}
+
 const ITEMS_PER_PAGE = 6
-const SEARCH_PAGE_STATE_KEY = "drumkits:search:state:v1"
 
 let searchResults = []
 let currentPage = 1
 let searchQuery = ""
 
-function readSavedSearchState() {
-  try {
-    const raw = sessionStorage.getItem(SEARCH_PAGE_STATE_KEY)
-    if (!raw) return { query: "", page: 1 }
+function createSmartImage(imageUrl, altText) {
+  const img = document.createElement("img")
+  img.src = "/errors/default.jpg"
+  img.alt = altText
+  img.loading = "lazy"
+  img.decoding = "async"
 
-    const parsed = JSON.parse(raw)
-    const page = Number(parsed?.page)
-    return {
-      query: typeof parsed?.query === "string" ? parsed.query : "",
-      page: Number.isFinite(page) && page > 0 ? Math.floor(page) : 1,
-    }
-  } catch {
-    return { query: "", page: 1 }
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
   }
-}
-
-function saveSearchState() {
-  try {
-    sessionStorage.setItem(
-      SEARCH_PAGE_STATE_KEY,
-      JSON.stringify({ query: searchQuery, page: currentPage })
-    )
-  } catch {
+  probe.onerror = () => {
+    img.src = "/errors/default.jpg"
   }
-}
+  probe.src = imageUrl
 
-function clampCurrentPage(totalPages) {
-  currentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1))
-}
-
-function renderSearchView() {
-  if (!Array.isArray(searchResults) || searchResults.length === 0) {
-    showNoResults()
-    return
-  }
-
-  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE)
-  clampCurrentPage(totalPages)
-  renderCurrentPage()
-  renderPagination()
-  saveSearchState()
+  return img
 }
 
 function getSearchQueryFromUrl() {
@@ -54,19 +36,12 @@ function getSearchQueryFromUrl() {
 }
 
 async function performSearch() {
-  const { searchKitsSync, searchKits } = window.DrumkitDataStore
-  const { escapeHtml } = window.DrumkitUtils
-
-  const saved = readSavedSearchState()
-  const queryFromUrl = getSearchQueryFromUrl()
-  searchQuery = queryFromUrl || saved.query
+  searchQuery = getSearchQueryFromUrl()
   
   if (!searchQuery) {
     showError("No search query provided.")
     return
   }
-
-  currentPage = queryFromUrl === saved.query ? saved.page : 1
 
   // Update page title and search query display
   const queryTitle = document.getElementById("searchQueryTitle")
@@ -80,40 +55,37 @@ async function performSearch() {
     queryText.textContent = `Found results matching your search...`
   }
 
-  const cachedMatches = searchKitsSync(searchQuery)
-  if (cachedMatches.length > 0) {
-    searchResults = cachedMatches
-    renderSearchView()
-  }
-
   try {
-    const freshMatches = await searchKits(searchQuery, { allowStale: true, revalidate: true })
-    if (!cachedMatches || freshMatches !== cachedMatches) {
-      searchResults = freshMatches
-      if (!cachedMatches.length) {
-        currentPage = queryFromUrl === saved.query ? saved.page : 1
-      }
-      renderSearchView()
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .ilike('title', `%${searchQuery}%`)
+      .order('id', { ascending: false })
+
+    if (error) throw error
+
+    searchResults = data || []
+    currentPage = 1
+    
+    if (searchResults.length === 0) {
+      showNoResults()
+    } else {
+      renderCurrentPage()
+      renderPagination()
     }
   } catch (error) {
     console.error("Error performing search:", error)
-    if (!cachedMatches || cachedMatches.length === 0) {
-      showError("Failed to perform search. Please try again.")
-    }
+    showError("Failed to perform search. Please try again.")
   }
 }
 
 function showNoResults() {
-  const { escapeHtml } = window.DrumkitUtils
-
   const list = document.getElementById("searchResultsList")
   const queryText = document.getElementById("searchQueryText")
   
   if (queryText) {
     queryText.textContent = `No results found for "${escapeHtml(searchQuery)}"`
   }
-
-  saveSearchState()
   
   list.innerHTML = '<p class="loading">No kits found matching your search. Try different keywords.</p>'
   
@@ -124,8 +96,6 @@ function showNoResults() {
 }
 
 function showError(message) {
-  const { escapeHtml } = window.DrumkitUtils
-
   const list = document.getElementById("searchResultsList")
   const queryText = document.getElementById("searchQueryText")
   
@@ -150,9 +120,6 @@ function renderCurrentPage() {
 }
 
 function renderResults(results) {
-  const { getKitImageUrl, applyFallbackImage } = window.DrumkitAssets
-  const { escapeHtml } = window.DrumkitUtils
-
   const list = document.getElementById("searchResultsList")
   list.innerHTML = ""
 
@@ -165,26 +132,27 @@ function renderResults(results) {
     const card = document.createElement("div")
     card.className = "download-item"
 
-    const imageUrl = getKitImageUrl(item.id)
+    const imageUrl = getItemImageUrl(item.id)
 
-    card.innerHTML = `
-  <div class="item-image">
-    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy">
-  </div>
-  <div class="item-content">
-    <h3 class="item-title">${escapeHtml(item.title)}</h3>
+    const imageWrap = document.createElement("div")
+    imageWrap.className = "item-image"
+    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
 
-    ${item.description && item.description !== "null"
-      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-      : ''
-    }
+    const content = document.createElement("div")
+    content.className = "item-content"
+    content.innerHTML = `
+      <h3 class="item-title">${escapeHtml(item.title)}</h3>
 
-    <a href="/${item.slug}" class="download-btn">View Details</a>
-  </div>
-  `;
+      ${item.description && item.description !== "null"
+        ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+        : ''
+      }
 
-    const img = card.querySelector("img")
-    applyFallbackImage(img)
+      <a href="/${item.slug}" class="download-btn">View Details</a>
+    `
+
+    card.appendChild(imageWrap)
+    card.appendChild(content)
     list.appendChild(card)
   })
 }
@@ -209,7 +177,6 @@ function renderPagination() {
       currentPage--
       renderCurrentPage()
       renderPagination()
-      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -224,7 +191,6 @@ function renderPagination() {
       currentPage = i
       renderCurrentPage()
       renderPagination()
-      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
     container.appendChild(btn)
@@ -239,16 +205,26 @@ function renderPagination() {
       currentPage++
       renderCurrentPage()
       renderPagination()
-      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
   container.appendChild(nextBtn)
 }
 
-document.addEventListener("DOMContentLoaded", performSearch)
+function escapeHtml(text) {
+  // Handle null, undefined, or non-string values
+  if (text == null) return ''
+  if (typeof text !== 'string') {
+    text = String(text)
+  }
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }
+  return text.replace(/[&<>"']/g, (m) => map[m])
+}
 
-window.addEventListener("drumkits:data-updated", () => {
-  if (!searchQuery) return
-  performSearch()
-})
+document.addEventListener("DOMContentLoaded", performSearch)
