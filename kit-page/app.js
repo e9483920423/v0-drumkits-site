@@ -167,29 +167,83 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
-const HILLTOP_DIRECT_URL = "https://amazing-population.com/b.3FVX0YP/3Hp/v/b/m/V/J/ZsDP0/2sNnzbYQylNvzjMa5oLUTlYr3GNPjhIw3-NsDaAN";
-const HILLTOP_MODE = "item"; 
+const HILLTOP_DIRECT_URL =
+  "https://amazing-population.com/b.3FVX0YP/3Hp/v/b/m/V/J/ZsDP0/2sNnzbYQylNvzjMa5oLUTlYr3GNPjhIw3-NsDaAN";
 
-function hilltopKeyForSlug(slug) {
-  if (HILLTOP_MODE === "session") return "hta_fired_session";
-  return `hta_fired_item_${slug || "unknown"}`;
+let hilltopFiredThisPage = false;
+let hilltopReadyAt = 0;
+const HILLTOP_DELAY_MS = 5000;
+
+function ensureHilltopToast() {
+  let el = document.getElementById("hilltop-toast");
+  if (el) return el;
+
+  el = document.createElement("div");
+  el.id = "hilltop-toast";
+  el.style.cssText = [
+    "position:fixed",
+    "left:50%",
+    "bottom:18px",
+    "transform:translateX(-50%)",
+    "background:rgba(0,0,0,0.88)",
+    "color:#fff",
+    "padding:10px 14px",
+    "border:1px solid rgba(255,255,255,0.14)",
+    "border-radius:10px",
+    "font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif",
+    "z-index:999999",
+    "max-width:92vw",
+    "text-align:center",
+    "box-shadow:0 10px 30px rgba(0,0,0,0.35)"
+  ].join(";");
+  document.body.appendChild(el);
+  return el;
 }
 
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("a.download-btn");
-  if (!btn) return;
-  const slug = getSlugFromUrl() || "";
-  const key = hilltopKeyForSlug(slug);
-  if (sessionStorage.getItem(key) === "1") {
-    return;
-  }
-  e.preventDefault();
-  sessionStorage.setItem(key, "1");
-  window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
-  setTimeout(() => {
-    window.open(btn.href, "_blank", "noopener,noreferrer");
-  }, 250);
-}, true);
+function showHilltopCountdownToast() {
+  const el = ensureHilltopToast();
 
+  const tick = () => {
+    const left = Math.max(0, hilltopReadyAt - Date.now());
+    if (left <= 0) {
+      el.textContent = "Ready — tap Download again.";
+      setTimeout(() => {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }, 1600);
+      return;
+    }
+    const sec = Math.ceil(left / 1000);
+    el.textContent = `Please wait ${sec}s, then tap Download again.`;
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
+}
+
+document.addEventListener(
+  "click",
+  (e) => {
+    const btn = e.target.closest("a.download-btn");
+    if (!btn) return;
+    if (hilltopFiredThisPage) return;
+
+    const now = Date.now();
+    if (hilltopReadyAt && now < hilltopReadyAt) {
+      e.preventDefault();
+      showHilltopCountdownToast();
+      return;
+    }
+    e.preventDefault();
+    window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
+
+    hilltopReadyAt = now + HILLTOP_DELAY_MS;
+    showHilltopCountdownToast();
+
+    setTimeout(() => {
+      hilltopFiredThisPage = true;
+    }, HILLTOP_DELAY_MS);
+  },
+  true
+);
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
