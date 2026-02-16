@@ -1,9 +1,3 @@
-//Public Development URL
-function getItemImageUrl(id) {
-  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
-}
-
 const ITEMS_PER_PAGE = 6
 
 let searchResults = []
@@ -16,6 +10,9 @@ function getSearchQueryFromUrl() {
 }
 
 async function performSearch() {
+  const { searchKits } = window.DrumkitDataStore
+  const { escapeHtml } = window.DrumkitUtils
+
   searchQuery = getSearchQueryFromUrl()
   
   if (!searchQuery) {
@@ -36,15 +33,7 @@ async function performSearch() {
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .ilike('title', `%${searchQuery}%`)
-      .order('id', { ascending: false })
-
-    if (error) throw error
-
-    searchResults = data || []
+    searchResults = await searchKits(searchQuery)
     currentPage = 1
     
     if (searchResults.length === 0) {
@@ -60,6 +49,8 @@ async function performSearch() {
 }
 
 function showNoResults() {
+  const { escapeHtml } = window.DrumkitUtils
+
   const list = document.getElementById("searchResultsList")
   const queryText = document.getElementById("searchQueryText")
   
@@ -76,6 +67,8 @@ function showNoResults() {
 }
 
 function showError(message) {
+  const { escapeHtml } = window.DrumkitUtils
+
   const list = document.getElementById("searchResultsList")
   const queryText = document.getElementById("searchQueryText")
   
@@ -100,6 +93,9 @@ function renderCurrentPage() {
 }
 
 function renderResults(results) {
+  const { getKitImageUrl, applyFallbackImage } = window.DrumkitAssets
+  const { escapeHtml } = window.DrumkitUtils
+
   const list = document.getElementById("searchResultsList")
   list.innerHTML = ""
 
@@ -112,12 +108,11 @@ function renderResults(results) {
     const card = document.createElement("div")
     card.className = "download-item"
 
-    const imageUrl = getItemImageUrl(item.id)
+    const imageUrl = getKitImageUrl(item.id)
 
     card.innerHTML = `
   <div class="item-image">
-    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy"
-         onerror="this.src='/errors/default.jpg'">
+    <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy">
   </div>
   <div class="item-content">
     <h3 class="item-title">${escapeHtml(item.title)}</h3>
@@ -130,6 +125,9 @@ function renderResults(results) {
     <a href="/${item.slug}" class="download-btn">View Details</a>
   </div>
   `;
+
+    const img = card.querySelector("img")
+    applyFallbackImage(img)
     list.appendChild(card)
   })
 }
@@ -186,22 +184,6 @@ function renderPagination() {
     }
   }
   container.appendChild(nextBtn)
-}
-
-function escapeHtml(text) {
-  // Handle null, undefined, or non-string values
-  if (text == null) return ''
-  if (typeof text !== 'string') {
-    text = String(text)
-  }
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
 document.addEventListener("DOMContentLoaded", performSearch)
