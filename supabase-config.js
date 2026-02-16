@@ -1,9 +1,16 @@
 // Supabase configuration
-// These values can be set via environment variables at build time
-// For Vercel, you can use NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+// NOTE: This is a static site, so process.env values are not available directly in browser JS.
+// If needed, inject runtime vars before this file via window.SUPABASE_URL / window.SUPABASE_ANON_KEY.
 
-const SUPABASE_URL = window.SUPABASE_URL || 'https://jdianavibwqbxgjkzniq.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkaWFuYXZpYndxYnhnamt6bmlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMjM4NTEsImV4cCI6MjA4MDc5OTg1MX0.qafIxFwH1w0c6zWb69G6226pyfUPINx7I4_idyiGPs8';
+const SUPABASE_URL =
+  window.SUPABASE_URL ||
+  window.NEXT_PUBLIC_SUPABASE_URL ||
+  "https://fwrnbfwzolplbmiaaeme.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  window.SUPABASE_ANON_KEY ||
+  window.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3cm5iZnd6b2xwbGJtaWFhZW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjExMDIsImV4cCI6MjA4Njc5NzEwMn0.shOMW9NahKSMW3m5sYfUiBf2jsQW8HuVck5WXG7SzAw";
 
 // Initialize Supabase client (supabase is loaded from CDN)
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
