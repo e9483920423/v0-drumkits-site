@@ -5,23 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results - DRUMKITS.SITE</title>
     <style>
-    body {
-      background-image: url('errors/tile_background(2).png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-    }
+      /* Critical CSS: paint header + body immediately */
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background-color:#000;color:#fff;line-height:1.6;display:flex;flex-direction:column;min-height:100vh;background-image:url('/errors/tile_background(2).png');background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
+      header{background-color:rgba(10,10,10,0.2);border-bottom:1px solid rgba(34,34,34,0.5);padding:0.7rem 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .header-container{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;justify-content:space-between;align-items:center}
+      .logo{display:flex;align-items:center;color:#fff;transition:color 0.2s ease}
+      .logo img{height:40px;width:auto}
+      .search-form{display:flex;align-items:center;gap:0.5rem;margin:0 1rem}
+      .search-input{padding:0.5rem 1rem;background-color:#111;border:1px solid #333;border-radius:4px;color:#fff;font-size:0.9rem;width:200px}
+      .search-btn{padding:0.5rem 1rem;background-color:#fff;color:#000;border:none;border-radius:4px;font-size:0.9rem;font-weight:600;cursor:pointer}
+      .main-nav{padding:16px 24px}
+      .main-nav a{padding:0.5rem 0.75rem;text-decoration:none;background-color:#111;color:#fff;border:1px solid #222;border-radius:4px;cursor:pointer;transition:all 0.2s}
+      /* Page transition overlay */
+      .page-transition-overlay{position:fixed;inset:0;background:#000;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.15s ease}
+      .page-transition-overlay.active{opacity:1;pointer-events:all}
     </style>
     <link rel="stylesheet" href="/base.css">
-    <link rel="stylesheet" href="/global.css">
     <link rel="stylesheet" href="/search-page/search-page.css">
 </head>
 <body>
-    <header id="header-placeholder"></header>
+    <header id="header-placeholder">
+      <div class="header-container">
+        <div class="logo">
+          <a href="/">
+            <img src="/errors/5f4f96a1224bed852e6e733b23280e7a.png" alt="DrumKits logo" width="120" height="40">
+          </a>
+        </div>
+        <form class="search-form" action="/search" method="GET">
+          <input type="text" name="q" placeholder="Search kits..." class="search-input" required>
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/submit">Submit</a>
+        </nav>
+      </div>
+    </header>
 
     <main>
         <div class="search-results-title">

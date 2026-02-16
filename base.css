@@ -536,3 +536,34 @@ footer {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
 }
+
+/* ========== Global Overrides and Theme Variables ========== */
+:root {
+  --bg-primary: #000;
+  --bg-secondary: #111;
+  --bg-tertiary: #222;
+  --text-primary: #fff;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+  --border-color: #222;
+  --accent-red: #ff0043;
+  --accent-red-dark: #8a072a;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color);
+}
