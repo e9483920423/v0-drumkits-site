@@ -1,8 +1,3 @@
-function getItemImageUrl(id) {
-  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
-}
-
 const ITEMS_PER_PAGE = 6
 const PAGINATION_LIMIT = 6 
 
@@ -16,6 +11,8 @@ let expandRight = false
 const preloadedImageIds = new Set()
 
 function preloadPageImages(page) {
+  const { getKitImageUrl } = window.DrumkitAssets
+
   const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
   if (!Number.isFinite(page) || page < 1 || page > totalPages) return
 
@@ -32,7 +29,7 @@ function preloadPageImages(page) {
     const img = new Image()
     img.decoding = "async"
     img.loading = "eager"
-    img.src = getItemImageUrl(item.id)
+    img.src = getKitImageUrl(item.id)
   }
 }
 
@@ -76,15 +73,10 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 }
 
 async function loadDownloads() {
+  const { getAllKits } = window.DrumkitDataStore
+
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .order('id', { ascending: false })
-
-    if (error) throw error
-
-    allDownloads = data || []
+    allDownloads = await getAllKits()
     preloadedImageIds.clear()
     preloadPageImages(1)
     preloadPageImages(2)
@@ -123,26 +115,10 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl, altText) {
-  const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
-  img.loading = "lazy"
-  img.decoding = "async"
-  img.width = 320
-  img.height = 320
-
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-  }
-  probe.src = imageUrl
-
-  return img
-}
-
 function renderDownloads(downloads) {
+  const { getKitImageUrl, createKitImage } = window.DrumkitAssets
+  const { escapeHtml } = window.DrumkitUtils
+
   const list = document.getElementById("downloadsList")
   if (!list) return
 
@@ -157,11 +133,17 @@ function renderDownloads(downloads) {
     const card = document.createElement("div")
     card.className = "download-item"
 
-    const imageUrl = getItemImageUrl(item.id)
+    const imageUrl = getKitImageUrl(item.id)
 
     const imageWrap = document.createElement("div")
     imageWrap.className = "item-image"
-    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
+    imageWrap.appendChild(
+      createKitImage(imageUrl, escapeHtml(item.title), {
+        loading: "lazy",
+        width: 320,
+        height: 320,
+      })
+    )
 
     const content = document.createElement("div")
     content.className = "item-content"
@@ -293,19 +275,6 @@ function renderPagination() {
   container.appendChild(
     makeBtn("Next →", currentPage + 1, { disabled: currentPage === totalPages })
   )
-}
-
-function escapeHtml(text) {
-  if (text == null) return ''
-  if (typeof text !== 'string') text = String(text)
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
