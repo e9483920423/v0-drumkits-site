@@ -22,6 +22,27 @@ async function loadDownloads() {
   }
 }
 
+function createSmartImage(imageUrl, altText, width = 800, height = 800) {
+  const img = document.createElement("img")
+  img.src = "/errors/default.jpg"
+  img.alt = altText
+  img.loading = "eager"
+  img.decoding = "async"
+  if (width) img.width = width
+  if (height) img.height = height
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+  }
+  probe.onerror = () => {
+  }
+  probe.src = imageUrl
+
+  return img
+}
+
 function getSlugFromUrl() {
   let slug = window.location.pathname.split("/").filter(Boolean).pop()
   if (slug) {
@@ -60,33 +81,42 @@ function displayItem() {
   const imageUrl = getItemImageUrl(item.id)
 
   const mainContent = document.getElementById("mainContent")
-  mainContent.innerHTML = `
-    <div class="item-hero">
-      <div class="item-image-wrapper">
-        <img src="${imageUrl}" alt="${escapeHtml(item.title)}" onerror="this.src='/errors/default.jpg'">
+  
+  const heroDiv = document.createElement("div")
+  heroDiv.className = "item-hero"
+  
+  const imageWrapper = document.createElement("div")
+  imageWrapper.className = "item-image-wrapper"
+  
+  const heroImage = createSmartImage(imageUrl, item.title, 800, 800)
+  imageWrapper.appendChild(heroImage)
+  
+  const detailsDiv = document.createElement("div")
+  detailsDiv.className = "item-details"
+  detailsDiv.innerHTML = `
+    <h1 class="item-title">${escapeHtml(item.title)}</h1>
+    <p class="item-description">${escapeHtml(item.description)}</p>
+    <div class="item-specs">
+      <div class="spec-row">
+        <span class="spec-label">File Size:</span>
+        <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
       </div>
-      <div class="item-details">
-        <h1 class="item-title">${escapeHtml(item.title)}</h1>
-        <p class="item-description">${escapeHtml(item.description)}</p>
-        <div class="item-specs">
-          <div class="spec-row">
-            <span class="spec-label">File Size:</span>
-            <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
-          </div>
-          ${item.update_date ? `
-          <div class="spec-row">
-            <span class="spec-label">Last Updated:</span>
-            <span class="spec-value">${escapeHtml(item.update_date)}</span>
-          </div>
-          ` : ''}
-        </div>
-        <div class="action-buttons">
-          <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
-          <a href="/" class="btn back-btn">← Back to Collection</a>
-        </div>
+      ${item.update_date ? `
+      <div class="spec-row">
+        <span class="spec-label">Last Updated:</span>
+        <span class="spec-value">${escapeHtml(item.update_date)}</span>
       </div>
+      ` : ''}
+    </div>
+    <div class="action-buttons">
+      <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
+      <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
+  
+  heroDiv.appendChild(imageWrapper)
+  heroDiv.appendChild(detailsDiv)
+  mainContent.replaceChildren(heroDiv)
 
   renderRandomItems(item.slug)
 }
@@ -115,28 +145,43 @@ function renderRandomItems(currentSlug) {
     return
   }
 
-  const cardsHtml = randomItems
-    .map((item) => {
-      const imageUrl = getItemImageUrl(item.id)
-      return `
-        <article class="random-item-card">
-          <a href="/${escapeHtml(item.slug)}" class="random-item-image-wrap" aria-label="View ${escapeHtml(item.title)}">
-            <img src="${imageUrl}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async" onerror="this.src='/errors/default.jpg'">
-          </a>
-          <h3 class="random-item-title">${escapeHtml(item.title)}</h3>
-          <a href="/${escapeHtml(item.slug)}" class="random-item-link">View Details</a>
-        </article>
-      `
-    })
-    .join("")
-
-  section.innerHTML = `
-    <div class="random-items-inner">
-      <div class="random-items-grid">
-        ${cardsHtml}
-      </div>
-    </div>
-  `
+  const grid = document.createElement("div")
+  grid.className = "random-items-grid"
+  
+  randomItems.forEach((item) => {
+    const imageUrl = getItemImageUrl(item.id)
+    
+    const card = document.createElement("article")
+    card.className = "random-item-card"
+    
+    const imageLink = document.createElement("a")
+    imageLink.href = `/${escapeHtml(item.slug)}`
+    imageLink.className = "random-item-image-wrap"
+    imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
+    
+    const img = createSmartImage(imageUrl, item.title, 320, 320)
+    imageLink.appendChild(img)
+    
+    const title = document.createElement("h3")
+    title.className = "random-item-title"
+    title.textContent = item.title
+    
+    const detailsLink = document.createElement("a")
+    detailsLink.href = `/${escapeHtml(item.slug)}`
+    detailsLink.className = "random-item-link"
+    detailsLink.textContent = "View Details"
+    
+    card.appendChild(imageLink)
+    card.appendChild(title)
+    card.appendChild(detailsLink)
+    grid.appendChild(card)
+  })
+  
+  const inner = document.createElement("div")
+  inner.className = "random-items-inner"
+  inner.appendChild(grid)
+  
+  section.replaceChildren(inner)
 }
 
 function showError(message) {
@@ -174,31 +219,50 @@ let hilltopFiredThisPage = false;
 let hilltopReadyAt = 0;
 const HILLTOP_DELAY_MS = 5000;
 
-function setDownloadBtnCountdown(btn) {
-  if (!btn.dataset.hilltopOriginalText) {
-    btn.dataset.hilltopOriginalText = btn.textContent || "Download Now";
-  }
+function ensureHilltopToast() {
+  let el = document.getElementById("hilltop-toast");
+  if (el) return el;
 
-  btn.setAttribute("aria-disabled", "true");
-  btn.style.pointerEvents = "none";
-  btn.style.opacity = "0.75";
-  btn.style.cursor = "not-allowed";
+  el = document.createElement("div");
+  el.id = "hilltop-toast";
+  el.style.cssText = [
+    "position:fixed",
+    "left:50%",
+    "bottom:18px",
+    "transform:translateX(-50%)",
+    "background:rgba(0,0,0,0.88)",
+    "color:#fff",
+    "padding:10px 14px",
+    "border:1px solid rgba(255,255,255,0.14)",
+    "border-radius:10px",
+    "font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif",
+    "z-index:999999",
+    "max-width:92vw",
+    "text-align:center",
+    "box-shadow:0 10px 30px rgba(0,0,0,0.35)"
+  ].join(";");
+  document.body.appendChild(el);
+  return el;
+}
 
-  const timer = setInterval(() => {
-    const left = hilltopReadyAt - Date.now();
+function showHilltopCountdownToast() {
+  const el = ensureHilltopToast();
+
+  const tick = () => {
+    const left = Math.max(0, hilltopReadyAt - Date.now());
     if (left <= 0) {
-      clearInterval(timer);
-      btn.textContent = btn.dataset.hilltopOriginalText || "Download Now";
-      btn.removeAttribute("aria-disabled");
-      btn.style.pointerEvents = "";
-      btn.style.opacity = "";
-      btn.style.cursor = "";
-      hilltopFiredThisPage = true;
+      el.textContent = "Ready — tap Download again.";
+      setTimeout(() => {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }, 1600);
       return;
     }
     const sec = Math.ceil(left / 1000);
-    btn.textContent = `Wait ${sec}s…`;
-  }, 200);
+    el.textContent = `Please wait ${sec}s, then tap Download again.`;
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
 }
 
 document.addEventListener(
@@ -211,13 +275,18 @@ document.addEventListener(
     const now = Date.now();
     if (hilltopReadyAt && now < hilltopReadyAt) {
       e.preventDefault();
+      showHilltopCountdownToast();
       return;
     }
     e.preventDefault();
     window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
 
     hilltopReadyAt = now + HILLTOP_DELAY_MS;
-    setDownloadBtnCountdown(btn);
+    showHilltopCountdownToast();
+
+    setTimeout(() => {
+      hilltopFiredThisPage = true;
+    }, HILLTOP_DELAY_MS);
   },
   true
 );
