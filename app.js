@@ -1,5 +1,6 @@
 const ITEMS_PER_PAGE = 6
 const PAGINATION_LIMIT = 6 
+const HOME_PAGE_STATE_KEY = "drumkits:home:page:v1"
 
 let allDownloads = []
 let currentPage = 1
@@ -9,6 +10,45 @@ let expandLeft = false
 let expandRight = false
 
 const preloadedImageIds = new Set()
+
+function readSavedHomePage() {
+  try {
+    const raw = sessionStorage.getItem(HOME_PAGE_STATE_KEY)
+    const parsed = Number(raw)
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1
+  } catch {
+    return 1
+  }
+}
+
+function saveHomePage(page) {
+  try {
+    sessionStorage.setItem(HOME_PAGE_STATE_KEY, String(page))
+  } catch {
+  }
+}
+
+function clampCurrentPage(totalPages) {
+  currentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1))
+}
+
+function applyDownloads(downloads, { keepPage = true } = {}) {
+  allDownloads = Array.isArray(downloads) ? downloads : []
+
+  const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
+  if (!keepPage) {
+    currentPage = readSavedHomePage()
+  }
+  clampCurrentPage(totalPages)
+
+  preloadedImageIds.clear()
+  preloadPageImages(currentPage)
+  preloadPageImages(currentPage + 1)
+
+  renderCurrentPage()
+  renderPagination()
+  saveHomePage(currentPage)
+}
 
 function preloadPageImages(page) {
   const { getKitImageUrl } = window.DrumkitAssets
@@ -73,20 +113,26 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 }
 
 async function loadDownloads() {
-  const { getAllKits } = window.DrumkitDataStore
+  const { getCachedKitsSync, getAllKits } = window.DrumkitDataStore
+
+  const cached = getCachedKitsSync({ allowStale: true })
+  if (cached && cached.length > 0) {
+    currentPage = readSavedHomePage()
+    applyDownloads(cached, { keepPage: true })
+  }
 
   try {
-    allDownloads = await getAllKits()
-    preloadedImageIds.clear()
-    preloadPageImages(1)
-    preloadPageImages(2)
-    currentPage = 1
-    renderCurrentPage()
-    renderPagination()
+    const latest = await getAllKits({ allowStale: true, revalidate: true })
+    if (!cached || latest !== cached) {
+      if (!cached) currentPage = readSavedHomePage()
+      applyDownloads(latest, { keepPage: true })
+    }
   } catch (error) {
     console.error("Error loading downloads:", error)
-    const list = document.getElementById("downloadsList")
-    list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+    if (!cached || cached.length === 0) {
+      const list = document.getElementById("downloadsList")
+      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+    }
   }
 }
 
@@ -188,6 +234,7 @@ function renderPagination() {
     paginationEl ? (paginationEl.getBoundingClientRect().top + window.scrollY) : window.scrollY
 
   currentPage = page
+  saveHomePage(currentPage)
   expandLeft = false
   expandRight = false
 
@@ -278,3 +325,9 @@ function renderPagination() {
 }
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
+
+window.addEventListener("drumkits:data-updated", (event) => {
+  const latest = event?.detail?.data
+  if (!Array.isArray(latest) || latest.length === 0) return
+  applyDownloads(latest, { keepPage: true })
+})

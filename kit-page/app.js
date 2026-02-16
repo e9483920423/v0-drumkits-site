@@ -1,14 +1,26 @@
 let allDownloads = []
+let activeSlug = ""
 
 async function loadDownloads() {
-  const { getAllKits } = window.DrumkitDataStore
+  const { getCachedKitsSync, getAllKits } = window.DrumkitDataStore
+
+  const cached = getCachedKitsSync({ allowStale: true })
+  if (cached && cached.length > 0) {
+    allDownloads = cached
+    displayItem()
+  }
 
   try {
-    allDownloads = await getAllKits()
-    displayItem()
+    const latest = await getAllKits({ allowStale: true, revalidate: true })
+    if (!cached || latest !== cached) {
+      allDownloads = latest
+      displayItem()
+    }
   } catch (error) {
     console.error("Error loading downloads:", error)
-    showError("Failed to load item data. Please try again.")
+    if (!cached || cached.length === 0) {
+      showError("Failed to load item data. Please try again.")
+    }
   }
 }
 
@@ -43,6 +55,8 @@ function displayItem() {
     const params = new URLSearchParams(window.location.search)
     slug = params.get("slug")
   }
+
+  activeSlug = slug
 
   if (!slug) {
     showError("No item specified. Please return to the home page.")
@@ -263,3 +277,17 @@ document.addEventListener(
 );
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
+
+window.addEventListener("drumkits:data-updated", (event) => {
+  const latest = event?.detail?.data
+  if (!Array.isArray(latest) || latest.length === 0) return
+
+  allDownloads = latest
+  if (!activeSlug) {
+    displayItem()
+    return
+  }
+
+  const exists = allDownloads.some((d) => d?.slug === activeSlug)
+  if (exists) displayItem()
+})

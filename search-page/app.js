@@ -1,8 +1,52 @@
 const ITEMS_PER_PAGE = 6
+const SEARCH_PAGE_STATE_KEY = "drumkits:search:state:v1"
 
 let searchResults = []
 let currentPage = 1
 let searchQuery = ""
+
+function readSavedSearchState() {
+  try {
+    const raw = sessionStorage.getItem(SEARCH_PAGE_STATE_KEY)
+    if (!raw) return { query: "", page: 1 }
+
+    const parsed = JSON.parse(raw)
+    const page = Number(parsed?.page)
+    return {
+      query: typeof parsed?.query === "string" ? parsed.query : "",
+      page: Number.isFinite(page) && page > 0 ? Math.floor(page) : 1,
+    }
+  } catch {
+    return { query: "", page: 1 }
+  }
+}
+
+function saveSearchState() {
+  try {
+    sessionStorage.setItem(
+      SEARCH_PAGE_STATE_KEY,
+      JSON.stringify({ query: searchQuery, page: currentPage })
+    )
+  } catch {
+  }
+}
+
+function clampCurrentPage(totalPages) {
+  currentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1))
+}
+
+function renderSearchView() {
+  if (!Array.isArray(searchResults) || searchResults.length === 0) {
+    showNoResults()
+    return
+  }
+
+  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE)
+  clampCurrentPage(totalPages)
+  renderCurrentPage()
+  renderPagination()
+  saveSearchState()
+}
 
 function getSearchQueryFromUrl() {
   const params = new URLSearchParams(window.location.search)
@@ -10,15 +54,19 @@ function getSearchQueryFromUrl() {
 }
 
 async function performSearch() {
-  const { searchKits } = window.DrumkitDataStore
+  const { searchKitsSync, searchKits } = window.DrumkitDataStore
   const { escapeHtml } = window.DrumkitUtils
 
-  searchQuery = getSearchQueryFromUrl()
+  const saved = readSavedSearchState()
+  const queryFromUrl = getSearchQueryFromUrl()
+  searchQuery = queryFromUrl || saved.query
   
   if (!searchQuery) {
     showError("No search query provided.")
     return
   }
+
+  currentPage = queryFromUrl === saved.query ? saved.page : 1
 
   // Update page title and search query display
   const queryTitle = document.getElementById("searchQueryTitle")
@@ -32,19 +80,26 @@ async function performSearch() {
     queryText.textContent = `Found results matching your search...`
   }
 
+  const cachedMatches = searchKitsSync(searchQuery)
+  if (cachedMatches.length > 0) {
+    searchResults = cachedMatches
+    renderSearchView()
+  }
+
   try {
-    searchResults = await searchKits(searchQuery)
-    currentPage = 1
-    
-    if (searchResults.length === 0) {
-      showNoResults()
-    } else {
-      renderCurrentPage()
-      renderPagination()
+    const freshMatches = await searchKits(searchQuery, { allowStale: true, revalidate: true })
+    if (!cachedMatches || freshMatches !== cachedMatches) {
+      searchResults = freshMatches
+      if (!cachedMatches.length) {
+        currentPage = queryFromUrl === saved.query ? saved.page : 1
+      }
+      renderSearchView()
     }
   } catch (error) {
     console.error("Error performing search:", error)
-    showError("Failed to perform search. Please try again.")
+    if (!cachedMatches || cachedMatches.length === 0) {
+      showError("Failed to perform search. Please try again.")
+    }
   }
 }
 
@@ -57,6 +112,8 @@ function showNoResults() {
   if (queryText) {
     queryText.textContent = `No results found for "${escapeHtml(searchQuery)}"`
   }
+
+  saveSearchState()
   
   list.innerHTML = '<p class="loading">No kits found matching your search. Try different keywords.</p>'
   
@@ -152,6 +209,7 @@ function renderPagination() {
       currentPage--
       renderCurrentPage()
       renderPagination()
+      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -166,6 +224,7 @@ function renderPagination() {
       currentPage = i
       renderCurrentPage()
       renderPagination()
+      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
     container.appendChild(btn)
@@ -180,6 +239,7 @@ function renderPagination() {
       currentPage++
       renderCurrentPage()
       renderPagination()
+      saveSearchState()
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -187,3 +247,8 @@ function renderPagination() {
 }
 
 document.addEventListener("DOMContentLoaded", performSearch)
+
+window.addEventListener("drumkits:data-updated", () => {
+  if (!searchQuery) return
+  performSearch()
+})
