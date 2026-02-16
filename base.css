@@ -75,12 +75,18 @@ header {
 .logo {
   display: flex;
   align-items: center;
+  color: white;
+  transition: color 0.2s ease;
 }
 
-.logo img {
+.logo svg {
   height: 40px;
   width: auto;
-  display: block;
+  fill: currentColor;
+}
+
+.logo:hover {
+  color: #ff0043;
 }
 
 nav a {
