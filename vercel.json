@@ -1,4 +1,6 @@
 {
+  "buildCommand": null,
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",
@@ -7,8 +9,13 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://plumprush.com https://*.plumprush.com https://va.vercel-scripts.com; connect-src 'self' https://jdianavibwqbxgjkzniq.supabase.co https://va.vercel-scripts.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://plumprush.com https://*.plumprush.com https://va.vercel-scripts.com; connect-src 'self' https://jdianavibwqbxgjkzniq.supabase.co https://va.vercel-scripts.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" }
       ]
     }
+  ],
+  "rewrites": [
+    { "source": "/submit", "destination": "/submit-page/index.html" },
+    { "source": "/search", "destination": "/search-page/index.html" },
+    { "source": "/:slug", "destination": "/kit-page/index.html" }
   ]
 }
