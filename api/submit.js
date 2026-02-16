@@ -155,7 +155,6 @@ export default async function handler(req, res) {
 
     await submitToDiscord(trimmedLink, DISCORD_WEBHOOK_URL);
 
-    // Success response
     res.status(200).json({
       success: true,
       message: 'Submission sent.'
@@ -163,8 +162,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-
-    // Return error response
     res.status(500).json({
       error: 'Failed to submit.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

@@ -212,7 +212,6 @@ function renderPagination() {
 }
 
 function escapeHtml(text) {
-  // Handle null, undefined, or non-string values
   if (text == null) return ''
   if (typeof text !== 'string') {
     text = String(text)

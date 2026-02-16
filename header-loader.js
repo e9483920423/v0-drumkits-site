@@ -1,9 +1,10 @@
 async function loadHeader() {
   const headerPlaceholder = document.getElementById("header-placeholder")
   if (!headerPlaceholder) return
+  if (headerPlaceholder.dataset.loadHeader !== "true") {
+    return
+  }
 
-  // Most pages already include full header HTML at first paint.
-  // Avoid replacing existing content to prevent visual flashes.
   if (headerPlaceholder.querySelector(".header-container")) {
     return
   }

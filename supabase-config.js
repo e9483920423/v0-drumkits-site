@@ -12,5 +12,4 @@ const SUPABASE_ANON_KEY =
   window.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3cm5iZnd6b2xwbGJtaWFhZW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjExMDIsImV4cCI6MjA4Njc5NzEwMn0.shOMW9NahKSMW3m5sYfUiBf2jsQW8HuVck5WXG7SzAw";
 
-// Initialize Supabase client (supabase is loaded from CDN)
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

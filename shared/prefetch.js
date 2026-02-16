@@ -1,11 +1,60 @@
 /**
  * Prefetch + Page Transitions
- * - Prefetches same-origin links on hover/touchstart (adds <link rel="prefetch">)
+ * - Prefetches same-origin document links on hover/touchstart (adds <link rel="prefetch">)
  * - Intercepts internal navigation to play a quick fade-out / fade-in transition
  */
 
 ;(function () {
   "use strict"
+
+  /* ---------- Helpers ---------- */
+
+  function getOverlay() {
+    return document.getElementById("pageTransitionOverlay")
+  }
+
+  function prefersReducedMotion() {
+    return !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+  }
+
+  function shouldAvoidPrefetch() {
+    const c = navigator.connection
+    if (c?.saveData) return true
+    if (typeof c?.effectiveType === "string" && c.effectiveType.includes("2g")) return true
+    return false
+  }
+
+  function toCleanUrl(href) {
+    const url = new URL(href, window.location.href)
+    url.hash = ""
+    return url
+  }
+
+  function isHttpUrl(url) {
+    return url.protocol === "http:" || url.protocol === "https:"
+  }
+
+  function isInternalLink(anchor) {
+    if (!anchor || !anchor.href) return false
+    if (anchor.target === "_blank") return false
+    if (anchor.hasAttribute("download")) return false
+
+    try {
+      const url = new URL(anchor.href, window.location.href)
+      if (!isHttpUrl(url)) return false
+      return url.origin === window.location.origin
+    } catch {
+      return false
+    }
+  }
+
+  function isSameDocumentIgnoringHash(aHref, bHref) {
+    try {
+      return toCleanUrl(aHref).href === toCleanUrl(bHref).href
+    } catch {
+      return false
+    }
+  }
 
   /* ---------- Prefetch on hover ---------- */
 
@@ -22,48 +71,68 @@
     document.head.appendChild(link)
   }
 
-  function isInternalLink(anchor) {
-    if (!anchor || !anchor.href) return false
-    if (anchor.target === "_blank") return false
-    if (anchor.hasAttribute("download")) return false
+  function onPointerOver(e) {
+    if (shouldAvoidPrefetch()) return
 
-    try {
-      const url = new URL(anchor.href, window.location.origin)
-      return url.origin === window.location.origin
-    } catch {
-      return false
-    }
-  }
-
-  function onPointerEnter(e) {
     const anchor = e.target.closest("a")
-    if (anchor && isInternalLink(anchor)) {
-      prefetchUrl(anchor.href)
-    }
+    if (!anchor || !isInternalLink(anchor)) return
+
+    if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
+
+    const cleanHref = toCleanUrl(anchor.href).href
+    prefetchUrl(cleanHref)
   }
 
-  document.addEventListener("pointerenter", onPointerEnter, { capture: true, passive: true })
-  document.addEventListener("touchstart", onPointerEnter, { capture: true, passive: true })
+  document.addEventListener("pointerover", onPointerOver, { capture: true, passive: true })
+  document.addEventListener("touchstart", onPointerOver, { capture: true, passive: true })
 
   /* ---------- Page Transition ---------- */
 
-  const TRANSITION_MS = 150 // matches the CSS transition duration
+  const PENDING_KEY = "pt_overlay_pending"
 
-  function getOverlay() {
-    return document.getElementById("pageTransitionOverlay")
+  function waitForTransition(overlay) {
+    if (prefersReducedMotion()) return Promise.resolve()
+
+    const fallbackMs = 300
+
+    return new Promise((resolve) => {
+      let done = false
+
+      function finish() {
+        if (done) return
+        done = true
+        overlay.removeEventListener("transitionend", onEnd)
+        clearTimeout(t)
+        resolve()
+      }
+
+      function onEnd(e) {
+        if (e.target === overlay) finish()
+      }
+
+      overlay.addEventListener("transitionend", onEnd)
+      const t = setTimeout(finish, fallbackMs)
+    })
   }
 
-  // On page load, if the overlay exists and is active (from the previous page's
-  // fade-out), fade it back in by removing the active class after a brief tick.
-  function fadeInOnLoad() {
+  function revealOnLoad() {
     const overlay = getOverlay()
     if (!overlay) return
 
-    // Start with the overlay visible (black screen) so the new page content
-    // is hidden while it paints, then fade it out to reveal the page.
-    overlay.classList.add("active")
+    const pending = sessionStorage.getItem(PENDING_KEY) === "1"
+    sessionStorage.removeItem(PENDING_KEY)
 
-    // Use rAF so the browser has a chance to paint with the overlay visible
+    if (!pending) {
+      overlay.classList.remove("active")
+      return
+    }
+
+    if (prefersReducedMotion()) {
+      overlay.classList.remove("active")
+      return
+    }
+
+    overlay.classList.add("active")
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         overlay.classList.remove("active")
@@ -71,44 +140,46 @@
     })
   }
 
-  // Intercept click on internal links: fade out, then navigate
   function onLinkClick(e) {
-    // Don't interfere with modified clicks (new tab, etc.)
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
 
     const anchor = e.target.closest("a")
     if (!anchor || !isInternalLink(anchor)) return
 
-    // Don't transition if it's the same page
-    if (anchor.href === window.location.href) return
+    if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
 
-    // Skip download buttons (those open in new tabs with special behaviour)
     if (anchor.classList.contains("download-btn") && anchor.target === "_blank") return
 
     const overlay = getOverlay()
-    if (!overlay) return // graceful fallback — just do normal nav
+    if (!overlay) return 
+
+    sessionStorage.setItem(PENDING_KEY, "1")
+
+    if (prefersReducedMotion()) return
 
     e.preventDefault()
-    overlay.classList.add("active")
 
-    setTimeout(function () {
-      window.location.href = anchor.href
-    }, TRANSITION_MS)
+    const dest = toCleanUrl(anchor.href).href
+
+    overlay.classList.add("active")
+    waitForTransition(overlay).then(function () {
+      window.location.href = dest
+    })
   }
 
   document.addEventListener("click", onLinkClick, { capture: false })
 
-  // Run fade-in once the DOM is ready
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", fadeInOnLoad)
+    document.addEventListener("DOMContentLoaded", revealOnLoad)
   } else {
-    fadeInOnLoad()
+    revealOnLoad()
   }
 
-  // Also handle bfcache (back/forward)
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) {
-      fadeInOnLoad()
+      sessionStorage.removeItem(PENDING_KEY)
+      const overlay = getOverlay()
+      if (overlay) overlay.classList.remove("active")
     }
   })
 })()
