@@ -146,6 +146,14 @@
     const anchor = e.target.closest("a")
     if (!anchor || !isInternalLink(anchor)) return
 
+    // Skip transition for "View Details" links so they navigate instantly.
+    if (
+      anchor.classList.contains("download-btn") ||
+      anchor.classList.contains("random-item-link")
+    ) {
+      return
+    }
+
     if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
 
     if (anchor.classList.contains("download-btn") && anchor.target === "_blank") return
