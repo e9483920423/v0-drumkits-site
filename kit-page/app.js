@@ -1,19 +1,4 @@
 let allDownloads = []
-const hideDownloadCSS = `
-  .download-btn {
-    display: none !important;
-  }
-`;
-
-const style = document.createElement('style');
-style.textContent = hideDownloadCSS;
-document.head.appendChild(style);
-function showDownloadButton() {
-  const downloadBtn = document.querySelector('.download-btn');
-  if (downloadBtn) {
-    downloadBtn.style.display = 'block';
-  }
-}
 
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
@@ -28,6 +13,7 @@ async function loadDownloads() {
       .order('id', { ascending: false })
 
     if (error) throw error
+
     allDownloads = data || []
     displayItem()
   } catch (error) {
@@ -276,9 +262,6 @@ document.addEventListener(
     if (!btn) return;
     if (hilltopFiredThisPage) return;
 
-    // Show the download button when first clicked
-    showDownloadButton();
-
     const now = Date.now();
     if (hilltopReadyAt && now < hilltopReadyAt) {
       e.preventDefault();
@@ -302,7 +285,4 @@ document.addEventListener(
   true
 );
 
-document.addEventListener("DOMContentLoaded", function() {
-  loadDownloads();
-  setTimeout(showDownloadButton, 1000);
-});
+document.addEventListener("DOMContentLoaded", loadDownloads)
