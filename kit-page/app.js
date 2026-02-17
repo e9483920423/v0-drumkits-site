@@ -226,46 +226,29 @@ let hilltopFiredThisPage = false;
 let hilltopReadyAt = 0;
 const HILLTOP_DELAY_MS = 5000;
 
-function ensureHilltopToast() {
-  let el = document.getElementById("hilltop-toast");
-  if (el) return el;
-
-  el = document.createElement("div");
-  el.id = "hilltop-toast";
-  el.style.cssText = [
-    "position:fixed",
-    "left:50%",
-    "bottom:18px",
-    "transform:translateX(-50%)",
-    "background:rgba(0,0,0,0.88)",
-    "color:#fff",
-    "padding:10px 14px",
-    "border:1px solid rgba(255,255,255,0.14)",
-    "border-radius:10px",
-    "font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif",
-    "z-index:999999",
-    "max-width:92vw",
-    "text-align:center",
-    "box-shadow:0 10px 30px rgba(0,0,0,0.35)"
-  ].join(";");
-  document.body.appendChild(el);
-  return el;
+function updateDownloadButtonText(button, message) {
+  button.textContent = message;
+  button.disabled = true;
+  button.style.opacity = "0.7";
+  button.style.cursor = "not-allowed";
 }
 
-function showHilltopCountdownToast() {
-  const el = ensureHilltopToast();
+function resetDownloadButton(button) {
+  button.textContent = "Download Now";
+  button.disabled = false;
+  button.style.opacity = "";
+  button.style.cursor = "";
+}
 
+function showHilltopCountdownInButton(button) {
   const tick = () => {
     const left = Math.max(0, hilltopReadyAt - Date.now());
     if (left <= 0) {
-      el.textContent = "Ready — tap Download again.";
-      setTimeout(() => {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      }, 1600);
+      resetDownloadButton(button);
       return;
     }
     const sec = Math.ceil(left / 1000);
-    el.textContent = `Please wait ${sec}s, then tap Download again.`;
+    updateDownloadButtonText(button, `Please wait ${sec}s...`);
     requestAnimationFrame(tick);
   };
 
@@ -282,17 +265,21 @@ document.addEventListener(
     const now = Date.now();
     if (hilltopReadyAt && now < hilltopReadyAt) {
       e.preventDefault();
-      showHilltopCountdownToast();
+      showHilltopCountdownInButton(btn);
       return;
     }
+    
     e.preventDefault();
     window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
 
     hilltopReadyAt = now + HILLTOP_DELAY_MS;
-    showHilltopCountdownToast();
+    showHilltopCountdownInButton(btn);
 
     setTimeout(() => {
       hilltopFiredThisPage = true;
+      setTimeout(() => {
+        resetDownloadButton(btn);
+      }, 1600);
     }, HILLTOP_DELAY_MS);
   },
   true
