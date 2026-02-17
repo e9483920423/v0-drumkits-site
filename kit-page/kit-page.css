@@ -120,7 +120,13 @@ html {
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
+  max-height: none;
 }
+
 
 .item-specs {
   background-color: var(--bg-primary);
