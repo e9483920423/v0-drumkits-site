@@ -1,4 +1,3 @@
-//Public Development URL
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
   return `${PUB_URL}/${id}.jpg`
@@ -9,6 +8,36 @@ const ITEMS_PER_PAGE = 6
 let searchResults = []
 let currentPage = 1
 let searchQuery = ""
+
+function saveScrollPosition() {
+  sessionStorage.setItem('scrollPosition', window.pageYOffset.toString());
+}
+
+function restoreScrollPosition() {
+  const scrollPosition = sessionStorage.getItem('scrollPosition');
+  if (scrollPosition) {
+    window.scrollTo(0, parseInt(scrollPosition));
+  }
+}
+
+window.addEventListener('beforeunload', saveScrollPosition);
+
+let isScrolling;
+window.addEventListener('scroll', function() {
+  window.clearTimeout(isScrolling);
+  isScrolling = setTimeout(function() {
+    saveScrollPosition();
+  }, 100);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  restoreScrollPosition();
+  performSearch();
+});
+
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
 
 function createSmartImage(imageUrl, altText) {
   const img = document.createElement("img")
@@ -43,7 +72,6 @@ async function performSearch() {
     return
   }
 
-  // Update page title and search query display
   const queryTitle = document.getElementById("searchQueryTitle")
   const queryText = document.getElementById("searchQueryText")
   
@@ -177,6 +205,7 @@ function renderPagination() {
       currentPage--
       renderCurrentPage()
       renderPagination()
+      saveScrollPosition();
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -191,6 +220,7 @@ function renderPagination() {
       currentPage = i
       renderCurrentPage()
       renderPagination()
+      saveScrollPosition();
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
     container.appendChild(btn)
@@ -205,6 +235,7 @@ function renderPagination() {
       currentPage++
       renderCurrentPage()
       renderPagination()
+      saveScrollPosition();
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -225,5 +256,3 @@ function escapeHtml(text) {
   }
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
-
-document.addEventListener("DOMContentLoaded", performSearch)
