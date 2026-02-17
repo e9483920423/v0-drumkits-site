@@ -116,7 +116,6 @@ function displayItem() {
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -126,6 +125,18 @@ function displayItem() {
   mainContent.replaceChildren(heroDiv)
 
   renderRandomItems(item.slug)
+}
+
+function addDownloadButton(downloadUrl) {
+  const actionButtonsDiv = document.querySelector('.action-buttons');
+  if (actionButtonsDiv) {
+    const downloadBtn = document.createElement('a');
+    downloadBtn.href = downloadUrl;
+    downloadBtn.className = 'btn download-btn';
+    downloadBtn.target = '_blank';
+    downloadBtn.textContent = 'Download Now';
+    actionButtonsDiv.insertBefore(downloadBtn, actionButtonsDiv.firstChild);
+  }
 }
 
 function getRandomItems(excludeSlug, count = 4) {
@@ -285,4 +296,46 @@ document.addEventListener(
   true
 );
 
-document.addEventListener("DOMContentLoaded", loadDownloads)
+let currentItem = null;
+
+document.addEventListener("DOMContentLoaded", async function() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
+
+    if (error) throw error
+
+    allDownloads = data || []
+    
+    let slug = getSlugFromUrl()
+    if (!slug) {
+      const params = new URLSearchParams(window.location.search)
+      slug = params.get("slug")
+    }
+    
+    if (slug) {
+      currentItem = allDownloads.find((d) => d.slug === slug)
+    }
+    
+    displayItem()
+  } catch (error) {
+    console.error("Error loading downloads:", error)
+    showError("Failed to load item data. Please try again.")
+  }
+});
+
+function adLoaded() {
+  if (currentItem && currentItem.download) {
+    addDownloadButton(currentItem.download);
+  }
+}
+
+window.adSystemReady = function() {
+  adLoaded();
+};
+
+document.addEventListener('adReady', function() {
+  adLoaded();
+});
