@@ -64,17 +64,18 @@
   <script src="app.js"></script>
   <script defer src="/shared/prefetch.js"></script>
 
-  <script>
-  setTimeout(function(){
+    <script>
+    (function(tuzda){
     var d = document,
-        s = d.createElement('script'),
-        l = d.body;
-    s.src = "//plumprush.com/cbDu9W6mb.2R5slpSbWMQ/9wNjj-cg2/M/jZcRz/OnSB0I2LNgzyYyyvNLz/Qawo";
+    s = d.createElement('script'),
+    l = d.scripts[d.scripts.length - 1];
+    s.settings = tuzda || {};
+    s.src = "\/\/plumprush.com\/cIDo9_6xb.2N5XlPSOWqQI9jN\/jJcv2\/MQj-clzHOqSn0o2NNmzRYWykNkzZQLwc";
     s.async = true;
     s.referrerPolicy = 'no-referrer-when-downgrade';
-    l.appendChild(s);
-  }, 3000);
-  </script>
+    l.parentNode.insertBefore(s, l);
+    })({})
+    </script>
 
   <script defer src="/_vercel/insights/script.js"></script>
 
