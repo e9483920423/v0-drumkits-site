@@ -29,35 +29,23 @@ async function loadDownloads() {
   }
 }
 
-function createSmartImage(imageUrl, altText, width = 800, height = 800, onReveal = null) {
+function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
   img.alt = altText || ""
   img.loading = "eager"
   img.decoding = "async"
-  img.style.visibility = "hidden"
-  if (width) img.width = width
-  if (height) img.height = height
-  img.onerror = () => {
-    img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
-    if (onReveal) onReveal()
-    probe.onload = null
-    probe.onerror = null
-  }
+  img.width = width
+  img.height = height
+  img.src = "/errors/default.jpg"
 
   const probe = new Image()
   probe.decoding = "async"
   probe.onload = () => {
     img.src = imageUrl
-    img.style.visibility = "visible"
-    if (onReveal) onReveal()
     probe.onload = null
     probe.onerror = null
   }
   probe.onerror = () => {
-    img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
-    if (onReveal) onReveal()
     probe.onload = null
     probe.onerror = null
   }
@@ -109,17 +97,13 @@ function displayItem() {
 
   const mainContent = document.getElementById("mainContent")
   
-  mainContent.style.visibility = "hidden"
-  
   const heroDiv = document.createElement("div")
   heroDiv.className = "item-hero"
   
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
 
-  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800, () => {
-    mainContent.style.visibility = "visible"
-  })
+  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -226,7 +210,6 @@ function renderRandomItems(currentSlug) {
 
 function showError(message) {
   const mainContent = document.getElementById("mainContent")
-  mainContent.style.visibility = "visible"
   mainContent.innerHTML = `
     <div class="error-message">
       <p>${escapeHtml(message)}</p>
@@ -262,7 +245,6 @@ const HILLTOP_DELAY_MS = 5000;
 
 function updateDownloadButtonText(button, message) {
   button.textContent = message;
-  // Works for <a> or <button>
   button.setAttribute("aria-disabled", "true");
   button.style.opacity = "0.7";
   button.style.cursor = "not-allowed";
