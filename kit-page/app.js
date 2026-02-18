@@ -122,7 +122,7 @@ function displayItem() {
       ` : ''}
     </div>
     <div class="action-buttons">
-      <button class="btn download-btn" type="button">Download Now</button>
+      <a class="btn download-btn" type="button">Download Now</a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
