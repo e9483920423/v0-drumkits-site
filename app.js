@@ -14,6 +14,7 @@ let expandLeft = false
 let expandRight = false
 
 const preloadedImageIds = new Set()
+const cardCache = new Map()
 
 function preloadPageImages(page) {
   const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
@@ -86,6 +87,7 @@ async function loadDownloads() {
 
     allDownloads = data || []
     preloadedImageIds.clear()
+    cardCache.clear()
     preloadPageImages(1)
     preloadPageImages(2)
     currentPage = 1
@@ -130,26 +132,42 @@ function createSmartImage(imageUrl, altText) {
   img.decoding = "async"
   img.width = 320
   img.height = 320
-  img.style.visibility = "hidden"
 
   img.onerror = () => {
     img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
   }
 
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    img.style.visibility = "visible"
-  }
-  probe.onerror = () => {
-    img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
-  }
-  probe.src = imageUrl
+  img.src = imageUrl
 
   return img
+}
+
+function buildCard(item) {
+  const card = document.createElement("div")
+  card.className = "download-item"
+
+  const imageUrl = getItemImageUrl(item.id)
+
+  const imageWrap = document.createElement("div")
+  imageWrap.className = "item-image"
+  imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
+
+  const content = document.createElement("div")
+  content.className = "item-content"
+  content.innerHTML = `
+    <h3 class="item-title">${escapeHtml(item.title)}</h3>
+
+    ${item.description && item.description !== "null"
+      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+      : ''
+    }
+
+    <a href="/${item.slug}" class="download-btn">View Details</a>
+  `
+
+  card.appendChild(imageWrap)
+  card.appendChild(content)
+  return card
 }
 
 function renderDownloads(downloads) {
@@ -160,35 +178,14 @@ function renderDownloads(downloads) {
     list.innerHTML = '<p class="loading">No downloads available.</p>'
     return
   }
-  
+
   const frag = document.createDocumentFragment()
 
   downloads.forEach((item) => {
-    const card = document.createElement("div")
-    card.className = "download-item"
-
-    const imageUrl = getItemImageUrl(item.id)
-
-    const imageWrap = document.createElement("div")
-    imageWrap.className = "item-image"
-    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
-
-    const content = document.createElement("div")
-    content.className = "item-content"
-    content.innerHTML = `
-      <h3 class="item-title">${escapeHtml(item.title)}</h3>
-
-      ${item.description && item.description !== "null"
-        ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-        : ''
-      }
-
-      <a href="/${item.slug}" class="download-btn">View Details</a>
-    `
-
-    card.appendChild(imageWrap)
-    card.appendChild(content)
-    frag.appendChild(card)
+    if (!cardCache.has(item.id)) {
+      cardCache.set(item.id, buildCard(item))
+    }
+    frag.appendChild(cardCache.get(item.id))
   })
 
   list.replaceChildren(frag)
