@@ -30,10 +30,9 @@ function preloadPageImages(page) {
     if (preloadedImageIds.has(id)) continue
     preloadedImageIds.add(id)
 
-    const img = new Image()
-    img.decoding = "async"
-    img.loading = "eager"
-    img.src = getItemImageUrl(item.id)
+    if (!cardCache.has(item.id)) {
+      cardCache.set(item.id, buildCard(item))
+    }
   }
 }
 
@@ -90,6 +89,7 @@ async function loadDownloads() {
     cardCache.clear()
     preloadPageImages(1)
     preloadPageImages(2)
+    preloadPageImages(3)
     currentPage = 1
     renderCurrentPage()
     renderPagination()
@@ -125,19 +125,20 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl, altText) {
+function createSmartImage(imageUrl) {
   const img = document.createElement("img")
   img.alt = ""
-  img.loading = "lazy"
+  img.loading = "eager"
   img.decoding = "async"
   img.width = 320
   img.height = 320
 
-  img.onerror = () => {
-    img.src = "/errors/default.jpg"
-  }
+  img.src = "/errors/default.jpg"
 
-  img.src = imageUrl
+  const real = new Image()
+  real.decoding = "async"
+  real.onload = () => { img.src = imageUrl }
+  real.src = imageUrl
 
   return img
 }
