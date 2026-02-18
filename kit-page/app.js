@@ -31,7 +31,7 @@ async function loadDownloads() {
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = altText || ""
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
