@@ -18,7 +18,11 @@ async function loadDownloads() {
     if (error) throw error
 
     allDownloads = data || []
-    displayItem()
+    if (allDownloads.length > 0) {
+      displayItem()
+    } else {
+      showError("No items available. Please try again later.")
+    }
   } catch (error) {
     console.error("Error loading downloads:", error)
     showError("Failed to load item data. Please try again.")
@@ -27,7 +31,7 @@ async function loadDownloads() {
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = ""
+  img.alt = altText || ""
   img.loading = "eager"
   img.decoding = "async"
   img.style.visibility = "hidden"
@@ -43,10 +47,14 @@ function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   probe.onload = () => {
     img.src = imageUrl
     img.style.visibility = "visible"
+    probe.onload = null
+    probe.onerror = null
   }
   probe.onerror = () => {
     img.src = "/errors/default.jpg"
     img.style.visibility = "visible"
+    probe.onload = null
+    probe.onerror = null
   }
   probe.src = imageUrl
 
@@ -78,20 +86,21 @@ function displayItem() {
     return
   }
 
-  const newUrl = `${window.location.origin}/${slug}`
+  const newUrl = `${window.location.origin}/${encodeURIComponent(slug)}`
   window.history.replaceState({}, "", newUrl)
 
   const item = allDownloads.find((d) => d.slug === slug)
 
   if (!item) {
-    showError(`Item "${slug}" not found. Please return to the home page.`)
-    return
+     window.location.href = window.location.origin
+     return
   }
 
-  currentDownloadUrl = item.download || null;
-  currentItemSlug = item.slug || null;
+  const { download, ...safeItem } = item
+  currentDownloadUrl = download || null
+  currentItemSlug = safeItem.slug || null
 
-  const imageUrl = getItemImageUrl(item.id)
+  const imageUrl = getItemImageUrl(safeItem.id)
 
   const mainContent = document.getElementById("mainContent")
   
@@ -101,28 +110,28 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
   
-  const heroImage = createSmartImage(imageUrl, item.title, 800, 800)
+  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
   detailsDiv.className = "item-details"
   detailsDiv.innerHTML = `
-    <h1 class="item-title">${escapeHtml(item.title)}</h1>
-    <p class="item-description">${escapeHtml(item.description)}</p>
+    <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
+    <p class="item-description">${escapeHtml(safeItem.description)}</p>
     <div class="item-specs">
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
-        <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
+        <span class="spec-value">${escapeHtml(safeItem.file_size ?? 'N/A')}</span>
       </div>
-      ${item.update_date ? `
+      ${safeItem.update_date ? `
       <div class="spec-row">
         <span class="spec-label">Last Updated:</span>
-        <span class="spec-value">${escapeHtml(item.update_date)}</span>
+        <span class="spec-value">${escapeHtml(safeItem.update_date)}</span>
       </div>
       ` : ''}
     </div>
     <div class="action-buttons">
-      <button class="btn download-btn" type="button">Download Now</button>
+      <a class="btn download-btn" role="button" tabindex="0">Download Now</a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -131,10 +140,14 @@ function displayItem() {
   heroDiv.appendChild(detailsDiv)
   mainContent.replaceChildren(heroDiv)
 
-  renderRandomItems(item.slug)
+  renderRandomItems(safeItem.slug)
 }
 
 function getRandomItems(excludeSlug, count = 4) {
+  if (!allDownloads || allDownloads.length === 0) {
+    return []
+  }
+  
   const pool = allDownloads.filter((d) => d && d.slug && d.slug !== excludeSlug)
 
   for (let i = pool.length - 1; i > 0; i--) {
@@ -150,6 +163,11 @@ function getRandomItems(excludeSlug, count = 4) {
 function renderRandomItems(currentSlug) {
   const section = document.getElementById("randomItemsSection")
   if (!section) return
+
+  if (!allDownloads || allDownloads.length === 0) {
+    section.innerHTML = ""
+    return
+  }
 
   const randomItems = getRandomItems(currentSlug, 4)
 
@@ -234,16 +252,18 @@ const HILLTOP_DELAY_MS = 5000;
 
 function updateDownloadButtonText(button, message) {
   button.textContent = message;
-  button.disabled = true;
+  button.setAttribute("aria-disabled", "true");
   button.style.opacity = "0.7";
   button.style.cursor = "not-allowed";
+  button.style.pointerEvents = "none";
 }
 
 function resetDownloadButton(button) {
   button.textContent = "Download Now";
-  button.disabled = false;
+  button.removeAttribute("aria-disabled");
   button.style.opacity = "";
   button.style.cursor = "";
+  button.style.pointerEvents = "";
 }
 
 function showHilltopCountdownInButton(button) {
@@ -260,6 +280,17 @@ function showHilltopCountdownInButton(button) {
 
   requestAnimationFrame(tick);
 }
+
+document.addEventListener("keydown", (e) => {
+  const el = document.activeElement;
+  const btn = el && el.closest ? el.closest(".download-btn[role='button']") : null;
+  if (!btn) return;
+  if (btn.getAttribute("aria-disabled") === "true") return;
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    btn.click();
+  }
+});
 
 document.addEventListener(
   "click",
