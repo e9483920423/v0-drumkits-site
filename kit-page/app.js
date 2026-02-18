@@ -1,4 +1,7 @@
 let allDownloads = []
+let currentDownloadUrl = null;
+let currentItemSlug = null;
+
 
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
@@ -85,6 +88,9 @@ function displayItem() {
     return
   }
 
+  currentDownloadUrl = item.download || null;
+  currentItemSlug = item.slug || null;
+
   const imageUrl = getItemImageUrl(item.id)
 
   const mainContent = document.getElementById("mainContent")
@@ -116,7 +122,7 @@ function displayItem() {
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
+      <button class="btn download-btn" type="button">Download Now</button>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -258,9 +264,16 @@ function showHilltopCountdownInButton(button) {
 document.addEventListener(
   "click",
   (e) => {
-    const btn = e.target.closest("a.download-btn");
+    const btn = e.target.closest(".download-btn");
     if (!btn) return;
-    if (hilltopFiredThisPage) return;
+    if (hilltopFiredThisPage) {
+      if (currentDownloadUrl) {
+        window.open(currentDownloadUrl, "_blank", "noopener,noreferrer");
+      } else {
+        console.warn("Download URL not available.");
+      }
+      return;
+    }
 
     const now = Date.now();
     if (hilltopReadyAt && now < hilltopReadyAt) {
