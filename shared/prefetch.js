@@ -7,8 +7,6 @@
 ;(function () {
   "use strict"
 
-  /* ---------- Helpers ---------- */
-
   function getOverlay() {
     return document.getElementById("pageTransitionOverlay")
   }
@@ -56,8 +54,6 @@
     }
   }
 
-  /* ---------- Prefetch on hover ---------- */
-
   const prefetched = new Set()
 
   function prefetchUrl(href) {
@@ -85,8 +81,6 @@
 
   document.addEventListener("pointerover", onPointerOver, { capture: true, passive: true })
   document.addEventListener("touchstart", onPointerOver, { capture: true, passive: true })
-
-  /* ---------- Page Transition ---------- */
 
   const PENDING_KEY = "pt_overlay_pending"
 
@@ -146,7 +140,6 @@
     const anchor = e.target.closest("a")
     if (!anchor || !isInternalLink(anchor)) return
 
-    // Skip transition for "View Details" links so they navigate instantly.
     if (
       anchor.classList.contains("download-btn") ||
       anchor.classList.contains("random-item-link")
