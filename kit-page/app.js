@@ -108,7 +108,7 @@ function displayItem() {
   const imageUrl = getItemImageUrl(safeItem.id)
 
   const mainContent = document.getElementById("mainContent")
-
+  
   mainContent.style.visibility = "hidden"
   
   const heroDiv = document.createElement("div")
@@ -173,7 +173,6 @@ function renderRandomItems(currentSlug) {
   const section = document.getElementById("randomItemsSection")
   if (!section) return
 
-  // Add safety check
   if (!allDownloads || allDownloads.length === 0) {
     section.innerHTML = ""
     return
@@ -263,6 +262,7 @@ const HILLTOP_DELAY_MS = 5000;
 
 function updateDownloadButtonText(button, message) {
   button.textContent = message;
+  // Works for <a> or <button>
   button.setAttribute("aria-disabled", "true");
   button.style.opacity = "0.7";
   button.style.cursor = "not-allowed";
