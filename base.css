@@ -26,20 +26,16 @@ body {
   background-color: #000;
   color: #fff;
   line-height: 1.6;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url('/errors/tile_background(2).png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
 
+img {
+  max-width: 100%;
+  height: auto;
+}
 header {
   background-color: rgba(10, 10, 10, 0.2);
   border-bottom: 1px solid rgba(34, 34, 34, 0.5);
@@ -49,7 +45,6 @@ header {
   z-index: 100;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  width: 100%;
 }
 
 .header-container {
@@ -156,6 +151,250 @@ main {
   width: 100%;
 }
 
+.page-title {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-title h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-title p {
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.page-title p a {
+  color: #ff0043;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.page-title p a:hover {
+  text-decoration: underline;
+}
+
+.downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--grid-gap-desktop);
+}
+
+.download-item {
+  position: relative;
+  background-color: #111;
+  border: 1px solid #222;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.download-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 0, 67, 0.08),
+    rgba(0, 0, 0, 0),
+    rgba(255, 0, 67, 0.08)
+  );
+  background-size: 300% 300%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  animation: redShift 12s ease infinite;
+  pointer-events: none;
+}
+
+.download-item:hover {
+  border-color: #ff0043;
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 1px rgba(255, 0, 67, 0.25),
+    0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.download-item:hover::before {
+  opacity: 1;
+}
+
+.item-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 16px;
+  position: relative; 
+  z-index: 1;         
+}
+
+.download-btn {
+  margin-top: auto;
+}
+
+@keyframes redShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.item-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #222 0%, #1a1a1a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 0.9rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: var(--transition);
+  position: relative;
+  z-index: 2;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: transform;
+}
+
+.download-item:hover .item-image img {
+  transform: scale(1.02);
+}
+
+.item-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.item-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.item-description {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.download-btn {
+  display: inline-block;
+  background-color: #ff0043;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: var(--transition);
+  text-align: center;
+  width: 100%;
+}
+
+.download-btn:hover {
+  background-color: #8a072a;
+  transform: translateY(-1px);
+}
+
+.download-btn:active {
+  background-color: #ff0043;
+  transform: translateY(0);
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #222;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  min-width: 40px;
+  text-align: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #ff0043;
+  color: #ff0043;
+}
+
+.pagination-btn.active {
+  background-color: #ff0043;
+  border-color: #ff0043;
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+  grid-column: 1 / -1;
+}
+
+footer {
+  background-color: #0a0a0a;
+  border-top: 1px solid #222;
+  padding: 2rem var(--container-padding-desktop);
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
 @media (max-width: 1024px) {
   :root {
     --container-padding-desktop: var(--container-padding-tablet);
@@ -173,6 +412,10 @@ main {
   
   main {
     padding: 2.5rem var(--container-padding-tablet);
+  }
+  
+  footer {
+    padding: 2rem var(--container-padding-tablet);
   }
 }
 
@@ -285,6 +528,12 @@ main {
   
   footer {
     padding: 1rem 0.5rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .downloads-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
 }
 
