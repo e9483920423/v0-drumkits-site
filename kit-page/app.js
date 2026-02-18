@@ -29,34 +29,18 @@ async function loadDownloads() {
   }
 }
 
-function createSmartImage(imageUrl, altText, width = 800, height = 800) {
+function createSimpleImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
+  img.src = imageUrl
   img.alt = altText || ""
   img.loading = "eager"
   img.decoding = "async"
-  img.style.visibility = "hidden"
   if (width) img.width = width
   if (height) img.height = height
+  
   img.onerror = () => {
     img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
   }
-
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    img.style.visibility = "visible"
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.onerror = () => {
-    img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.src = imageUrl
 
   return img
 }
@@ -110,7 +94,7 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
   
-  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
+  const heroImage = createSimpleImage(imageUrl, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -190,7 +174,7 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSmartImage(imageUrl, item.title, 320, 320)
+    const img = createSimpleImage(imageUrl, item.title, 320, 320)
     imageLink.appendChild(img)
     
     const title = document.createElement("h3")
