@@ -29,18 +29,39 @@ async function loadDownloads() {
   }
 }
 
-function createSimpleImage(imageUrl, altText, width = 800, height = 800) {
+function createSmartImage(imageUrl, altText, width = 800, height = 800, onReveal = null) {
   const img = document.createElement("img")
-  img.src = imageUrl
   img.alt = altText || ""
   img.loading = "eager"
   img.decoding = "async"
+  img.style.visibility = "hidden"
   if (width) img.width = width
   if (height) img.height = height
-  
   img.onerror = () => {
     img.src = "/errors/default.jpg"
+    img.style.visibility = "visible"
+    if (onReveal) onReveal()
+    probe.onload = null
+    probe.onerror = null
   }
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+    img.style.visibility = "visible"
+    if (onReveal) onReveal()
+    probe.onload = null
+    probe.onerror = null
+  }
+  probe.onerror = () => {
+    img.src = "/errors/default.jpg"
+    img.style.visibility = "visible"
+    if (onReveal) onReveal()
+    probe.onload = null
+    probe.onerror = null
+  }
+  probe.src = imageUrl
 
   return img
 }
@@ -87,14 +108,18 @@ function displayItem() {
   const imageUrl = getItemImageUrl(safeItem.id)
 
   const mainContent = document.getElementById("mainContent")
+
+  mainContent.style.visibility = "hidden"
   
   const heroDiv = document.createElement("div")
   heroDiv.className = "item-hero"
   
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
-  
-  const heroImage = createSimpleImage(imageUrl, safeItem.title, 800, 800)
+
+  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800, () => {
+    mainContent.style.visibility = "visible"
+  })
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -148,6 +173,7 @@ function renderRandomItems(currentSlug) {
   const section = document.getElementById("randomItemsSection")
   if (!section) return
 
+  // Add safety check
   if (!allDownloads || allDownloads.length === 0) {
     section.innerHTML = ""
     return
@@ -174,7 +200,7 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSimpleImage(imageUrl, item.title, 320, 320)
+    const img = createSmartImage(imageUrl, item.title, 320, 320)
     imageLink.appendChild(img)
     
     const title = document.createElement("h3")
@@ -201,6 +227,7 @@ function renderRandomItems(currentSlug) {
 
 function showError(message) {
   const mainContent = document.getElementById("mainContent")
+  mainContent.style.visibility = "visible"
   mainContent.innerHTML = `
     <div class="error-message">
       <p>${escapeHtml(message)}</p>
