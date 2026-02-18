@@ -285,16 +285,6 @@ html {
   position: relative;
 }
 
-.random-item-image-wrap::before {
-  content: '📸';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  opacity: 0.3;
-  z-index: 1;
-}
 
 .random-item-image-wrap img {
   width: 100%;
