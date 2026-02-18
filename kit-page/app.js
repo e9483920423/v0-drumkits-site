@@ -84,14 +84,15 @@ function displayItem() {
   const item = allDownloads.find((d) => d.slug === slug)
 
   if (!item) {
-    showError(`Item "${slug}" not found. Please return to the home page.`)
+    window.location.href = "/"
     return
   }
 
-  currentDownloadUrl = item.download || null;
-  currentItemSlug = item.slug || null;
+  const { download, ...safeItem } = item
+  currentDownloadUrl = download || null
+  currentItemSlug = safeItem.slug || null
 
-  const imageUrl = getItemImageUrl(item.id)
+  const imageUrl = getItemImageUrl(safeItem.id)
 
   const mainContent = document.getElementById("mainContent")
   
@@ -101,28 +102,28 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
   
-  const heroImage = createSmartImage(imageUrl, item.title, 800, 800)
+  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
   detailsDiv.className = "item-details"
   detailsDiv.innerHTML = `
-    <h1 class="item-title">${escapeHtml(item.title)}</h1>
-    <p class="item-description">${escapeHtml(item.description)}</p>
+    <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
+    <p class="item-description">${escapeHtml(safeItem.description)}</p>
     <div class="item-specs">
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
-        <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
+        <span class="spec-value">${escapeHtml(safeItem.file_size ?? 'N/A')}</span>
       </div>
-      ${item.update_date ? `
+      ${safeItem.update_date ? `
       <div class="spec-row">
         <span class="spec-label">Last Updated:</span>
-        <span class="spec-value">${escapeHtml(item.update_date)}</span>
+        <span class="spec-value">${escapeHtml(safeItem.update_date)}</span>
       </div>
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a class="btn download-btn" type="button">Download Now</a>
+      <a class="btn download-btn" role="button" tabindex="0">Download Now</a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -131,7 +132,7 @@ function displayItem() {
   heroDiv.appendChild(detailsDiv)
   mainContent.replaceChildren(heroDiv)
 
-  renderRandomItems(item.slug)
+  renderRandomItems(safeItem.slug)
 }
 
 function getRandomItems(excludeSlug, count = 4) {
@@ -170,7 +171,7 @@ function renderRandomItems(currentSlug) {
     const imageLink = document.createElement("a")
     imageLink.href = `/${escapeHtml(item.slug)}`
     imageLink.className = "random-item-image-wrap"
-    imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
+    imageLink.setAttribute("aria-label", `View ${escapeHtml(safeItem.title)}`)
     
     const img = createSmartImage(imageUrl, item.title, 320, 320)
     imageLink.appendChild(img)
@@ -234,17 +235,20 @@ const HILLTOP_DELAY_MS = 5000;
 
 function updateDownloadButtonText(button, message) {
   button.textContent = message;
-  button.disabled = true;
+  button.setAttribute("aria-disabled", "true");
   button.style.opacity = "0.7";
   button.style.cursor = "not-allowed";
+  button.style.pointerEvents = "none";
 }
 
 function resetDownloadButton(button) {
   button.textContent = "Download Now";
-  button.disabled = false;
+  button.removeAttribute("aria-disabled");
   button.style.opacity = "";
   button.style.cursor = "";
+  button.style.pointerEvents = "";
 }
+
 
 function showHilltopCountdownInButton(button) {
   const tick = () => {
@@ -260,6 +264,17 @@ function showHilltopCountdownInButton(button) {
 
   requestAnimationFrame(tick);
 }
+
+document.addEventListener("keydown", (e) => {
+  const el = document.activeElement;
+  const btn = el && el.closest ? el.closest(".download-btn[role='button']") : null;
+  if (!btn) return;
+  if (btn.getAttribute("aria-disabled") === "true") return;
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    btn.click();
+  }
+});
 
 document.addEventListener(
   "click",
