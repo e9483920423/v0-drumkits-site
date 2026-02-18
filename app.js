@@ -130,24 +130,12 @@ function createSmartImage(imageUrl, altText) {
   img.decoding = "async"
   img.width = 320
   img.height = 320
-  img.style.visibility = "hidden"
 
   img.onerror = () => {
     img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
   }
 
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    img.style.visibility = "visible"
-  }
-  probe.onerror = () => {
-    img.src = "/errors/default.jpg"
-    img.style.visibility = "visible"
-  }
-  probe.src = imageUrl
+  img.src = imageUrl
 
   return img
 }
