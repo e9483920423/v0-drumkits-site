@@ -1,4 +1,4 @@
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 1;
 const DRUMKIT_CACHE_KEY = `drumkits:all:v${CACHE_VERSION}`;
 const DRUMKIT_CACHE_TTL_MS = 5 * 60 * 1000;
 
