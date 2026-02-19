@@ -66,6 +66,24 @@ async function loadDownloads() {
       return
     }
 
+    if (!currentData.download && window.DrumkitDataStore?.getKitBySlug) {
+      const refreshed = await window.DrumkitDataStore.getKitBySlug(slug, {
+        forceRefresh: true,
+        allowStale: false,
+      })
+
+      if (refreshed?.download) {
+        currentData = refreshed
+
+        if (window.DrumkitDataStore?.getAllKits) {
+          const freshKits = await window.DrumkitDataStore.getAllKits({
+            allowStale: true,
+          })
+          listData = Array.isArray(freshKits) ? freshKits : listData
+        }
+      }
+    }
+
     allDownloads = listData
     displayItem(currentData)
   } catch (error) {
@@ -303,6 +321,16 @@ function resetDownloadButton(button) {
   button.style.pointerEvents = "";
 }
 
+function openPopupSafely(url) {
+  try {
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    return !!opened;
+  } catch (err) {
+    console.warn("Popup open failed:", err);
+    return false;
+  }
+}
+
 function showHilltopCountdownInButton(button) {
   const tick = () => {
     const left = Math.max(0, hilltopReadyAt - Date.now());
@@ -336,7 +364,7 @@ document.addEventListener(
     if (!btn) return;
     if (hilltopFiredThisPage) {
       if (currentDownloadUrl) {
-        window.open(currentDownloadUrl, "_blank", "noopener,noreferrer");
+        openPopupSafely(currentDownloadUrl);
       } else {
         console.warn("Download URL not available.");
       }
@@ -351,7 +379,17 @@ document.addEventListener(
     }
     
     e.preventDefault();
-    window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
+    const adOpened = openPopupSafely(HILLTOP_DIRECT_URL);
+
+    if (!adOpened) {
+      console.warn("Ad popup blocked. Falling back to direct download path.");
+      hilltopFiredThisPage = true;
+      resetDownloadButton(btn);
+      if (currentDownloadUrl) {
+        openPopupSafely(currentDownloadUrl);
+      }
+      return;
+    }
 
     hilltopReadyAt = now + HILLTOP_DELAY_MS;
     showHilltopCountdownInButton(btn);
