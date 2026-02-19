@@ -1,6 +1,11 @@
 function getItemImageUrl(id) {
+  if (window.DrumkitAssets?.getKitImageUrl) {
+    return window.DrumkitAssets.getKitImageUrl(id)
+  }
+
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+  const normalizedId = encodeURIComponent(String(id))
+  return `${PUB_URL}/${normalizedId}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
@@ -127,20 +132,27 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl) {
+function createSmartImage(imageUrl, altText) {
+  if (window.DrumkitAssets?.createKitImage) {
+    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
+      loading: "eager",
+      width: 320,
+      height: 320,
+      fallbackSrc: "/errors/default.jpg",
+    })
+  }
+
   const img = document.createElement("img")
-  img.alt = ""
+  img.alt = altText || "Drum kit image"
   img.loading = "eager"
   img.decoding = "async"
   img.width = 320
   img.height = 320
-
   img.onerror = () => {
     img.onerror = null
-    img.src = imageUrl
+    img.src = "/errors/default.jpg"
   }
-  img.src = "/errors/default.jpg"
-
+  img.src = imageUrl
   return img
 }
 

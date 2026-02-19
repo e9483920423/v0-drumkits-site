@@ -4,8 +4,13 @@ let currentItemSlug = null;
 
 
 function getItemImageUrl(id) {
+  if (window.DrumkitAssets?.getKitImageUrl) {
+    return window.DrumkitAssets.getKitImageUrl(id)
+  }
+
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+  const normalizedId = encodeURIComponent(String(id))
+  return `${PUB_URL}/${normalizedId}.jpg`
 }
 
 async function loadDownloads() {
@@ -51,27 +56,26 @@ async function loadDownloads() {
 }
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
+  if (window.DrumkitAssets?.createKitImage) {
+    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
+      loading: "eager",
+      width,
+      height,
+      fallbackSrc: "/errors/default.jpg",
+    })
+  }
+
   const img = document.createElement("img")
-  img.alt = ""
+  img.alt = altText || "Drum kit image"
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
   img.height = height
-  img.src = "/errors/default.jpg"
-
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    probe.onload = null
-    probe.onerror = null
+  img.onerror = () => {
+    img.onerror = null
+    img.src = "/errors/default.jpg"
   }
-  probe.onerror = () => {
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.src = imageUrl
-
+  img.src = imageUrl
   return img
 }
 
