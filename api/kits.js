@@ -27,6 +27,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(getSupabaseRestUrl(), {
+      method: 'GET',
       cache: "no-store",
       headers: {
         apikey: SUPABASE_ANON_KEY,
