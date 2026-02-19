@@ -1,11 +1,6 @@
 function getItemImageUrl(id) {
-  if (window.DrumkitAssets?.getKitImageUrl) {
-    return window.DrumkitAssets.getKitImageUrl(id)
-  }
-
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  const normalizedId = encodeURIComponent(String(id))
-  return `${PUB_URL}/${normalizedId}.jpg`
+  return `${PUB_URL}/${id}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
@@ -45,23 +40,21 @@ if ('scrollRestoration' in history) {
 }
 
 function createSmartImage(imageUrl, altText) {
-  if (window.DrumkitAssets?.createKitImage) {
-    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
-      loading: "lazy",
-      fallbackSrc: "/errors/default.jpg",
-    })
-  }
-
   const img = document.createElement("img")
-  img.alt = ""
+  img.src = "/errors/default.jpg"
+  img.alt = altText
   img.loading = "lazy"
   img.decoding = "async"
 
-  img.onerror = () => {
-    img.onerror = null
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+  }
+  probe.onerror = () => {
     img.src = "/errors/default.jpg"
   }
-  img.src = imageUrl
+  probe.src = imageUrl
 
   return img
 }
@@ -91,24 +84,15 @@ async function performSearch() {
   }
 
   try {
-    if (window.DrumkitDataStore?.searchKits) {
-      searchResults = await window.DrumkitDataStore.searchKits(searchQuery, {
-        allowStale: true,
-        revalidate: true,
-      })
-    } else {
-      const response = await fetch(`/api/kits?q=${encodeURIComponent(searchQuery)}`, {
-        headers: { Accept: 'application/json' },
-      })
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .ilike('title', `%${searchQuery}%`)
+      .order('id', { ascending: false })
 
-      if (!response.ok) {
-        throw new Error(`Failed to perform search (${response.status})`)
-      }
+    if (error) throw error
 
-      const payload = await response.json()
-      searchResults = Array.isArray(payload?.data) ? payload.data : []
-    }
-
+    searchResults = data || []
     currentPage = 1
     
     if (searchResults.length === 0) {

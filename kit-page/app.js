@@ -4,62 +4,18 @@ let currentItemSlug = null;
 
 
 function getItemImageUrl(id) {
-  if (window.DrumkitAssets?.getKitImageUrl) {
-    return window.DrumkitAssets.getKitImageUrl(id)
-  }
-
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  const normalizedId = encodeURIComponent(String(id))
-  return `${PUB_URL}/${normalizedId}.jpg`
+  return `${PUB_URL}/${id}.jpg`
 }
 
 async function loadDownloads() {
   try {
-    const slug = getSlugFromUrl() || new URLSearchParams(window.location.search).get("slug")
-    if (!slug) {
-      showError("No item specified. Please return to the home page.")
-      return
-    }
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
 
-    let listData = []
-    let currentData = null
-
-    if (window.DrumkitDataStore?.getAllKits && window.DrumkitDataStore?.getKitBySlug) {
-      const [kits, selected] = await Promise.all([
-        window.DrumkitDataStore.getAllKits({
-          allowStale: true,
-          revalidate: true,
-        }),
-        window.DrumkitDataStore.getKitBySlug(slug, {
-          allowStale: true,
-          revalidate: true,
-        }),
-      ])
-
-      listData = Array.isArray(kits) ? kits : []
-      currentData = selected || null
-    } else {
-      const [listResponse, currentResponse] = await Promise.all([
-        fetch('/api/kits', { headers: { Accept: 'application/json' } }),
-        fetch(`/api/kits?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } }),
-      ])
-
-      if (!listResponse.ok) {
-        throw new Error(`Failed to load kit list (${listResponse.status})`)
-      }
-
-      if (!currentResponse.ok) {
-        throw new Error(`Failed to load selected kit (${currentResponse.status})`)
-      }
-
-      const [listPayload, currentPayload] = await Promise.all([
-        listResponse.json(),
-        currentResponse.json(),
-      ])
-
-      listData = Array.isArray(listPayload?.data) ? listPayload.data : []
-      currentData = Array.isArray(currentPayload?.data) ? currentPayload.data[0] : null
-    }
+    if (error) throw error
 
     allDownloads = data || []
     if (allDownloads.length > 0) {
@@ -74,15 +30,6 @@ async function loadDownloads() {
 }
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
-  if (window.DrumkitAssets?.createKitImage) {
-    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
-      loading: "eager",
-      width,
-      height,
-      fallbackSrc: "/errors/default.jpg",
-    })
-  }
-
   const img = document.createElement("img")
   img.alt = ""
   img.loading = "eager"
@@ -120,7 +67,7 @@ function getSlugFromUrl() {
   return slug
 }
 
-function displayItem(selectedItem) {
+function displayItem() {
   let slug = getSlugFromUrl()
   if (!slug) {
     const params = new URLSearchParams(window.location.search)
@@ -135,7 +82,7 @@ function displayItem(selectedItem) {
   const newUrl = `${window.location.origin}/${encodeURIComponent(slug)}`
   window.history.replaceState({}, "", newUrl)
 
-  const item = selectedItem || allDownloads.find((d) => d.slug === slug)
+  const item = allDownloads.find((d) => d.slug === slug)
 
   if (!item) {
      window.location.href = window.location.origin

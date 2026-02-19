@@ -1,11 +1,6 @@
 function getItemImageUrl(id) {
-  if (window.DrumkitAssets?.getKitImageUrl) {
-    return window.DrumkitAssets.getKitImageUrl(id)
-  }
-
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  const normalizedId = encodeURIComponent(String(id))
-  return `${PUB_URL}/${normalizedId}.jpg`
+  return `${PUB_URL}/${id}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
@@ -82,24 +77,14 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 
 async function loadDownloads() {
   try {
-    if (window.DrumkitDataStore?.getAllKits) {
-      allDownloads = await window.DrumkitDataStore.getAllKits({
-        allowStale: true,
-        revalidate: true,
-      })
-    } else {
-      const response = await fetch('/api/kits', {
-        headers: { Accept: 'application/json' },
-      })
+    const { data, error } = await supabaseClient
+      .from('drum_kits')
+      .select('*')
+      .order('id', { ascending: false })
 
-      if (!response.ok) {
-        throw new Error(`Failed to load kits (${response.status})`)
-      }
+    if (error) throw error
 
-      const payload = await response.json()
-      allDownloads = Array.isArray(payload?.data) ? payload.data : []
-    }
-
+    allDownloads = data || []
     preloadedImageIds.clear()
     cardCache.clear()
     preloadPageImages(1)
@@ -147,7 +132,6 @@ function createSmartImage(imageUrl) {
   img.decoding = "async"
   img.width = 320
   img.height = 320
-  img.src = "/errors/default.jpg"
 
   img.src = "/errors/default.jpg"
 
