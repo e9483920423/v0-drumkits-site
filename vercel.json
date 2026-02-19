@@ -15,7 +15,7 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://plumprush.com https://*.plumprush.com https://va.vercel-scripts.com; connect-src 'self' https://jdianavibwqbxgjkzniq.supabase.co https://fwrnbfwzolplbmiaaeme.supabase.co https://va.vercel-scripts.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://va.vercel-scripts.com; connect-src 'self' https://fwrnbfwzolplbmiaaeme.supabase.co https://va.vercel-scripts.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" }
       ]
     }
   ],
