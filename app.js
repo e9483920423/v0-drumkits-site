@@ -139,6 +139,7 @@ function createSmartImage(imageUrl, altText) {
       width: 320,
       height: 320,
       fallbackSrc: "/errors/default.jpg",
+      placeholderFirst: true,
     })
   }
 
@@ -148,11 +149,21 @@ function createSmartImage(imageUrl, altText) {
   img.decoding = "async"
   img.width = 320
   img.height = 320
-  img.onerror = () => {
-    img.onerror = null
-    img.src = "/errors/default.jpg"
+  img.src = "/errors/default.jpg"
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+    probe.onload = null
+    probe.onerror = null
   }
-  img.src = imageUrl
+  probe.onerror = () => {
+    probe.onload = null
+    probe.onerror = null
+  }
+  probe.src = imageUrl
+
   return img
 }
 
