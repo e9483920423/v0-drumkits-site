@@ -135,12 +135,11 @@ function createSmartImage(imageUrl) {
   img.width = 320
   img.height = 320
 
+  img.onerror = () => {
+    img.onerror = null
+    img.src = imageUrl
+  }
   img.src = "/errors/default.jpg"
-
-  const real = new Image()
-  real.decoding = "async"
-  real.onload = () => { img.src = imageUrl }
-  real.src = imageUrl
 
   return img
 }
