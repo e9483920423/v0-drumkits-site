@@ -1,19 +1,10 @@
 /**
- * Prefetch + Page Transitions
+ * Prefetch only
  * - Prefetches same-origin document links on hover/touchstart (adds <link rel="prefetch">)
- * - Intercepts internal navigation to play a quick fade-out / fade-in transition
  */
 
 ;(function () {
   "use strict"
-
-  function getOverlay() {
-    return document.getElementById("pageTransitionOverlay")
-  }
-
-  function prefersReducedMotion() {
-    return !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
-  }
 
   function shouldAvoidPrefetch() {
     const c = navigator.connection
@@ -81,106 +72,4 @@
 
   document.addEventListener("pointerover", onPointerOver, { capture: true, passive: true })
   document.addEventListener("touchstart", onPointerOver, { capture: true, passive: true })
-
-  const PENDING_KEY = "pt_overlay_pending"
-
-  function waitForTransition(overlay) {
-    if (prefersReducedMotion()) return Promise.resolve()
-
-    const fallbackMs = 300
-
-    return new Promise((resolve) => {
-      let done = false
-
-      function finish() {
-        if (done) return
-        done = true
-        overlay.removeEventListener("transitionend", onEnd)
-        clearTimeout(t)
-        resolve()
-      }
-
-      function onEnd(e) {
-        if (e.target === overlay) finish()
-      }
-
-      overlay.addEventListener("transitionend", onEnd)
-      const t = setTimeout(finish, fallbackMs)
-    })
-  }
-
-  function revealOnLoad() {
-    const overlay = getOverlay()
-    if (!overlay) return
-
-    const pending = sessionStorage.getItem(PENDING_KEY) === "1"
-    sessionStorage.removeItem(PENDING_KEY)
-
-    if (!pending) {
-      overlay.classList.remove("active")
-      return
-    }
-
-    if (prefersReducedMotion()) {
-      overlay.classList.remove("active")
-      return
-    }
-
-    overlay.classList.add("active")
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        overlay.classList.remove("active")
-      })
-    })
-  }
-
-  function onLinkClick(e) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-
-    const anchor = e.target.closest("a")
-    if (!anchor || !isInternalLink(anchor)) return
-
-    if (
-      anchor.classList.contains("download-btn") ||
-      anchor.classList.contains("random-item-link")
-    ) {
-      return
-    }
-
-    if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
-
-    if (anchor.classList.contains("download-btn") && anchor.target === "_blank") return
-
-    const overlay = getOverlay()
-    if (!overlay) return 
-
-    sessionStorage.setItem(PENDING_KEY, "1")
-
-    if (prefersReducedMotion()) return
-
-    e.preventDefault()
-
-    const dest = toCleanUrl(anchor.href).href
-
-    overlay.classList.add("active")
-    waitForTransition(overlay).then(function () {
-      window.location.href = dest
-    })
-  }
-
-  document.addEventListener("click", onLinkClick, { capture: false })
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", revealOnLoad)
-  } else {
-    revealOnLoad()
-  }
-
-  window.addEventListener("pageshow", function (e) {
-    if (e.persisted) {
-      sessionStorage.removeItem(PENDING_KEY)
-      const overlay = getOverlay()
-      if (overlay) overlay.classList.remove("active")
-    }
-  })
 })()

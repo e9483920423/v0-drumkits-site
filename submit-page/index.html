@@ -19,8 +19,6 @@
       .search-btn{padding:0.5rem 1rem;background-color:#fff;color:#000;border:none;border-radius:4px;font-size:0.9rem;font-weight:600;cursor:pointer}
       .main-nav{padding:16px 24px}
       .main-nav a{padding:0.5rem 0.75rem;text-decoration:none;background-color:#111;color:#fff;border:1px solid #222;border-radius:4px;cursor:pointer;transition:all 0.2s}
-      .page-transition-overlay{position:fixed;inset:0;background:#000;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.15s ease}
-      .page-transition-overlay.active{opacity:1;pointer-events:all}
     </style>
     <link rel="stylesheet" href="/base.css">
     <link rel="stylesheet" href="/submit-page/submit-page.css">
@@ -73,15 +71,13 @@
             <div id="submitStatus" class="submit-status"></div>
         </div>
     </main>
-
-    <div class="page-transition-overlay" id="pageTransitionOverlay"></div>
-
     <script defer src="/header-loader.js"></script>
     <script defer src="/submit-page/app.js"></script>
     <script defer src="/shared/prefetch.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
+
 
 
 
