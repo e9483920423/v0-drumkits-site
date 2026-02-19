@@ -1,6 +1,11 @@
 function getItemImageUrl(id) {
+  if (window.DrumkitAssets?.getKitImageUrl) {
+    return window.DrumkitAssets.getKitImageUrl(id)
+  }
+
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+  const normalizedId = encodeURIComponent(String(id))
+  return `${PUB_URL}/${normalizedId}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
@@ -40,21 +45,23 @@ if ('scrollRestoration' in history) {
 }
 
 function createSmartImage(imageUrl, altText) {
+  if (window.DrumkitAssets?.createKitImage) {
+    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
+      loading: "lazy",
+      fallbackSrc: "/errors/default.jpg",
+    })
+  }
+
   const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
+  img.alt = ""
   img.loading = "lazy"
   img.decoding = "async"
 
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-  }
-  probe.onerror = () => {
+  img.onerror = () => {
+    img.onerror = null
     img.src = "/errors/default.jpg"
   }
-  probe.src = imageUrl
+  img.src = imageUrl
 
   return img
 }
@@ -84,15 +91,24 @@ async function performSearch() {
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .ilike('title', `%${searchQuery}%`)
-      .order('id', { ascending: false })
+    if (window.DrumkitDataStore?.searchKits) {
+      searchResults = await window.DrumkitDataStore.searchKits(searchQuery, {
+        allowStale: true,
+        revalidate: true,
+      })
+    } else {
+      const response = await fetch(`/api/kits?q=${encodeURIComponent(searchQuery)}`, {
+        headers: { Accept: 'application/json' },
+      })
 
-    if (error) throw error
+      if (!response.ok) {
+        throw new Error(`Failed to perform search (${response.status})`)
+      }
 
-    searchResults = data || []
+      const payload = await response.json()
+      searchResults = Array.isArray(payload?.data) ? payload.data : []
+    }
+
     currentPage = 1
     
     if (searchResults.length === 0) {

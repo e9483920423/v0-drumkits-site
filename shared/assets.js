@@ -18,15 +18,40 @@ function applyFallbackImage(img, fallbackSrc = "/errors/default.jpg") {
 function createKitImage(
   imageUrl,
   altText,
-  { loading = "lazy", width, height, fallbackSrc = "/errors/default.jpg" } = {}
+  {
+    loading = "lazy",
+    width,
+    height,
+    fallbackSrc = "/errors/default.jpg",
+    placeholderFirst = false,
+  } = {}
 ) {
   const img = document.createElement("img");
-  img.alt = altText || "Drum kit image";
+  img.alt = "";
   img.loading = loading;
   img.decoding = "async";
 
   if (width) img.width = width;
   if (height) img.height = height;
+
+  if (placeholderFirst) {
+    img.src = fallbackSrc;
+
+    const probe = new Image();
+    probe.decoding = "async";
+    probe.onload = () => {
+      img.src = imageUrl;
+      probe.onload = null;
+      probe.onerror = null;
+    };
+    probe.onerror = () => {
+      probe.onload = null;
+      probe.onerror = null;
+    };
+    probe.src = imageUrl;
+
+    return img;
+  }
 
   applyFallbackImage(img, fallbackSrc);
   img.src = imageUrl;
