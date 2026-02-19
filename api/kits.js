@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 const SUPABASE_URL =
   process.env.drumkits_SUPABASE_URL ||
   process.env.SUPABASE_URL ||
@@ -27,9 +29,7 @@ function getSupabaseRestUrl(query = {}) {
   const params = new URLSearchParams();
 
   const hasSlugFilter = typeof query.slug === "string" && query.slug.trim().length > 0;
-  const selectFields = hasSlugFilter
-    ? "id,slug,title,description,file_size,update_date,download"
-    : "id,slug,title,description,file_size,update_date";
+  const selectFields = "id,slug,title,description,file_size,update_date,download";
 
   params.set("select", selectFields);
   params.set("order", "id.desc");
@@ -57,6 +57,12 @@ function getSupabaseRestUrl(query = {}) {
   return `${base}/rest/v1/drum_kits?${params.toString()}`;
 }
 
+function buildStrongEtag(payload) {
+  const serialized = JSON.stringify(payload ?? []);
+  const hash = createHash("sha1").update(serialized).digest("base64");
+  return `"${hash}"`;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -72,7 +78,6 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(getSupabaseRestUrl(req.query || {}), {
       method: 'GET',
-      cache: "no-store",
       headers: {
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
@@ -86,8 +91,18 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({ data: data || [] });
+    const normalizedData = Array.isArray(data) ? data : [];
+    const etag = buildStrongEtag(normalizedData);
+
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+    res.setHeader("ETag", etag);
+
+    const incomingEtag = req.headers["if-none-match"];
+    if (incomingEtag && incomingEtag === etag) {
+      return res.status(304).end();
+    }
+
+    return res.status(200).json({ data: normalizedData });
   } catch (error) {
     console.error("/api/kits failed:", error);
     return res.status(500).json({ error: "Failed to load kits." });

@@ -21,26 +21,45 @@ async function loadDownloads() {
       return
     }
 
-    const [listResponse, currentResponse] = await Promise.all([
-      fetch('/api/kits', { headers: { Accept: 'application/json' } }),
-      fetch(`/api/kits?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } }),
-    ])
+    let listData = []
+    let currentData = null
 
-    if (!listResponse.ok) {
-      throw new Error(`Failed to load kit list (${listResponse.status})`)
+    if (window.DrumkitDataStore?.getAllKits && window.DrumkitDataStore?.getKitBySlug) {
+      const [kits, selected] = await Promise.all([
+        window.DrumkitDataStore.getAllKits({
+          allowStale: true,
+          revalidate: true,
+        }),
+        window.DrumkitDataStore.getKitBySlug(slug, {
+          allowStale: true,
+          revalidate: true,
+        }),
+      ])
+
+      listData = Array.isArray(kits) ? kits : []
+      currentData = selected || null
+    } else {
+      const [listResponse, currentResponse] = await Promise.all([
+        fetch('/api/kits', { headers: { Accept: 'application/json' } }),
+        fetch(`/api/kits?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } }),
+      ])
+
+      if (!listResponse.ok) {
+        throw new Error(`Failed to load kit list (${listResponse.status})`)
+      }
+
+      if (!currentResponse.ok) {
+        throw new Error(`Failed to load selected kit (${currentResponse.status})`)
+      }
+
+      const [listPayload, currentPayload] = await Promise.all([
+        listResponse.json(),
+        currentResponse.json(),
+      ])
+
+      listData = Array.isArray(listPayload?.data) ? listPayload.data : []
+      currentData = Array.isArray(currentPayload?.data) ? currentPayload.data[0] : null
     }
-
-    if (!currentResponse.ok) {
-      throw new Error(`Failed to load selected kit (${currentResponse.status})`)
-    }
-
-    const [listPayload, currentPayload] = await Promise.all([
-      listResponse.json(),
-      currentResponse.json(),
-    ])
-
-    const listData = Array.isArray(listPayload?.data) ? listPayload.data : []
-    const currentData = Array.isArray(currentPayload?.data) ? currentPayload.data[0] : null
 
     if (!currentData) {
       window.location.href = window.location.origin

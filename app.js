@@ -82,16 +82,24 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch('/api/kits', {
-      headers: { Accept: 'application/json' },
-    })
+    if (window.DrumkitDataStore?.getAllKits) {
+      allDownloads = await window.DrumkitDataStore.getAllKits({
+        allowStale: true,
+        revalidate: true,
+      })
+    } else {
+      const response = await fetch('/api/kits', {
+        headers: { Accept: 'application/json' },
+      })
 
-    if (!response.ok) {
-      throw new Error(`Failed to load kits (${response.status})`)
+      if (!response.ok) {
+        throw new Error(`Failed to load kits (${response.status})`)
+      }
+
+      const payload = await response.json()
+      allDownloads = Array.isArray(payload?.data) ? payload.data : []
     }
 
-    const payload = await response.json()
-    allDownloads = Array.isArray(payload?.data) ? payload.data : []
     preloadedImageIds.clear()
     cardCache.clear()
     preloadPageImages(1)

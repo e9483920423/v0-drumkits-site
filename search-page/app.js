@@ -91,16 +91,24 @@ async function performSearch() {
   }
 
   try {
-    const response = await fetch(`/api/kits?q=${encodeURIComponent(searchQuery)}`, {
-      headers: { Accept: 'application/json' },
-    })
+    if (window.DrumkitDataStore?.searchKits) {
+      searchResults = await window.DrumkitDataStore.searchKits(searchQuery, {
+        allowStale: true,
+        revalidate: true,
+      })
+    } else {
+      const response = await fetch(`/api/kits?q=${encodeURIComponent(searchQuery)}`, {
+        headers: { Accept: 'application/json' },
+      })
 
-    if (!response.ok) {
-      throw new Error(`Failed to perform search (${response.status})`)
+      if (!response.ok) {
+        throw new Error(`Failed to perform search (${response.status})`)
+      }
+
+      const payload = await response.json()
+      searchResults = Array.isArray(payload?.data) ? payload.data : []
     }
 
-    const payload = await response.json()
-    searchResults = Array.isArray(payload?.data) ? payload.data : []
     currentPage = 1
     
     if (searchResults.length === 0) {
