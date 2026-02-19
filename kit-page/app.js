@@ -1,4 +1,7 @@
 let allDownloads = []
+let currentDownloadUrl = null;
+let currentItemSlug = null;
+
 
 function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
@@ -7,15 +10,40 @@ function getItemImageUrl(id) {
 
 async function loadDownloads() {
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .order('id', { ascending: false })
+    const slug = getSlugFromUrl() || new URLSearchParams(window.location.search).get("slug")
+    if (!slug) {
+      showError("No item specified. Please return to the home page.")
+      return
+    }
 
-    if (error) throw error
+    const [listResponse, currentResponse] = await Promise.all([
+      fetch('/api/kits', { headers: { Accept: 'application/json' } }),
+      fetch(`/api/kits?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } }),
+    ])
 
-    allDownloads = data || []
-    displayItem()
+    if (!listResponse.ok) {
+      throw new Error(`Failed to load kit list (${listResponse.status})`)
+    }
+
+    if (!currentResponse.ok) {
+      throw new Error(`Failed to load selected kit (${currentResponse.status})`)
+    }
+
+    const [listPayload, currentPayload] = await Promise.all([
+      listResponse.json(),
+      currentResponse.json(),
+    ])
+
+    const listData = Array.isArray(listPayload?.data) ? listPayload.data : []
+    const currentData = Array.isArray(currentPayload?.data) ? currentPayload.data[0] : null
+
+    if (!currentData) {
+      window.location.href = window.location.origin
+      return
+    }
+
+    allDownloads = listData
+    displayItem(currentData)
   } catch (error) {
     console.error("Error loading downloads:", error)
     showError("Failed to load item data. Please try again.")
@@ -24,24 +52,23 @@ async function loadDownloads() {
 
 function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
-  if (width) img.width = width
-  if (height) img.height = height
-  img.onerror = () => {
-    if (!img.src.endsWith('/errors/default.jpg')) {
-      img.src = "/errors/default.jpg"
-    }
-  }
+  img.width = width
+  img.height = height
+  img.src = "/errors/default.jpg"
 
   const probe = new Image()
   probe.decoding = "async"
   probe.onload = () => {
     img.src = imageUrl
+    probe.onload = null
+    probe.onerror = null
   }
   probe.onerror = () => {
+    probe.onload = null
+    probe.onerror = null
   }
   probe.src = imageUrl
 
@@ -61,7 +88,7 @@ function getSlugFromUrl() {
   return slug
 }
 
-function displayItem() {
+function displayItem(selectedItem) {
   let slug = getSlugFromUrl()
   if (!slug) {
     const params = new URLSearchParams(window.location.search)
@@ -73,17 +100,21 @@ function displayItem() {
     return
   }
 
-  const newUrl = `${window.location.origin}/${slug}`
+  const newUrl = `${window.location.origin}/${encodeURIComponent(slug)}`
   window.history.replaceState({}, "", newUrl)
 
-  const item = allDownloads.find((d) => d.slug === slug)
+  const item = selectedItem || allDownloads.find((d) => d.slug === slug)
 
   if (!item) {
-    showError(`Item "${slug}" not found. Please return to the home page.`)
-    return
+     window.location.href = window.location.origin
+     return
   }
 
-  const imageUrl = getItemImageUrl(item.id)
+  const { download, ...safeItem } = item
+  currentDownloadUrl = download || null
+  currentItemSlug = safeItem.slug || null
+
+  const imageUrl = getItemImageUrl(safeItem.id)
 
   const mainContent = document.getElementById("mainContent")
   
@@ -92,29 +123,29 @@ function displayItem() {
   
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
-  
-  const heroImage = createSmartImage(imageUrl, item.title, 800, 800)
+
+  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
   detailsDiv.className = "item-details"
   detailsDiv.innerHTML = `
-    <h1 class="item-title">${escapeHtml(item.title)}</h1>
-    <p class="item-description">${escapeHtml(item.description)}</p>
+    <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
+    <p class="item-description">${escapeHtml(safeItem.description)}</p>
     <div class="item-specs">
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
-        <span class="spec-value">${escapeHtml(item.file_size ?? 'N/A')}</span>
+        <span class="spec-value">${escapeHtml(safeItem.file_size ?? 'N/A')}</span>
       </div>
-      ${item.update_date ? `
+      ${safeItem.update_date ? `
       <div class="spec-row">
         <span class="spec-label">Last Updated:</span>
-        <span class="spec-value">${escapeHtml(item.update_date)}</span>
+        <span class="spec-value">${escapeHtml(safeItem.update_date)}</span>
       </div>
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a href="${escapeHtml(item.download)}" class="btn download-btn" target="_blank">Download Now</a>
+      <a class="btn download-btn" role="button" tabindex="0">Download Now</a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -123,10 +154,14 @@ function displayItem() {
   heroDiv.appendChild(detailsDiv)
   mainContent.replaceChildren(heroDiv)
 
-  renderRandomItems(item.slug)
+  renderRandomItems(safeItem.slug)
 }
 
 function getRandomItems(excludeSlug, count = 4) {
+  if (!allDownloads || allDownloads.length === 0) {
+    return []
+  }
+  
   const pool = allDownloads.filter((d) => d && d.slug && d.slug !== excludeSlug)
 
   for (let i = pool.length - 1; i > 0; i--) {
@@ -142,6 +177,11 @@ function getRandomItems(excludeSlug, count = 4) {
 function renderRandomItems(currentSlug) {
   const section = document.getElementById("randomItemsSection")
   if (!section) return
+
+  if (!allDownloads || allDownloads.length === 0) {
+    section.innerHTML = ""
+    return
+  }
 
   const randomItems = getRandomItems(currentSlug, 4)
 
@@ -224,73 +264,80 @@ let hilltopFiredThisPage = false;
 let hilltopReadyAt = 0;
 const HILLTOP_DELAY_MS = 5000;
 
-function ensureHilltopToast() {
-  let el = document.getElementById("hilltop-toast");
-  if (el) return el;
-
-  el = document.createElement("div");
-  el.id = "hilltop-toast";
-  el.style.cssText = [
-    "position:fixed",
-    "left:50%",
-    "bottom:18px",
-    "transform:translateX(-50%)",
-    "background:rgba(0,0,0,0.88)",
-    "color:#fff",
-    "padding:10px 14px",
-    "border:1px solid rgba(255,255,255,0.14)",
-    "border-radius:10px",
-    "font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif",
-    "z-index:999999",
-    "max-width:92vw",
-    "text-align:center",
-    "box-shadow:0 10px 30px rgba(0,0,0,0.35)"
-  ].join(";");
-  document.body.appendChild(el);
-  return el;
+function updateDownloadButtonText(button, message) {
+  button.textContent = message;
+  button.setAttribute("aria-disabled", "true");
+  button.style.opacity = "0.7";
+  button.style.cursor = "not-allowed";
+  button.style.pointerEvents = "none";
 }
 
-function showHilltopCountdownToast() {
-  const el = ensureHilltopToast();
+function resetDownloadButton(button) {
+  button.textContent = "Download Now";
+  button.removeAttribute("aria-disabled");
+  button.style.opacity = "";
+  button.style.cursor = "";
+  button.style.pointerEvents = "";
+}
 
+function showHilltopCountdownInButton(button) {
   const tick = () => {
     const left = Math.max(0, hilltopReadyAt - Date.now());
     if (left <= 0) {
-      el.textContent = "Ready — tap Download again.";
-      setTimeout(() => {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      }, 1600);
+      resetDownloadButton(button);
       return;
     }
     const sec = Math.ceil(left / 1000);
-    el.textContent = `Please wait ${sec}s, then tap Download again.`;
+    updateDownloadButtonText(button, `Please wait ${sec}s...`);
     requestAnimationFrame(tick);
   };
 
   requestAnimationFrame(tick);
 }
 
+document.addEventListener("keydown", (e) => {
+  const el = document.activeElement;
+  const btn = el && el.closest ? el.closest(".download-btn[role='button']") : null;
+  if (!btn) return;
+  if (btn.getAttribute("aria-disabled") === "true") return;
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    btn.click();
+  }
+});
+
 document.addEventListener(
   "click",
   (e) => {
-    const btn = e.target.closest("a.download-btn");
+    const btn = e.target.closest(".download-btn");
     if (!btn) return;
-    if (hilltopFiredThisPage) return;
+    if (hilltopFiredThisPage) {
+      if (currentDownloadUrl) {
+        window.open(currentDownloadUrl, "_blank", "noopener,noreferrer");
+      } else {
+        console.warn("Download URL not available.");
+      }
+      return;
+    }
 
     const now = Date.now();
     if (hilltopReadyAt && now < hilltopReadyAt) {
       e.preventDefault();
-      showHilltopCountdownToast();
+      showHilltopCountdownInButton(btn);
       return;
     }
+    
     e.preventDefault();
     window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
 
     hilltopReadyAt = now + HILLTOP_DELAY_MS;
-    showHilltopCountdownToast();
+    showHilltopCountdownInButton(btn);
 
     setTimeout(() => {
       hilltopFiredThisPage = true;
+      setTimeout(() => {
+        resetDownloadButton(btn);
+      }, 1600);
     }, HILLTOP_DELAY_MS);
   },
   true

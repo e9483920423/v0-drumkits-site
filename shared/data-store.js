@@ -1,5 +1,17 @@
-const DRUMKIT_CACHE_KEY = "drumkits:all:v1";
+const CACHE_VERSION = 1;
+const DRUMKIT_CACHE_KEY = `drumkits:all:v${CACHE_VERSION}`;
 const DRUMKIT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+;(function pruneOldCacheKeys() {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("drumkits:all:") && key !== DRUMKIT_CACHE_KEY) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {}
+})();
 
 let inMemoryKits = null;
 let inMemoryTimestamp = 0;
@@ -11,8 +23,8 @@ function normalizeKit(row) {
     slug: row?.slug || "",
     title: row?.title || "Untitled",
     description: row?.description || "",
-    file_size: row?.file_size || row?.fileSize || "N/A",
-    update_date: row?.update_date || row?.updateDate || null,
+    file_size: row?.file_size ?? row?.fileSize ?? "N/A",
+    update_date: row?.update_date ?? row?.updateDate ?? null,
     download: row?.download || "",
   };
 }
@@ -32,32 +44,24 @@ function readLocalCache() {
 }
 
 function writeLocalCache(data) {
-  try {
-    const now = Date.now();
-    inMemoryKits = data;
-    inMemoryTimestamp = now;
+  const now = Date.now();
 
+  inMemoryKits = data;
+  inMemoryTimestamp = now;
+
+  try {
     localStorage.setItem(
       DRUMKIT_CACHE_KEY,
-      JSON.stringify({
-        timestamp: now,
-        data,
-      })
+      JSON.stringify({ timestamp: now, data })
     );
-
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("drumkits:data-updated", {
-          detail: {
-            data,
-            timestamp: now,
-          },
-        })
-      );
-    }
   } catch {
-    // Ignore storage failures (private mode/quota/etc)
   }
+
+  try {
+    window.dispatchEvent(
+      new CustomEvent("drumkits:data-updated", { detail: { data, timestamp: now } })
+    );
+  } catch {}
 }
 
 function isLikelyLocalStaticPreview() {
@@ -128,6 +132,9 @@ function refreshKitsInBackground() {
       writeLocalCache(kits);
       return kits;
     })
+    .catch((err) => {
+      console.warn("[DrumkitDataStore] Background refresh failed:", err);
+    })
     .finally(() => {
       inFlightKitsPromise = null;
     });
@@ -156,7 +163,7 @@ async function getAllKits({ forceRefresh = false, allowStale = true, revalidate 
     }
   }
 
-  if (!forceRefresh && inFlightKitsPromise) {
+  if (inFlightKitsPromise) {
     return inFlightKitsPromise;
   }
 

@@ -4,15 +4,57 @@ const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   "https://fwrnbfwzolplbmiaaeme.supabase.co";
 
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.drumkits_SUPABASE_SERVICE_ROLE_KEY;
+
 const SUPABASE_ANON_KEY =
   process.env.drumkits_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_ANON_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_PUBLIC_ANON_KEY;
 
-function getSupabaseRestUrl() {
+function escapeIlikeValue(value = "") {
+  return String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_")
+    .replace(/,/g, "\\,");
+}
+
+function getSupabaseRestUrl(query = {}) {
   const base = SUPABASE_URL.replace(/\/$/, "");
-  return `${base}/rest/v1/drum_kits?select=*&order=id.desc`;
+  const params = new URLSearchParams();
+
+  const hasSlugFilter = typeof query.slug === "string" && query.slug.trim().length > 0;
+  const selectFields = hasSlugFilter
+    ? "id,slug,title,description,file_size,update_date,download"
+    : "id,slug,title,description,file_size,update_date";
+
+  params.set("select", selectFields);
+  params.set("order", "id.desc");
+
+  if (hasSlugFilter) {
+    params.set("slug", `eq.${query.slug.trim()}`);
+  }
+
+  if (typeof query.q === "string" && query.q.trim()) {
+    const q = escapeIlikeValue(query.q.trim());
+    params.set("or", `title.ilike.*${q}*,description.ilike.*${q}*,slug.ilike.*${q}*`);
+  }
+
+  const limit = Number.parseInt(query.limit, 10);
+  const page = Number.parseInt(query.page, 10);
+
+  if (Number.isFinite(limit) && limit > 0) {
+    const normalizedLimit = Math.min(limit, 100);
+    const normalizedPage = Number.isFinite(page) && page > 0 ? page : 1;
+    const offset = (normalizedPage - 1) * normalizedLimit;
+    params.set("limit", String(normalizedLimit));
+    params.set("offset", String(offset));
+  }
+
+  return `${base}/rest/v1/drum_kits?${params.toString()}`;
 }
 
 export default async function handler(req, res) {
@@ -21,16 +63,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+
+  if (!SUPABASE_URL || !supabaseKey) {
     return res.status(500).json({ error: "Supabase config missing on server." });
   }
 
   try {
-    const response = await fetch(getSupabaseRestUrl(), {
+    const response = await fetch(getSupabaseRestUrl(req.query || {}), {
+      method: 'GET',
       cache: "no-store",
       headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
         Accept: "application/json",
       },
     });

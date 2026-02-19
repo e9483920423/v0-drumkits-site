@@ -14,6 +14,7 @@ let expandLeft = false
 let expandRight = false
 
 const preloadedImageIds = new Set()
+const cardCache = new Map()
 
 function preloadPageImages(page) {
   const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
@@ -29,10 +30,9 @@ function preloadPageImages(page) {
     if (preloadedImageIds.has(id)) continue
     preloadedImageIds.add(id)
 
-    const img = new Image()
-    img.decoding = "async"
-    img.loading = "eager"
-    img.src = getItemImageUrl(item.id)
+    if (!cardCache.has(item.id)) {
+      cardCache.set(item.id, buildCard(item))
+    }
   }
 }
 
@@ -77,17 +77,21 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 
 async function loadDownloads() {
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .order('id', { ascending: false })
+    const response = await fetch('/api/kits', {
+      headers: { Accept: 'application/json' },
+    })
 
-    if (error) throw error
+    if (!response.ok) {
+      throw new Error(`Failed to load kits (${response.status})`)
+    }
 
-    allDownloads = data || []
+    const payload = await response.json()
+    allDownloads = Array.isArray(payload?.data) ? payload.data : []
     preloadedImageIds.clear()
+    cardCache.clear()
     preloadPageImages(1)
     preloadPageImages(2)
+    preloadPageImages(3)
     currentPage = 1
     renderCurrentPage()
     renderPagination()
@@ -123,23 +127,50 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl, altText) {
+function createSmartImage(imageUrl) {
   const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
-  img.loading = "lazy"
+  img.alt = ""
+  img.loading = "eager"
   img.decoding = "async"
   img.width = 320
   img.height = 320
 
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-  }
-  probe.src = imageUrl
+  img.src = "/errors/default.jpg"
+
+  const real = new Image()
+  real.decoding = "async"
+  real.onload = () => { img.src = imageUrl }
+  real.src = imageUrl
 
   return img
+}
+
+function buildCard(item) {
+  const card = document.createElement("div")
+  card.className = "download-item"
+
+  const imageUrl = getItemImageUrl(item.id)
+
+  const imageWrap = document.createElement("div")
+  imageWrap.className = "item-image"
+  imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
+
+  const content = document.createElement("div")
+  content.className = "item-content"
+  content.innerHTML = `
+    <h3 class="item-title">${escapeHtml(item.title)}</h3>
+
+    ${item.description && item.description !== "null"
+      ? `<p class="item-description">${escapeHtml(item.description)}</p>`
+      : ''
+    }
+
+    <a href="/${item.slug}" class="download-btn">View Details</a>
+  `
+
+  card.appendChild(imageWrap)
+  card.appendChild(content)
+  return card
 }
 
 function renderDownloads(downloads) {
@@ -150,35 +181,14 @@ function renderDownloads(downloads) {
     list.innerHTML = '<p class="loading">No downloads available.</p>'
     return
   }
-  
+
   const frag = document.createDocumentFragment()
 
   downloads.forEach((item) => {
-    const card = document.createElement("div")
-    card.className = "download-item"
-
-    const imageUrl = getItemImageUrl(item.id)
-
-    const imageWrap = document.createElement("div")
-    imageWrap.className = "item-image"
-    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
-
-    const content = document.createElement("div")
-    content.className = "item-content"
-    content.innerHTML = `
-      <h3 class="item-title">${escapeHtml(item.title)}</h3>
-
-      ${item.description && item.description !== "null"
-        ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-        : ''
-      }
-
-      <a href="/${item.slug}" class="download-btn">View Details</a>
-    `
-
-    card.appendChild(imageWrap)
-    card.appendChild(content)
-    frag.appendChild(card)
+    if (!cardCache.has(item.id)) {
+      cardCache.set(item.id, buildCard(item))
+    }
+    frag.appendChild(cardCache.get(item.id))
   })
 
   list.replaceChildren(frag)

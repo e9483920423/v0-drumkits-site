@@ -120,7 +120,13 @@ html {
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
+  max-height: none;
 }
+
 
 .item-specs {
   background-color: var(--bg-primary);
@@ -250,6 +256,9 @@ html {
 
 .random-item-card {
   background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
@@ -276,16 +285,6 @@ html {
   position: relative;
 }
 
-.random-item-image-wrap::before {
-  content: '📸';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  opacity: 0.3;
-  z-index: 1;
-}
 
 .random-item-image-wrap img {
   width: 100%;
@@ -323,6 +322,8 @@ html {
   font-size: 0.85rem;
   text-align: center;
   transition: var(--transition);
+  margin-top: auto;
+  align-self: flex-end;
 }
 
 .random-item-link:hover {
