@@ -140,17 +140,7 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl, altText) {
-  if (window.DrumkitAssets?.createKitImage) {
-    return window.DrumkitAssets.createKitImage(imageUrl, altText, {
-      loading: "eager",
-      width: 320,
-      height: 320,
-      fallbackSrc: "/errors/default.jpg",
-      placeholderFirst: true,
-    })
-  }
-
+function createSmartImage(imageUrl) {
   const img = document.createElement("img")
   img.alt = ""
   img.loading = "eager"
@@ -159,18 +149,12 @@ function createSmartImage(imageUrl, altText) {
   img.height = 320
   img.src = "/errors/default.jpg"
 
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.onerror = () => {
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.src = imageUrl
+  img.src = "/errors/default.jpg"
+
+  const real = new Image()
+  real.decoding = "async"
+  real.onload = () => { img.src = imageUrl }
+  real.src = imageUrl
 
   return img
 }

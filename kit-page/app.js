@@ -61,13 +61,12 @@ async function loadDownloads() {
       currentData = Array.isArray(currentPayload?.data) ? currentPayload.data[0] : null
     }
 
-    if (!currentData) {
-      window.location.href = window.location.origin
-      return
+    allDownloads = data || []
+    if (allDownloads.length > 0) {
+      displayItem()
+    } else {
+      showError("No items available. Please try again later.")
     }
-
-    allDownloads = listData
-    displayItem(currentData)
   } catch (error) {
     console.error("Error loading downloads:", error)
     showError("Failed to load item data. Please try again.")
@@ -90,11 +89,21 @@ function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   img.decoding = "async"
   img.width = width
   img.height = height
-  img.onerror = () => {
-    img.onerror = null
-    img.src = "/errors/default.jpg"
+  img.src = "/errors/default.jpg"
+
+  const probe = new Image()
+  probe.decoding = "async"
+  probe.onload = () => {
+    img.src = imageUrl
+    probe.onload = null
+    probe.onerror = null
   }
-  img.src = imageUrl
+  probe.onerror = () => {
+    probe.onload = null
+    probe.onerror = null
+  }
+  probe.src = imageUrl
+
   return img
 }
 
