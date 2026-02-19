@@ -53,7 +53,7 @@ function createSmartImage(imageUrl, altText) {
   }
 
   const img = document.createElement("img")
-  img.alt = altText || "Drum kit image"
+  img.alt = ""
   img.loading = "lazy"
   img.decoding = "async"
 

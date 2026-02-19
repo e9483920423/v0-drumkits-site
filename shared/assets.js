@@ -21,7 +21,7 @@ function createKitImage(
   { loading = "lazy", width, height, fallbackSrc = "/errors/default.jpg" } = {}
 ) {
   const img = document.createElement("img");
-  img.alt = altText || "Drum kit image";
+  img.alt = "";
   img.loading = loading;
   img.decoding = "async";
 
