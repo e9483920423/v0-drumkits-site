@@ -116,7 +116,7 @@ html {
 }
 
 .item-description {
-  color: var(--text-secondary);
+  color: #b3b3b3;
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
@@ -128,18 +128,15 @@ html {
 }
 
 .item-description a {
-  color: var(--primary-color);
-  text-decoration: underline;
-  text-decoration-color: var(--primary-color);
-  text-underline-offset: 3px;
+  color: #ff0043;
   font-weight: 500;
   transition: var(--transition);
 }
 
 .item-description a:hover {
-  color: var(--primary-hover);
-  text-decoration-color: var(--primary-hover);
+  text-decoration: underline;
 }
+
 
 
 .item-specs {
