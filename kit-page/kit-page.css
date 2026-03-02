@@ -120,11 +120,25 @@ html {
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
-  white-space: normal;
+  white-space: pre-wrap;
   overflow: visible;
   text-overflow: clip;
   display: block;
   max-height: none;
+}
+
+.item-description a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  text-decoration-color: var(--primary-color);
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.item-description a:hover {
+  color: var(--primary-hover);
+  text-decoration-color: var(--primary-hover);
 }
 
 
