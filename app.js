@@ -1,18 +1,34 @@
+const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
 const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
+const imageUrlCache = new Map()
 
-async function getItemImageUrl(id) {
-  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+function resolveItemImageUrl(id) {
+  const key = String(id)
+  const cached = imageUrlCache.get(key)
+  if (cached) return Promise.resolve(cached)
 
-  for (const ext of IMAGE_EXTENSIONS) {
-    const url = `${PUB_URL}/${id}.${ext}`
-    try {
-      const res = await fetch(url, { method: "HEAD" })
-      if (res.ok) return url
-    } catch (_) {
+  return new Promise((resolve) => {
+    let i = 0
+    const tryNext = () => {
+      if (i >= IMAGE_EXTENSIONS.length) {
+        const fallback = "/errors/default.jpg"
+        imageUrlCache.set(key, fallback)
+        resolve(fallback)
+        return
+      }
+      const ext = IMAGE_EXTENSIONS[i++]
+      const url = `${PUB_URL}/${key}.${ext}`
+      const probe = new Image()
+      probe.decoding = "async"
+      probe.onload = () => {
+        imageUrlCache.set(key, url)
+        resolve(url)
+      }
+      probe.onerror = tryNext
+      probe.src = url
     }
-  }
-
-  return "/errors/default.jpg"
+    tryNext()
+  })
 }
 
 const ITEMS_PER_PAGE = 6
@@ -137,39 +153,25 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(title = "") {
+function createSmartImage(id) {
   const img = document.createElement("img")
-  img.alt = title || ""
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = 320
   img.height = 320
-
   img.src = "/errors/default.jpg"
 
-  return {
-    img,
-    async load(id) {
-      const imageUrl = await getItemImageUrl(id)
-
-      const real = new Image()
-      real.decoding = "async"
-      real.onload = () => { img.src = imageUrl }
-      real.onerror = () => { img.src = "/errors/default.jpg" }
-      real.src = imageUrl
-    },
-  }
+  resolveItemImageUrl(id).then((url) => { img.src = url })
+  return img
 }
 
 function buildCard(item) {
   const card = document.createElement("div")
   card.className = "download-item"
-
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
-  const smartImage = createSmartImage(item.title)
-  imageWrap.appendChild(smartImage.img)
-  smartImage.load(item.id)
+  imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
 
   const content = document.createElement("div")
   content.className = "item-content"
