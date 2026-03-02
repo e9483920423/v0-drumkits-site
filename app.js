@@ -1,34 +1,6 @@
-const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
-const imageUrlCache = new Map()
-
-function resolveItemImageUrl(id) {
-  const key = String(id)
-  const cached = imageUrlCache.get(key)
-  if (cached) return Promise.resolve(cached)
-
-  return new Promise((resolve) => {
-    let i = 0
-    const tryNext = () => {
-      if (i >= IMAGE_EXTENSIONS.length) {
-        const fallback = "/errors/default.jpg"
-        imageUrlCache.set(key, fallback)
-        resolve(fallback)
-        return
-      }
-      const ext = IMAGE_EXTENSIONS[i++]
-      const url = `${PUB_URL}/${key}.${ext}`
-      const probe = new Image()
-      probe.decoding = "async"
-      probe.onload = () => {
-        imageUrlCache.set(key, url)
-        resolve(url)
-      }
-      probe.onerror = tryNext
-      probe.src = url
-    }
-    tryNext()
-  })
+function getItemImageUrl(id) {
+  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+  return `${PUB_URL}/${id}.jpg`
 }
 
 const ITEMS_PER_PAGE = 6
@@ -153,22 +125,30 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(id) {
+function createSmartImage(imageUrl) {
   const img = document.createElement("img")
   img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = 320
   img.height = 320
+
   img.src = "/errors/default.jpg"
 
-  resolveItemImageUrl(id).then((url) => { img.src = url })
+  const real = new Image()
+  real.decoding = "async"
+  real.onload = () => { img.src = imageUrl }
+  real.src = imageUrl
+
   return img
 }
 
 function buildCard(item) {
   const card = document.createElement("div")
   card.className = "download-item"
+
+  const imageUrl = getItemImageUrl(item.id)
+
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
   imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
