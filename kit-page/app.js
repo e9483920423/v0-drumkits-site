@@ -82,6 +82,13 @@ function getSlugFromUrl() {
   return slug
 }
 
+function linkify(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, function(url) {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
+
 function displayItem() {
   let slug = getSlugFromUrl()
   if (!slug) {
@@ -108,7 +115,7 @@ function displayItem() {
   currentDownloadUrl = download || null
   currentItemSlug = safeItem.slug || null
 
-    const mainContent = document.getElementById("mainContent")
+  const mainContent = document.getElementById("mainContent")
   
   const heroDiv = document.createElement("div")
   heroDiv.className = "item-hero"
@@ -121,9 +128,10 @@ function displayItem() {
   
   const detailsDiv = document.createElement("div")
   detailsDiv.className = "item-details"
+  
   detailsDiv.innerHTML = `
     <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
-    <p class="item-description">${escapeHtml(safeItem.description)}</p>
+    <p class="item-description">${linkify(escapeHtml(safeItem.description))}</p>
     <div class="item-specs">
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
