@@ -57,31 +57,6 @@ async function loadDownloads() {
   }
 }
 
-function createSmartItemImage(item.id, altText, width = 800, height = 800) {
-  const img = document.createElement("img")
-  img.alt = ""
-  img.loading = "eager"
-  img.decoding = "async"
-  img.width = width
-  img.height = height
-  img.src = "/errors/default.jpg"
-
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.onerror = () => {
-    probe.onload = null
-    probe.onerror = null
-  }
-  probe.src = imageUrl
-
-  return img
-}
-
 function createSmartItemImage(id, altText, width = 800, height = 800) {
   const img = document.createElement("img")
   img.alt = altText || ""
