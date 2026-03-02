@@ -3,9 +3,37 @@ let currentDownloadUrl = null;
 let currentItemSlug = null;
 
 
-function getItemImageUrl(id) {
-  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
+const imageUrlCache = new Map()
+
+function resolveItemImageUrl(id) {
+  const key = String(id)
+  const cached = imageUrlCache.get(key)
+  if (cached) return Promise.resolve(cached)
+
+  return new Promise((resolve) => {
+    let i = 0
+    const tryNext = () => {
+      if (i >= IMAGE_EXTENSIONS.length) {
+        const fallback = "/errors/default.jpg"
+        imageUrlCache.set(key, fallback)
+        resolve(fallback)
+        return
+      }
+      const ext = IMAGE_EXTENSIONS[i++]
+      const url = `${PUB_URL}/${key}.${ext}`
+      const probe = new Image()
+      probe.decoding = "async"
+      probe.onload = () => {
+        imageUrlCache.set(key, url)
+        resolve(url)
+      }
+      probe.onerror = tryNext
+      probe.src = url
+    }
+    tryNext()
+  })
 }
 
 async function loadDownloads() {
@@ -29,7 +57,7 @@ async function loadDownloads() {
   }
 }
 
-function createSmartImage(imageUrl, altText, width = 800, height = 800) {
+function createSmartItemImage(item.id, altText, width = 800, height = 800) {
   const img = document.createElement("img")
   img.alt = ""
   img.loading = "eager"
@@ -51,6 +79,18 @@ function createSmartImage(imageUrl, altText, width = 800, height = 800) {
   }
   probe.src = imageUrl
 
+  return img
+}
+
+function createSmartItemImage(id, altText, width = 800, height = 800) {
+  const img = document.createElement("img")
+  img.alt = altText || ""
+  img.loading = "eager"
+  img.decoding = "async"
+  img.width = width
+  img.height = height
+  img.src = "/errors/default.jpg"
+  resolveItemImageUrl(id).then((url) => { img.src = url })
   return img
 }
 
@@ -93,9 +133,7 @@ function displayItem() {
   currentDownloadUrl = download || null
   currentItemSlug = safeItem.slug || null
 
-  const imageUrl = getItemImageUrl(safeItem.id)
-
-  const mainContent = document.getElementById("mainContent")
+    const mainContent = document.getElementById("mainContent")
   
   const heroDiv = document.createElement("div")
   heroDiv.className = "item-hero"
@@ -103,7 +141,7 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
 
-  const heroImage = createSmartImage(imageUrl, safeItem.title, 800, 800)
+  const heroImage = createSmartItemImage(item.id, safeItem.title, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -173,9 +211,7 @@ function renderRandomItems(currentSlug) {
   grid.className = "random-items-grid"
   
   randomItems.forEach((item) => {
-    const imageUrl = getItemImageUrl(item.id)
-    
-    const card = document.createElement("article")
+        const card = document.createElement("article")
     card.className = "random-item-card"
     
     const imageLink = document.createElement("a")
@@ -183,7 +219,7 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSmartImage(imageUrl, item.title, 320, 320)
+    const img = createSmartItemImage(item.id, item.title, 320, 320)
     imageLink.appendChild(img)
     
     const title = document.createElement("h3")
