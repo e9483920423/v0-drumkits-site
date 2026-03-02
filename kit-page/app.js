@@ -57,9 +57,9 @@ async function loadDownloads() {
   }
 }
 
-function createSmartItemImage(id, altText, width = 800, height = 800) {
+function createSmartItemImage(id, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = altText || ""
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
@@ -123,7 +123,7 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
 
-  const heroImage = createSmartItemImage(item.id, safeItem.title, 800, 800)
+  const heroImage = createSmartItemImage(item.id, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -194,7 +194,7 @@ function renderRandomItems(currentSlug) {
   grid.className = "random-items-grid"
   
   randomItems.forEach((item) => {
-        const card = document.createElement("article")
+    const card = document.createElement("article")
     card.className = "random-item-card"
     
     const imageLink = document.createElement("a")
@@ -202,7 +202,7 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSmartItemImage(item.id, item.title, 320, 320)
+    const img = createSmartItemImage(item.id, 320, 320)
     imageLink.appendChild(img)
     
     const title = document.createElement("h3")
