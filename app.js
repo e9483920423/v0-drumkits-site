@@ -1,6 +1,18 @@
-function getItemImageUrl(id) {
+const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
+
+async function getItemImageUrl(id) {
   const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+
+  for (const ext of IMAGE_EXTENSIONS) {
+    const url = `${PUB_URL}/${id}.${ext}`
+    try {
+      const res = await fetch(url, { method: "HEAD" })
+      if (res.ok) return url
+    } catch (_) {
+    }
+  }
+
+  return "/errors/default.jpg"
 }
 
 const ITEMS_PER_PAGE = 6
@@ -125,9 +137,9 @@ function renderCurrentPage() {
   })
 }
 
-function createSmartImage(imageUrl) {
+function createSmartImage(title = "") {
   const img = document.createElement("img")
-  img.alt = ""
+  img.alt = title || ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = 320
@@ -135,23 +147,29 @@ function createSmartImage(imageUrl) {
 
   img.src = "/errors/default.jpg"
 
-  const real = new Image()
-  real.decoding = "async"
-  real.onload = () => { img.src = imageUrl }
-  real.src = imageUrl
+  return {
+    img,
+    async load(id) {
+      const imageUrl = await getItemImageUrl(id)
 
-  return img
+      const real = new Image()
+      real.decoding = "async"
+      real.onload = () => { img.src = imageUrl }
+      real.onerror = () => { img.src = "/errors/default.jpg" }
+      real.src = imageUrl
+    },
+  }
 }
 
 function buildCard(item) {
   const card = document.createElement("div")
   card.className = "download-item"
 
-  const imageUrl = getItemImageUrl(item.id)
-
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
-  imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
+  const smartImage = createSmartImage(item.title)
+  imageWrap.appendChild(smartImage.img)
+  smartImage.load(item.id)
 
   const content = document.createElement("div")
   content.className = "item-content"
