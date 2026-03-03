@@ -191,6 +191,23 @@ main {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
 }
 
+.category-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: var(--accent-red);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
 .item-image {
   position: absolute;
   inset: 0;
