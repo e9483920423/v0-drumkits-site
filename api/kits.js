@@ -10,9 +10,15 @@ const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_PUBLIC_ANON_KEY;
 
-function getSupabaseRestUrl() {
+function getSupabaseRestUrl(searchQuery) {
   const base = SUPABASE_URL.replace(/\/$/, "");
-  return `${base}/rest/v1/drum_kits?select=*&order=id.desc`;
+  let url = `${base}/rest/v1/drum_kits?select=*&order=id.desc`;
+  
+  if (searchQuery) {
+    url += `&title=ilike.*${encodeURIComponent(searchQuery)}*`;
+  }
+  
+  return url;
 }
 
 export default async function handler(req, res) {
@@ -25,8 +31,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Supabase config missing on server." });
   }
 
+  const searchQuery = req.query.q || req.query.search || "";
+
   try {
-    const response = await fetch(getSupabaseRestUrl(), {
+    const response = await fetch(getSupabaseRestUrl(searchQuery), {
       method: 'GET',
       cache: "no-store",
       headers: {
