@@ -1,5 +1,5 @@
 const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
+const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
 const imageUrlCache = new Map()
 
 function resolveItemImageUrl(id) {
@@ -7,28 +7,26 @@ function resolveItemImageUrl(id) {
   const cached = imageUrlCache.get(key)
   if (cached) return Promise.resolve(cached)
 
-  return new Promise((resolve) => {
-    let i = 0
-    const tryNext = () => {
-      if (i >= IMAGE_EXTENSIONS.length) {
-        const fallback = "/errors/default.jpg"
-        imageUrlCache.set(key, fallback)
-        resolve(fallback)
-        return
-      }
-      const ext = IMAGE_EXTENSIONS[i++]
+  const promises = IMAGE_EXTENSIONS.map(ext => {
+    return new Promise((resolve, reject) => {
       const url = `${PUB_URL}/${key}.${ext}`
       const probe = new Image()
-      probe.decoding = "async"
-      probe.onload = () => {
-        imageUrlCache.set(key, url)
-        resolve(url)
-      }
-      probe.onerror = tryNext
+      probe.onload = () => resolve(url)
+      probe.onerror = reject
       probe.src = url
-    }
-    tryNext()
+    })
   })
+
+  return Promise.any(promises)
+    .then(validUrl => {
+      imageUrlCache.set(key, validUrl)
+      return validUrl
+    })
+    .catch(() => {
+      const fallback = "/errors/default.jpg"
+      imageUrlCache.set(key, fallback)
+      return fallback
+    })
 }
 
 const ITEMS_PER_PAGE = 6
@@ -36,7 +34,6 @@ const PAGINATION_LIMIT = 6
 
 let allDownloads = []
 let currentPage = 1
-
 
 let expandLeft = false
 let expandRight = false
@@ -70,6 +67,7 @@ function setListLoading(isLoading) {
   if (isLoading) list.classList.add("is-loading")
   else list.classList.remove("is-loading")
 }
+
 function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
   if (total <= limit) {
     const all = []
