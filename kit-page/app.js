@@ -368,8 +368,79 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
 
+/**
+ * Pre-loads images for a set of items and only updates the DOM 
+ * once the images are ready to be displayed.
+ */
+async function refreshRandomItemsSmoothly(currentSlug) {
+  const section = document.getElementById("randomItemsSection");
+  if (!section || !allDownloads || allDownloads.length === 0) return;
+
+  const randomItems = getRandomItems(currentSlug, 4);
+  if (randomItems.length === 0) return;
+
+  // 1. Create the new grid in memory (not yet in the DOM)
+  const grid = document.createElement("div");
+  grid.className = "random-items-grid";
+  
+  const imageLoadPromises = [];
+
+  randomItems.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "random-item-card";
+    
+    const imageLink = document.createElement("a");
+    imageLink.href = `/${escapeHtml(item.slug)}`;
+    imageLink.className = "random-item-image-wrap";
+    
+    // Use your existing image resolver
+    const img = createSmartItemImage(item.id, 320, 320);
+    
+    // Create a promise that resolves when THIS image is loaded
+    const imgLoad = new Promise((resolve) => {
+      img.onload = resolve;
+      img.onerror = resolve; // Resolve anyway on error to avoid hanging
+    });
+    imageLoadPromises.push(imgLoad);
+
+    imageLink.appendChild(img);
+    
+    const title = document.createElement("h3");
+    title.className = "random-item-title";
+    title.textContent = item.title;
+    
+    const detailsLink = document.createElement("a");
+    detailsLink.href = `/${escapeHtml(item.slug)}`;
+    detailsLink.className = "random-item-link";
+    detailsLink.textContent = "View Details";
+    
+    card.appendChild(imageLink);
+    card.appendChild(title);
+    card.appendChild(detailsLink);
+    grid.appendChild(card);
+  });
+
+  // 2. Wait for all images to download in the background
+  await Promise.all(imageLoadPromises);
+
+  // 3. Swap the content smoothly
+  const inner = document.createElement("div");
+  inner.className = "random-items-inner";
+  inner.style.opacity = "0"; // Start invisible for a fade effect
+  inner.style.transition = "opacity 0.5s ease";
+  inner.appendChild(grid);
+
+  section.replaceChildren(inner);
+  
+  // Trigger the fade-in
+  requestAnimationFrame(() => {
+    inner.style.opacity = "1";
+  });
+}
+
+// Updated Interval (using 12 seconds as requested)
 setInterval(() => {
   if (currentItemSlug) {
-    renderRandomItems(currentItemSlug);
+    refreshRandomItemsSmoothly(currentItemSlug);
   }
 }, 12000);
