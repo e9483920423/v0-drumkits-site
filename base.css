@@ -248,13 +248,11 @@ main {
 }
 
 .item-title {
-  font-size: 1.15rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 0.75rem;
   line-height: 1.2;
   text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
-  text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
@@ -278,6 +276,7 @@ main {
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
+  text-transform: uppercase;
   text-align: center;
   transition: var(--transition);
 }
