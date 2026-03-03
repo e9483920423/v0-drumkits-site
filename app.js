@@ -103,7 +103,6 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 
 async function loadDownloads() {
   try {
-    // Fetch directly from your secure backend API route
     const response = await fetch('/api/kits');
     if (!response.ok) throw new Error('Network response was not ok');
     
