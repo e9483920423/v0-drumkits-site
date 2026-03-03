@@ -33,25 +33,34 @@ function resolveItemImageUrl(id) {
       return fallback
     })
 }
-
 async function loadDownloads() {
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .order('id', { ascending: false })
+    const response = await fetch('/api/kits');
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-    if (error) throw error
+    const { data } = await response.json();
 
     allDownloads = data || []
-    if (allDownloads.length > 0) {
-      displayItem()
-    } else {
-      showError("No items available. Please try again later.")
-    }
+    preloadedImageIds.clear()
+    cardCache.clear()
+    preloadPageImages(1)
+    preloadPageImages(2)
+    preloadPageImages(3)
+    currentPage = 1
+    renderCurrentPage()
+    renderPagination()
+    
   } catch (error) {
     console.error("Error loading downloads:", error)
-    showError("Failed to load item data. Please try again.")
+    const list = document.getElementById("downloadsList")
+    if (list) {
+      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+    } else {
+      showError("Failed to load item data. Please try again.")
+    }
   }
 }
 
