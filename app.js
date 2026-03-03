@@ -103,12 +103,11 @@ function getPaginationRange(current, total, limit = PAGINATION_LIMIT) {
 
 async function loadDownloads() {
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .order('id', { ascending: false })
-
-    if (error) throw error
+    // Fetch directly from your secure backend API route
+    const response = await fetch('/api/kits');
+    if (!response.ok) throw new Error('Network response was not ok');
+    
+    const { data } = await response.json();
 
     allDownloads = data || []
     preloadedImageIds.clear()
@@ -122,7 +121,9 @@ async function loadDownloads() {
   } catch (error) {
     console.error("Error loading downloads:", error)
     const list = document.getElementById("downloadsList")
-    list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+    if (list) {
+      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+    }
   }
 }
 
