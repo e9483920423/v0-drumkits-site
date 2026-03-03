@@ -184,7 +184,7 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: flex-end; 
-  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.7s, box-shadow 0.7s;
+  transition: transform 0.7s cubic-bezier(0.4, 2.2, 0, 1), border-color 0.7s, box-shadow 0.7s;
 }
 
 .download-item:hover {
