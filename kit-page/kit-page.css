@@ -57,7 +57,7 @@ html {
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
-  align-items: start;
+  align-items: center; 
   padding: 0 var(--spacing-sm);
 }
 
@@ -121,10 +121,10 @@ html {
   margin: 0;
   width: 100%;
   white-space: pre-wrap;
-  overflow: visible;
-  text-overflow: clip;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
   display: block;
-  max-height: none;
 }
 
 .item-description a {
