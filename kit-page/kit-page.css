@@ -119,6 +119,7 @@ html {
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
+  width: 100%;
   white-space: pre-wrap;
   overflow: visible;
   text-overflow: clip;
@@ -140,11 +141,8 @@ html {
   position: relative;
   width: 100%;
   padding-bottom: 56.25%;
-  border-radius: var(--border-radius);
+  border-radius: calc(var(--border-radius) - 2px);
   overflow: hidden;
-  margin: var(--spacing-xs) 0;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--border-color);
   background-color: var(--bg-tertiary);
 }
 
@@ -161,7 +159,7 @@ html {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-md);
+  padding: 0 var(--spacing-md);
   margin: 0;
   box-shadow: var(--card-shadow);
 }
@@ -170,15 +168,19 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0;
   border-bottom: 1px solid var(--border-color);
   transition: var(--transition);
 }
 
+.spec-row.block-row {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--spacing-md) 0;
+}
+
 .spec-row:hover {
   background-color: var(--hover-overlay);
-  padding-left: var(--spacing-xs);
-  padding-right: var(--spacing-xs);
 }
 
 .spec-row:last-child {
