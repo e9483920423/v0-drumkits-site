@@ -233,12 +233,47 @@ html {
 }
 
 .download-btn {
+  position: relative;
+  overflow: hidden; /* Keeps the glow inside */
   background-color: var(--primary-color);
   color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  z-index: 1;
+  /* Smooth return when mouse leaves */
+  transition: transform 0.2s ease-out, background-color 0.3s; 
+  transform-style: preserve-3d;
 }
 
-.download-btn:hover {
-  background-color: var(--primary-hover);
+/* The Glow Layer */
+.download-btn .mouse-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle 100px at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(255, 255, 255, 0.3), 
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none; /* Mouse goes "through" this to the button */
+  z-index: 2;
+}
+
+.download-btn:hover .mouse-glow {
+  opacity: 1;
+}
+
+/* Glossy highlight line on the edge */
+.download-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+  pointer-events: none;
 }
 
 .back-btn {
