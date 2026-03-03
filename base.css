@@ -103,6 +103,7 @@ header {
   color: #000;
   border-radius: 4px;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
   border: none;
   transition: var(--transition);
