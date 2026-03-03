@@ -182,36 +182,29 @@ function displayItem() {
   heroDiv.appendChild(imageWrapper)
   heroDiv.appendChild(detailsDiv)
   mainContent.replaceChildren(heroDiv)
-
-  // --- ADD THIS CODE BELOW heroDiv.appendChild(detailsDiv) ---
   
   const dlBtn = detailsDiv.querySelector('.download-btn');
   if (dlBtn) {
-    // 1. Create the glow element
     const glow = document.createElement('div');
     glow.className = 'mouse-glow';
     dlBtn.appendChild(glow);
 
-    // 2. Track Mouse Movement
     dlBtn.addEventListener('mousemove', e => {
       const rect = dlBtn.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      // Move the CSS glow
       dlBtn.style.setProperty('--mouse-x', `${x}px`);
       dlBtn.style.setProperty('--mouse-y', `${y}px`);
 
-      // Calculate Tilt/Distortion
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const rotateX = (y - centerY) / 7; // Tilt intensity
+      const rotateX = (y - centerY) / 7;
       const rotateY = (centerX - x) / 7;
 
       dlBtn.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
     });
 
-    // 3. Reset on Leave
     dlBtn.addEventListener('mouseleave', () => {
       dlBtn.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
     });
@@ -375,10 +368,8 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
 
-// Refresh the random items section every 25 seconds
 setInterval(() => {
-  // currentItemSlug is updated globally inside the displayItem() function
   if (currentItemSlug) {
     renderRandomItems(currentItemSlug);
   }
-}, 25000);
+}, 12000);
