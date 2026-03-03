@@ -167,23 +167,27 @@ function createSmartImage(id) {
 function buildCard(item) {
   const card = document.createElement("div")
   card.className = "download-item"
+  
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
   imageWrap.appendChild(createSmartImage(item.id))
+  if (item.category) {
+    const badge = document.createElement("span")
+    badge.className = "category-badge"
+    badge.textContent = item.category
+    imageWrap.appendChild(badge)
+  }
 
   const content = document.createElement("div")
   content.className = "item-content"
   content.innerHTML = `
     <h3 class="item-title">${escapeHtml(item.title)}</h3>
-
     ${item.description && item.description !== "null"
       ? `<p class="item-description">${escapeHtml(item.description)}</p>`
       : ''
     }
-
     <a href="/${item.slug}" class="download-btn">View Details</a>
   `
-
   card.appendChild(imageWrap)
   card.appendChild(content)
   return card
