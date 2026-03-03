@@ -214,22 +214,36 @@ main {
   padding: 1.25rem;
   margin: 10px;
   border-radius: 1.25rem;
+  background: rgba(2, 2, 2, 0.3); 
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
   display: flex;
   flex-direction: column;
   flex: none;
 }
 
 .item-title {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: #ff0043;
+  color: #fff;
   margin-bottom: 0.75rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+  text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.item-content::before {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--accent-red);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.25rem;
+  display: block;
 }
 
 .item-description { display: none; }
