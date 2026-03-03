@@ -113,7 +113,8 @@ html {
   line-height: 1.2;
   margin: 0;
   text-align: left;
-  align-self: flex-start;
+  align-self: self-start;
+  text-align: center;
 }
 
 .item-description {
