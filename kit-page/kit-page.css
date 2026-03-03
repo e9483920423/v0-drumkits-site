@@ -179,9 +179,8 @@ html {
   padding: var(--spacing-md) 0;
 }
 
-.spec-row:hover {
-  background-color: var(--hover-overlay);
-}
+/*< .spec-row:hover {
+}*/
 
 .spec-row:last-child {
   border-bottom: none;
