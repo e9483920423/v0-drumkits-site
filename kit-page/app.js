@@ -374,3 +374,11 @@ document.addEventListener("click", (e) => {
 }, true);
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
+
+// Refresh the random items section every 25 seconds
+setInterval(() => {
+  // currentItemSlug is updated globally inside the displayItem() function
+  if (currentItemSlug) {
+    renderRandomItems(currentItemSlug);
+  }
+}, 25000);
