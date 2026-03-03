@@ -4,7 +4,7 @@ let currentItemSlug = null;
 
 
 const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-const IMAGE_EXTENSIONS = ["avif", "webp", "png", "jpeg", "jpg", "gif"]
+const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
 const imageUrlCache = new Map()
 
 function resolveItemImageUrl(id) {
@@ -12,28 +12,26 @@ function resolveItemImageUrl(id) {
   const cached = imageUrlCache.get(key)
   if (cached) return Promise.resolve(cached)
 
-  return new Promise((resolve) => {
-    let i = 0
-    const tryNext = () => {
-      if (i >= IMAGE_EXTENSIONS.length) {
-        const fallback = "/errors/default.jpg"
-        imageUrlCache.set(key, fallback)
-        resolve(fallback)
-        return
-      }
-      const ext = IMAGE_EXTENSIONS[i++]
+  const promises = IMAGE_EXTENSIONS.map(ext => {
+    return new Promise((resolve, reject) => {
       const url = `${PUB_URL}/${key}.${ext}`
       const probe = new Image()
-      probe.decoding = "async"
-      probe.onload = () => {
-        imageUrlCache.set(key, url)
-        resolve(url)
-      }
-      probe.onerror = tryNext
+      probe.onload = () => resolve(url)
+      probe.onerror = reject
       probe.src = url
-    }
-    tryNext()
+    })
   })
+
+  return Promise.any(promises)
+    .then(validUrl => {
+      imageUrlCache.set(key, validUrl)
+      return validUrl
+    })
+    .catch(() => {
+      const fallback = "/errors/default.jpg"
+      imageUrlCache.set(key, fallback)
+      return fallback
+    })
 }
 
 async function loadDownloads() {
@@ -119,6 +117,8 @@ function displayItem() {
      window.location.href = window.location.origin
      return
   }
+  
+  document.title = `${escapeHtml(item.title)} | drumkits4.me`
 
   const { download, ...safeItem } = item
   currentDownloadUrl = download || null
@@ -243,6 +243,7 @@ function renderRandomItems(currentSlug) {
     detailsLink.href = `/${escapeHtml(item.slug)}`
     detailsLink.className = "random-item-link"
     detailsLink.textContent = "View Details"
+    detailsLink.setAttribute("aria-label", `View details for ${escapeHtml(item.title)}`)
     
     card.appendChild(imageLink)
     card.appendChild(title)
