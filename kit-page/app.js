@@ -432,4 +432,4 @@ setInterval(() => {
   if (currentItemSlug) {
     refreshRandomItemsSmoothly(currentItemSlug);
   }
-}, 2000);
+}, 10000);
