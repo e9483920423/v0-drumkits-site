@@ -314,7 +314,7 @@ html {
 }
 
 .random-items-section {
-  margin-top: var(--spacing-xl);
+  /*! margin-top: var(--spacing-xl); */
   padding: 0 var(--spacing-sm);
 }
 
