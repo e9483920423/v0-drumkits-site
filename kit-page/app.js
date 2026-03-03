@@ -140,24 +140,29 @@ function displayItem() {
 
   const embedUrl = getYouTubeEmbedUrl(safeItem.src);
   const videoHtml = embedUrl ? `
-    <div class="video-preview">
-      <iframe 
-        src="${embedUrl}" 
-        title="YouTube video player" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-      </iframe>
+    <div class="spec-row block-row">
+      <div class="video-preview">
+        <iframe 
+          src="${embedUrl}" 
+          title="YouTube video player" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      </div>
     </div>
   ` : '';
   
   detailsDiv.innerHTML = `
     <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
-    <p class="item-description">${linkify(escapeHtml(safeItem.description))}</p>
     
-    ${videoHtml}
-
     <div class="item-specs">
+      <div class="spec-row block-row">
+        <p class="item-description">${linkify(escapeHtml(safeItem.description))}</p>
+      </div>
+
+      ${videoHtml}
+
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
         <span class="spec-value">${escapeHtml(safeItem.file_size ?? 'N/A')}</span>
