@@ -237,7 +237,7 @@ html {
   position: relative;
   overflow: hidden;
   background-color: var(--primary-color);
-  color: var(--text-primary);
+  /*! color: var(--text-primary); */
   padding: 1rem 2rem;
   font-weight: 700;
   border-radius: var(--border-radius);
@@ -256,7 +256,7 @@ html {
   /* Concentrated white spotlight at the cursor */
   background: radial-gradient(
     circle 80px at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-    rgba(255, 255, 255, 0.45), 
+    rgba(255, 178, 198, 0.44), 
     transparent 100%
   );
   
@@ -276,7 +276,7 @@ html {
   background-image: linear-gradient(
     115deg, 
     transparent 0%, 
-    rgba(138, 7, 42, 0.4) 50%, /* Your --primary-hover color */
+    rgba(138, 7, 42, 0.7) 50%, /* Your --primary-hover color */
     transparent 100%
   );
   
@@ -307,7 +307,7 @@ html {
   
   box-shadow: 
     inset 0 0 0 1px rgba(255, 255, 255, 0.4), 
-    0 10px 30px rgba(255, 0, 67, 0.15); /* Vibrant outer glow */
+    0 10px 30px rgba(255, 0, 67, 0.3); /* Vibrant outer glow */
     
   transform: perspective(1000px) scale(1.02);
 }
