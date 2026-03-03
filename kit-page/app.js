@@ -2,7 +2,6 @@ let allDownloads = []
 let currentDownloadUrl = null;
 let currentItemSlug = null;
 
-
 const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
 const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
 const imageUrlCache = new Map()
@@ -33,6 +32,7 @@ function resolveItemImageUrl(id) {
       return fallback
     })
 }
+
 async function loadDownloads() {
   try {
     const response = await fetch('/api/kits');
@@ -44,23 +44,14 @@ async function loadDownloads() {
     const { data } = await response.json();
 
     allDownloads = data || []
-    preloadedImageIds.clear()
-    cardCache.clear()
-    preloadPageImages(1)
-    preloadPageImages(2)
-    preloadPageImages(3)
-    currentPage = 1
-    renderCurrentPage()
-    renderPagination()
-    
+    if (allDownloads.length > 0) {
+      displayItem()
+    } else {
+      showError("No items available. Please try again later.")
+    }
   } catch (error) {
     console.error("Error loading downloads:", error)
-    const list = document.getElementById("downloadsList")
-    if (list) {
-      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
-    } else {
-      showError("Failed to load item data. Please try again.")
-    }
+    showError("Failed to load item data. Please try again.")
   }
 }
 
@@ -85,7 +76,6 @@ function getSlugFromUrl() {
       console.warn("Could not decode slug, using original:", slug)
     }
   }
-
   return slug
 }
 
@@ -197,38 +187,29 @@ function displayItem() {
 }
 
 function getRandomItems(excludeSlug, count = 4) {
-  if (!allDownloads || allDownloads.length === 0) {
-    return []
-  }
-  
+  if (!allDownloads || allDownloads.length === 0) return []
   const pool = allDownloads.filter((d) => d && d.slug && d.slug !== excludeSlug)
-
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     const temp = pool[i]
     pool[i] = pool[j]
     pool[j] = temp
   }
-
   return pool.slice(0, count)
 }
 
 function renderRandomItems(currentSlug) {
   const section = document.getElementById("randomItemsSection")
   if (!section) return
-
   if (!allDownloads || allDownloads.length === 0) {
     section.innerHTML = ""
     return
   }
-
   const randomItems = getRandomItems(currentSlug, 4)
-
   if (randomItems.length === 0) {
     section.innerHTML = ""
     return
   }
-
   const grid = document.createElement("div")
   grid.className = "random-items-grid"
   
@@ -263,7 +244,6 @@ function renderRandomItems(currentSlug) {
   const inner = document.createElement("div")
   inner.className = "random-items-inner"
   inner.appendChild(grid)
-  
   section.replaceChildren(inner)
 }
 
@@ -275,29 +255,18 @@ function showError(message) {
       <p style="margin-top: 1rem;"><a href="/">← Return to home</a></p>
     </div>
   `
-
   const randomSection = document.getElementById("randomItemsSection")
   if (randomSection) randomSection.innerHTML = ""
 }
 
 function escapeHtml(text) {
   if (text == null) return ''
-  if (typeof text !== 'string') {
-    text = String(text)
-  }
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  }
+  if (typeof text !== 'string') text = String(text)
+  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
-const HILLTOP_DIRECT_URL =
-  "https://amazing-population.com/b.3FVX0YP/3Hp/v/b/m/V/J/ZsDP0/2sNnzbYQylNvzjMa5oLUTlYr3GNPjhIw3-NsDaAN";
-
+const HILLTOP_DIRECT_URL = "https://amazing-population.com/b.3FVX0YP/3Hp/v/b/m/V/J/ZsDP0/2sNnzbYQylNvzjMa5oLUTlYr3GNPjhIw3-NsDaAN";
 let hilltopFiredThisPage = false;
 let hilltopReadyAt = 0;
 const HILLTOP_DELAY_MS = 5000;
@@ -329,7 +298,6 @@ function showHilltopCountdownInButton(button) {
     updateDownloadButtonText(button, `Please wait ${sec}s...`);
     requestAnimationFrame(tick);
   };
-
   requestAnimationFrame(tick);
 }
 
@@ -344,41 +312,31 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.addEventListener(
-  "click",
-  (e) => {
-    const btn = e.target.closest(".download-btn");
-    if (!btn) return;
-    if (hilltopFiredThisPage) {
-      if (currentDownloadUrl) {
-        window.open(currentDownloadUrl, "_blank", "noopener,noreferrer");
-      } else {
-        console.warn("Download URL not available.");
-      }
-      return;
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".download-btn");
+  if (!btn) return;
+  if (hilltopFiredThisPage) {
+    if (currentDownloadUrl) {
+      window.open(currentDownloadUrl, "_blank", "noopener,noreferrer");
+    } else {
+      console.warn("Download URL not available.");
     }
-
-    const now = Date.now();
-    if (hilltopReadyAt && now < hilltopReadyAt) {
-      e.preventDefault();
-      showHilltopCountdownInButton(btn);
-      return;
-    }
-    
+    return;
+  }
+  const now = Date.now();
+  if (hilltopReadyAt && now < hilltopReadyAt) {
     e.preventDefault();
-    window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
-
-    hilltopReadyAt = now + HILLTOP_DELAY_MS;
     showHilltopCountdownInButton(btn);
-
-    setTimeout(() => {
-      hilltopFiredThisPage = true;
-      setTimeout(() => {
-        resetDownloadButton(btn);
-      }, 1600);
-    }, HILLTOP_DELAY_MS);
-  },
-  true
-);
+    return;
+  }
+  e.preventDefault();
+  window.open(HILLTOP_DIRECT_URL, "_blank", "noopener,noreferrer");
+  hilltopReadyAt = now + HILLTOP_DELAY_MS;
+  showHilltopCountdownInButton(btn);
+  setTimeout(() => {
+    hilltopFiredThisPage = true;
+    setTimeout(() => { resetDownloadButton(btn); }, 1600);
+  }, HILLTOP_DELAY_MS);
+}, true);
 
 document.addEventListener("DOMContentLoaded", loadDownloads)
