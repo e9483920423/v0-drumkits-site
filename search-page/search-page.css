@@ -16,3 +16,31 @@
   margin-top: 0.5rem;
 }
 
+@media (max-width: 768px) {
+  .search-results-title h1 {
+    font-size: 1.8rem;
+  }
+  
+  .search-results-title p {
+    font-size: 0.9rem;
+  }
+  
+  .download-item .item-image img {
+    object-position: center;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-results-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .search-results-title p {
+    font-size: 0.85rem;
+  }
+  
+  .download-item .item-image img {
+    object-position: center;
+  }
+}
