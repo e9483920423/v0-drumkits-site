@@ -167,10 +167,23 @@ function createSmartImage(id) {
 function buildCard(item) {
   const card = document.createElement("div")
   card.className = "download-item"
-  
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
-  imageWrap.appendChild(createSmartImage(item.id))
+  const img = createSmartImage(item.id)
+  imageWrap.appendChild(img)
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const moveX = (x - 0.5) * 20; 
+    const moveY = (y - 0.5) * 20;
+
+    img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
+  });
+
+  card.addEventListener("mouseleave", () => {
+    img.style.transform = `scale(1) translate(0, 0)`;
+  });
   if (item.category) {
     const badge = document.createElement("span")
     badge.className = "category-badge"
@@ -188,6 +201,7 @@ function buildCard(item) {
     }
     <a href="/${item.slug}" class="download-btn">View Details</a>
   `
+
   card.appendChild(imageWrap)
   card.appendChild(content)
   return card
