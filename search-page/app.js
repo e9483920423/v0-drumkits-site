@@ -1,63 +1,42 @@
-function getItemImageUrl(id) {
-  const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
-  return `${PUB_URL}/${id}.jpg`
+const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
+const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
+const imageUrlCache = new Map()
+
+function resolveItemImageUrl(id) {
+  const key = String(id)
+  const cached = imageUrlCache.get(key)
+  if (cached) return Promise.resolve(cached)
+
+  const promises = IMAGE_EXTENSIONS.map(ext => {
+    return new Promise((resolve, reject) => {
+      const url = `${PUB_URL}/${key}.${ext}`
+      const probe = new Image()
+      probe.onload = () => resolve(url)
+      probe.onerror = reject
+      probe.src = url
+    })
+  })
+
+  return Promise.any(promises)
+    .then(validUrl => {
+      imageUrlCache.set(key, validUrl)
+      return validUrl
+    })
+    .catch(() => {
+      const fallback = "/errors/default.jpg"
+      imageUrlCache.set(key, fallback)
+      return fallback
+    })
 }
 
 const ITEMS_PER_PAGE = 6
-
 let searchResults = []
 let currentPage = 1
 let searchQuery = ""
 
-function saveScrollPosition() {
-  sessionStorage.setItem('scrollPosition', window.pageYOffset.toString());
-}
-
-function restoreScrollPosition() {
-  const scrollPosition = sessionStorage.getItem('scrollPosition');
-  if (scrollPosition) {
-    window.scrollTo(0, parseInt(scrollPosition));
-  }
-}
-
-window.addEventListener('beforeunload', saveScrollPosition);
-
-let isScrolling;
-window.addEventListener('scroll', function() {
-  window.clearTimeout(isScrolling);
-  isScrolling = setTimeout(function() {
-    saveScrollPosition();
-  }, 100);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-  restoreScrollPosition();
-  performSearch();
-});
-
-if ('scrollRestoration' in history) {
-  history.scrollRestoration = 'manual';
-}
-
-function createSmartImage(imageUrl, altText) {
-  const img = document.createElement("img")
-  img.src = "/errors/default.jpg"
-  img.alt = altText
-  img.loading = "lazy"
-  img.decoding = "async"
-
-  const probe = new Image()
-  probe.decoding = "async"
-  probe.onload = () => {
-    img.src = imageUrl
-  }
-  probe.onerror = () => {
-    img.src = "/errors/default.jpg"
-  }
-  probe.src = imageUrl
-
-  return img
-}
+document.addEventListener('DOMContentLoaded', () => {
+  performSearch()
+})
 
 function getSearchQueryFromUrl() {
   const params = new URLSearchParams(window.location.search)
@@ -73,24 +52,15 @@ async function performSearch() {
   }
 
   const queryTitle = document.getElementById("searchQueryTitle")
-  const queryText = document.getElementById("searchQueryText")
-  
   if (queryTitle) {
     queryTitle.textContent = `Search Results for "${escapeHtml(searchQuery)}"`
   }
-  
-  if (queryText) {
-    queryText.textContent = `Found results matching your search...`
-  }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('drum_kits')
-      .select('*')
-      .ilike('title', `%${searchQuery}%`)
-      .order('id', { ascending: false })
-
-    if (error) throw error
+    const response = await fetch(`/api/kits?search=${encodeURIComponent(searchQuery)}`)
+    if (!response.ok) throw new Error('Network response was not ok')
+    
+    const { data } = await response.json()
 
     searchResults = data || []
     currentPage = 1
@@ -107,75 +77,37 @@ async function performSearch() {
   }
 }
 
-function showNoResults() {
-  const list = document.getElementById("searchResultsList")
-  const queryText = document.getElementById("searchQueryText")
-  
-  if (queryText) {
-    queryText.textContent = `No results found for "${escapeHtml(searchQuery)}"`
-  }
-  
-  list.innerHTML = '<p class="loading">No kits found matching your search. Try different keywords.</p>'
-  
-  const paginationContainer = document.getElementById("paginationContainer")
-  if (paginationContainer) {
-    paginationContainer.innerHTML = ""
-  }
-}
-
-function showError(message) {
-  const list = document.getElementById("searchResultsList")
-  const queryText = document.getElementById("searchQueryText")
-  
-  if (queryText) {
-    queryText.textContent = ""
-  }
-  
-  list.innerHTML = `<p class="loading">${escapeHtml(message)}</p>`
-  
-  const paginationContainer = document.getElementById("paginationContainer")
-  if (paginationContainer) {
-    paginationContainer.innerHTML = ""
-  }
-}
-
 function renderCurrentPage() {
   const startIdx = (currentPage - 1) * ITEMS_PER_PAGE
   const endIdx = startIdx + ITEMS_PER_PAGE
   const pageItems = searchResults.slice(startIdx, endIdx)
-
   renderResults(pageItems)
 }
 
 function renderResults(results) {
   const list = document.getElementById("searchResultsList")
+  if (!list) return
   list.innerHTML = ""
-
-  if (results.length === 0) {
-    list.innerHTML = '<p class="loading">No results available.</p>'
-    return
-  }
 
   results.forEach((item) => {
     const card = document.createElement("div")
     card.className = "download-item"
 
-    const imageUrl = getItemImageUrl(item.id)
-
     const imageWrap = document.createElement("div")
     imageWrap.className = "item-image"
-    imageWrap.appendChild(createSmartImage(imageUrl, escapeHtml(item.title)))
+    
+    const img = document.createElement("img")
+    img.alt = ""
+    img.loading = "lazy"
+    img.src = "/errors/default.jpg"
+    resolveItemImageUrl(item.id).then(url => img.src = url)
+    imageWrap.appendChild(img)
 
     const content = document.createElement("div")
     content.className = "item-content"
     content.innerHTML = `
       <h3 class="item-title">${escapeHtml(item.title)}</h3>
-
-      ${item.description && item.description !== "null"
-        ? `<p class="item-description">${escapeHtml(item.description)}</p>`
-        : ''
-      }
-
+      ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
       <a href="/${item.slug}" class="download-btn">View Details</a>
     `
 
@@ -183,6 +115,12 @@ function renderResults(results) {
     card.appendChild(content)
     list.appendChild(card)
   })
+}
+
+function escapeHtml(text) {
+  if (text == null) return ''
+  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }
+  return String(text).replace(/[&<>"']/g, (m) => map[m])
 }
 
 function renderPagination() {
@@ -256,3 +194,4 @@ function escapeHtml(text) {
   }
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
+
