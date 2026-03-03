@@ -326,10 +326,29 @@ footer {
   .downloads-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
   .item-content { margin: 8px; padding: 1rem; }
   .page-title h1 { font-size: 1.8rem; }
+  
+  .item-image img {
+    object-fit: cover;
+    object-position: center bottom;
+    transition: none !important;
+  }
+  
+  .download-item:hover {
+    transform: none !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+  }
+  
+  .download-item:hover .item-image img {
+    transform: none !important;
+  }
 }
 
 @media (max-width: 480px) {
   .downloads-grid { grid-template-columns: 1fr; }
   .pagination-btn { padding: 0.4rem 0.6rem; font-size: 0.8rem; min-width: 35px; }
   .page-title h1 { font-size: 1.5rem; }
+  .item-image img {
+    object-position: center bottom;
+  }
 }
