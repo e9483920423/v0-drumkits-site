@@ -290,7 +290,7 @@ html {
   
   box-shadow: 
     inset 0 0 0 1px rgba(255, 255, 255, 0.4), 
-    0 10px 30px rgba(255, 0, 67, 0.3); /* Vibrant outer glow */
+    0 10px 30px rgba(255, 0, 67, 0.1); /* Vibrant outer glow */
   transform: perspective(1000px) scale(1.02);
 }
 
