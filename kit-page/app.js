@@ -89,6 +89,15 @@ function linkify(text) {
   });
 }
 
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11)
+    ? `https://www.youtube.com/embed/${match[2]}`
+    : null;
+}
+
 function displayItem() {
   let slug = getSlugFromUrl()
   if (!slug) {
@@ -128,10 +137,26 @@ function displayItem() {
   
   const detailsDiv = document.createElement("div")
   detailsDiv.className = "item-details"
+
+  const embedUrl = getYouTubeEmbedUrl(safeItem.src);
+  const videoHtml = embedUrl ? `
+    <div class="video-preview">
+      <iframe 
+        src="${embedUrl}" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  ` : '';
   
   detailsDiv.innerHTML = `
     <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
     <p class="item-description">${linkify(escapeHtml(safeItem.description))}</p>
+    
+    ${videoHtml}
+
     <div class="item-specs">
       <div class="spec-row">
         <span class="spec-label">File Size:</span>
