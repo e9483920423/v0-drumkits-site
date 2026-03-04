@@ -49,8 +49,8 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .header-container {
@@ -238,13 +238,10 @@ main {
   padding: 1.25rem;
   margin: 10px;
   border-radius: 1.25rem;
-  background: rgba(2, 2, 2, 0.3); 
+  background: #1400051f; 
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-
+  border: 1px solid #ff004324;
   display: flex;
   flex-direction: column;
   flex: none;
