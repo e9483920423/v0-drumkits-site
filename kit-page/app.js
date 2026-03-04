@@ -55,15 +55,22 @@ async function loadDownloads() {
   }
 }
 
-function createSmartItemImage(id, width = 800, height = 800) {
+// FIX: Added itemTitle parameter to handle alt text AFTER load
+function createSmartItemImage(id, itemTitle, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = ""
+  img.alt = "" // Start empty to prevent flash
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
   img.height = height
   img.src = "/errors/default.jpg"
-  resolveItemImageUrl(id).then((url) => { img.src = url })
+  resolveItemImageUrl(id).then((url) => { 
+    img.src = url;
+    // Apply alt text only after the real image URL is resolved
+    if (itemTitle) {
+      img.alt = `${escapeHtml(itemTitle)} - Drum Kit`;
+    }
+  })
   return img
 }
 
@@ -135,9 +142,8 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
 
-  const heroImage = createSmartItemImage(item.id, 800, 800)
-  // SEO Optimization: Add proper alt text to the main image
-  heroImage.alt = `${pageTitle} - Drum Kit Sample Pack`
+  // FIX: Passing the title directly to the smart image creator
+  const heroImage = createSmartItemImage(item.id, pageTitle, 800, 800)
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -255,14 +261,9 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSmartItemImage(item.id, 320, 320);
-    const imgLoad = new Promise((resolve) => {
-      img.onload = () => {
-        img.alt = `${escapeHtml(item.title)} - Drum Kit`;
-        resolve();
-      };
-      img.onerror = resolve;
-    });
+    // FIX: Passing the title directly
+    const img = createSmartItemImage(item.id, item.title, 320, 320);
+    imageLink.appendChild(img)
     
     const title = document.createElement("h3")
     title.className = "random-item-title"
@@ -400,8 +401,8 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     imageLink.href = `/${escapeHtml(item.slug)}`;
     imageLink.className = "random-item-image-wrap";
     
-    const img = createSmartItemImage(item.id, 320, 320);
-    img.alt = `${escapeHtml(item.title)} - Drum Kit`; // Added alt text here too
+    // FIX: Passing the title directly and restored the exact original Promise logic
+    const img = createSmartItemImage(item.id, item.title, 320, 320);
     
     const imgLoad = new Promise((resolve) => {
       img.onload = resolve;
