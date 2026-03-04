@@ -269,7 +269,7 @@ main {
 
 .download-btn {
   display: block;
-  background-color: var(--accent-red);
+  background-color: var(--bg-secondary);
   color: #fff;
   padding: 0.7rem 1rem;
   text-decoration: none;
@@ -281,7 +281,7 @@ main {
   transition: var(--transition);
 }
 
-.download-btn:hover { background-color: var(--accent-red-dark); }
+.download-btn:hover { background-color: var(--accent-red); }
 
 footer {
   background-color: #0a0a0a;
