@@ -23,5 +23,9 @@
     { "source": "/submit", "destination": "/submit-page/index.html" },
     { "source": "/search", "destination": "/search-page/index.html" },
     { "source": "/:slug", "destination": "/kit-page/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
