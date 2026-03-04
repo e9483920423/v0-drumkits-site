@@ -255,9 +255,14 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    const img = createSmartItemImage(item.id, 320, 320)
-    img.alt = `${escapeHtml(item.title)} - Drum Kit`; // Added alt text here too
-    imageLink.appendChild(img)
+    const img = createSmartItemImage(item.id, 320, 320);
+    const imgLoad = new Promise((resolve) => {
+      img.onload = () => {
+        img.alt = `${escapeHtml(item.title)} - Drum Kit`;
+        resolve();
+      };
+      img.onerror = resolve;
+    });
     
     const title = document.createElement("h3")
     title.className = "random-item-title"
