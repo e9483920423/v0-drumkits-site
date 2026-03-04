@@ -415,6 +415,7 @@ html {
   transition: var(--transition);
   margin-top: auto;
   align-self: flex-end;
+  text-transform: uppercase;
 }
 
 .random-item-link:hover {
