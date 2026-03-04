@@ -442,8 +442,6 @@ setInterval(() => {
   }
 }, 8000);
 
-// --- SEO Helper Functions ---
-
 function updateMetaTags(title, description) {
   document.title = `${title} | drumkits4.me`;
   
