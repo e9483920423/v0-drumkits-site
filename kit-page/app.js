@@ -57,7 +57,7 @@ async function loadDownloads() {
 
 function createSmartItemImage(id, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = ""
+  // Added the item title dynamically to the alt text below in the render logic
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
@@ -117,7 +117,11 @@ function displayItem() {
      return
   }
   
-  document.title = `${escapeHtml(item.title)} | drumkits4.me`
+  // SEO Optimization: Update Title, Meta Tags, and inject Schema Markup
+  const pageTitle = escapeHtml(item.title);
+  const pageDescription = item.description ? escapeHtml(item.description) : `Download the ${pageTitle} high-quality drum kit.`;
+  updateMetaTags(pageTitle, pageDescription);
+  injectSchemaMarkup(item);
 
   const { download, ...safeItem } = item
   currentDownloadUrl = download || null
@@ -132,6 +136,8 @@ function displayItem() {
   imageWrapper.className = "item-image-wrapper"
 
   const heroImage = createSmartItemImage(item.id, 800, 800)
+  // SEO Optimization: Add proper alt text to the main image
+  heroImage.alt = `${pageTitle} - Drum Kit Sample Pack`
   imageWrapper.appendChild(heroImage)
   
   const detailsDiv = document.createElement("div")
@@ -250,6 +256,7 @@ function renderRandomItems(currentSlug) {
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
     const img = createSmartItemImage(item.id, 320, 320)
+    img.alt = `${escapeHtml(item.title)} - Drum Kit`; // Added alt text here too
     imageLink.appendChild(img)
     
     const title = document.createElement("h3")
@@ -389,6 +396,7 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     imageLink.className = "random-item-image-wrap";
     
     const img = createSmartItemImage(item.id, 320, 320);
+    img.alt = `${escapeHtml(item.title)} - Drum Kit`; // Added alt text here too
     
     const imgLoad = new Promise((resolve) => {
       img.onload = resolve;
@@ -433,3 +441,52 @@ setInterval(() => {
     refreshRandomItemsSmoothly(currentItemSlug);
   }
 }, 8000);
+
+// --- SEO Helper Functions ---
+
+function updateMetaTags(title, description) {
+  document.title = `${title} | drumkits4.me`;
+  
+  let metaDescription = document.querySelector('meta[name="description"]');
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta');
+    metaDescription.name = "description";
+    document.head.appendChild(metaDescription);
+  }
+  metaDescription.content = description;
+
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement('meta');
+    ogTitle.setAttribute('property', 'og:title');
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.content = title;
+}
+
+function injectSchemaMarkup(item) {
+  const existingSchema = document.getElementById('product-schema');
+  if (existingSchema) {
+    existingSchema.remove();
+  }
+
+  const schema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": item.title,
+    "description": item.description || `Download the ${item.title} drum kit.`,
+    "category": "Audio Files > Drum Kits",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  };
+
+  const script = document.createElement('script');
+  script.type = "application/ld+json";
+  script.id = "product-schema";
+  script.text = JSON.stringify(schema);
+  document.head.appendChild(script);
+}
