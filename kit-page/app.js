@@ -57,7 +57,7 @@ async function loadDownloads() {
 
 function createSmartItemImage(id, width = 800, height = 800) {
   const img = document.createElement("img")
-  // Added the item title dynamically to the alt text below in the render logic
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
