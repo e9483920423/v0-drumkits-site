@@ -433,30 +433,3 @@ setInterval(() => {
     refreshRandomItemsSmoothly(currentItemSlug);
   }
 }, 8000);
-
-function injectSchemaMarkup(item) {
-  const existingSchema = document.getElementById('product-schema');
-  if (existingSchema) {
-    existingSchema.remove();
-  }
-
-  const schema = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": item.title,
-    "description": item.description,
-    "category": "Audio Files > Drum Kits",
-    "offers": {
-      "@type": "Offer",
-      "price": "0.00",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock"
-    }
-  };
-
-  const script = document.createElement('script');
-  script.type = "application/ld+json";
-  script.id = "product-schema";
-  script.text = JSON.stringify(schema);
-  document.head.appendChild(script);
-}
