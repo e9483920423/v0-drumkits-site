@@ -108,21 +108,22 @@ html {
 
 .item-title {
   font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 700;
   color: #ff0043;
   line-height: 1.2;
-  margin: 0;
+  margin: -8px;
   text-align: center;
+  text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
+  letter-spacing: 0.02em;
 }
 
 .item-description {
   color: #b3b3b3;
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 1.2rem;
+  line-height: 1.0;
   margin: 0;
   width: 100%;
   white-space: pre-wrap;
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
   padding-right: var(--spacing-xs);
   display: block;
@@ -161,7 +162,7 @@ html {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 0 var(--spacing-md);
-  margin: 0;
+  margin: 0px;
   box-shadow: var(--card-shadow);
 }
 
