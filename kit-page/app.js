@@ -55,7 +55,6 @@ async function loadDownloads() {
   }
 }
 
-// FIX: Added itemTitle parameter to handle alt text AFTER load
 function createSmartItemImage(id, itemTitle, width = 800, height = 800) {
   const img = document.createElement("img")
   img.alt = "" // Start empty to prevent flash
@@ -66,7 +65,6 @@ function createSmartItemImage(id, itemTitle, width = 800, height = 800) {
   img.src = "/errors/default.jpg"
   resolveItemImageUrl(id).then((url) => { 
     img.src = url;
-    // Apply alt text only after the real image URL is resolved
     if (itemTitle) {
       img.alt = `${escapeHtml(itemTitle)} - Drum Kit`;
     }
@@ -124,7 +122,6 @@ function displayItem() {
      return
   }
   
-  // SEO Optimization: Update Title, Meta Tags, and inject Schema Markup
   const pageTitle = escapeHtml(item.title);
   const pageDescription = item.description ? escapeHtml(item.description) : `Download the ${pageTitle} high-quality drum kit.`;
   updateMetaTags(pageTitle, pageDescription);
@@ -142,7 +139,6 @@ function displayItem() {
   const imageWrapper = document.createElement("div")
   imageWrapper.className = "item-image-wrapper"
 
-  // FIX: Passing the title directly to the smart image creator
   const heroImage = createSmartItemImage(item.id, pageTitle, 800, 800)
   imageWrapper.appendChild(heroImage)
   
@@ -261,7 +257,6 @@ function renderRandomItems(currentSlug) {
     imageLink.className = "random-item-image-wrap"
     imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`)
     
-    // FIX: Passing the title directly
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     imageLink.appendChild(img)
     
@@ -401,7 +396,6 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     imageLink.href = `/${escapeHtml(item.slug)}`;
     imageLink.className = "random-item-image-wrap";
     
-    // FIX: Passing the title directly and restored the exact original Promise logic
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     
     const imgLoad = new Promise((resolve) => {
