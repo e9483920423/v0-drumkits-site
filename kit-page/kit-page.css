@@ -15,7 +15,6 @@
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
   --transition: all 0.3s ease;
-  
   --shadow-color: rgba(0, 0, 0, 0.3);
   --hover-overlay: rgba(255, 255, 255, 0.05);
   --card-shadow: 0 2px 15px var(--shadow-color);
