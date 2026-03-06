@@ -213,6 +213,10 @@ main {
   pointer-events: none;
 }
 
+.item-title {
+  text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
+}
+
 .item-image {
   position: absolute;
   inset: 0;
