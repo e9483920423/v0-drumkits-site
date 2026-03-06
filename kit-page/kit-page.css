@@ -64,6 +64,7 @@ main {
   margin-bottom: var(--spacing-xl);
   align-items: center; 
   padding: 0 var(--spacing-sm);
+  margin: 2.4rem 0;
 }
 
 .item-hero > * {
