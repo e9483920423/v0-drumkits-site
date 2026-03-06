@@ -247,15 +247,6 @@ main {
   flex: none;
 }
 
-.item-title {
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
-  text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
-  letter-spacing: 0.02em;
-}
-
 .item-content::before {
   font-size: 0.6rem;
   font-weight: 800;
