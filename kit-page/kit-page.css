@@ -52,6 +52,11 @@ html {
   background: var(--primary-color);
 }
 
+main {
+  max-width: none;
+  padding: 0;
+}
+
 .item-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
