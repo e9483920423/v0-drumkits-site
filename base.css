@@ -195,33 +195,31 @@ main {
 
 .category-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   background-color: rgba(117, 0, 31, 0.48);
   border: 1px solid rgba(255, 149, 177, 0.56);
   color: #fff;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  padding: 0.1rem 0.4rem;
-  font-size: 0.7rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.62rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-radius: 30px;
   z-index: 5;
-  /*! box-shadow: 0 4px 10px rgba(0, 0, 0, 0), inset 0 1px 0 rgba(255, 255, 255, 0.1); */
   pointer-events: none;
 }
 
 .item-title {
-  font-size: 1.1rem;
-  line-height: 1.4;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  margin-bottom: 0.55rem;
   text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
   
-  /* Truncates text after 3 lines */
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Change this number to show more or fewer lines */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -248,9 +246,9 @@ main {
 .item-content {
   position: relative;
   z-index: 2;
-  padding: 0.85rem;
-  margin: 10px;
-  border-radius: 1rem;
+  padding: 0.55rem 0.65rem;
+  margin: 8px;
+  border-radius: 0.75rem;
   background: #04000145; 
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -275,10 +273,10 @@ main {
   display: block;
   background-color: var(--bg-secondary);
   color: #fff;
-  padding: 0.7rem 1rem;
+  padding: 0.4rem 0.75rem;
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: 6px;
+  font-size: 1.0rem;
   font-weight: 600;
   text-transform: uppercase;
   text-align: center;
@@ -348,7 +346,7 @@ footer {
 
 @media (max-width: 768px) {
   .downloads-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-  .item-content { margin: 8px; padding: 1rem; }
+  .item-content { margin: 6px; padding: 0.6rem 0.65rem; }
   .page-title h1 { font-size: 1.8rem; }
   
   .item-image img {
