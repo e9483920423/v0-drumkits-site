@@ -248,9 +248,9 @@ main {
 .item-content {
   position: relative;
   z-index: 2;
-  padding: 1.25rem;
+  padding: 0.85rem;
   margin: 10px;
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   background: #04000145; 
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -265,7 +265,7 @@ main {
   font-weight: 800;
   color: var(--accent-red);
   letter-spacing: 0.1em;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
   display: block;
 }
 
