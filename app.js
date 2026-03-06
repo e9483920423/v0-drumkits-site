@@ -29,7 +29,7 @@ function resolveItemImageUrl(id) {
     })
 }
 
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 8
 const PAGINATION_LIMIT = 6 
 
 let allDownloads = []
