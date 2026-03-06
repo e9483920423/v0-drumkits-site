@@ -64,8 +64,11 @@ html {
 .item-hero > * {
   min-width: 0;
 }
+
 .item-image-wrapper {
   width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
   aspect-ratio: 1;
   background: var(--bg-tertiary);
   border-radius: var(--border-radius);
