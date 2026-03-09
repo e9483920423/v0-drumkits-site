@@ -22,7 +22,8 @@
   "rewrites": [
     { "source": "/submit", "destination": "/submit-page/index.html" },
     { "source": "/search", "destination": "/search-page/index.html" },
-    { "source": "/:slug", "destination": "/kit-page/index.html" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/:slug", "destination": "/api/kit-page" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
