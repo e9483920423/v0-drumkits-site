@@ -161,9 +161,9 @@ function displayItem() {
   ` : '';
   
   detailsDiv.innerHTML = `
-    <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
     
     <div class="item-specs">
+      <h1 class="item-title">${escapeHtml(safeItem.title)}</h1>
       <div class="spec-row block-row">
         <p class="item-description">${linkify(escapeHtml(safeItem.description))}</p>
       </div>
