@@ -40,7 +40,7 @@ export default async function handler(req, res) {
   }
 
   const { data: kit, error } = await supabase
-    .from('kits')
+    .from('drum_kits')
     .select('title, description, slug, id')
     .eq('slug', slug)
     .single()
