@@ -57,7 +57,7 @@ async function loadDownloads() {
 
 function createSmartItemImage(id, itemTitle, width = 800, height = 800) {
   const img = document.createElement("img")
-  img.alt = "" // Start empty to prevent flash
+  img.alt = ""
   img.loading = "eager"
   img.decoding = "async"
   img.width = width
