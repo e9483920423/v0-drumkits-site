@@ -8,10 +8,23 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  // Extract slug robustly, ignoring query parameters like ?ref=twitter
+  // Extract slug robustly, handling Vercel rewrites and query parameters
   const baseUrl = `http://${req.headers.host || 'localhost'}`
   const parsedUrl = new URL(req.url, baseUrl)
-  const slug = decodeURIComponent(parsedUrl.pathname.split('/').filter(Boolean).pop() || '')
+  
+  // Vercel populates req.query based on the route rewrite, e.g., /:slug -> req.query.slug
+  let parsedSlug = req.query?.slug || parsedUrl.searchParams.get('slug')
+  
+  if (!parsedSlug) {
+    // Fallback: get the last path segment, ignoring standard API paths
+    const segments = parsedUrl.pathname.split('/').filter(Boolean)
+    const lastSegment = segments.pop() || ''
+    if (lastSegment !== 'kit-page' && lastSegment !== 'api') {
+      parsedSlug = lastSegment
+    }
+  }
+  
+  const slug = decodeURIComponent(parsedSlug || '')
 
   if (!slug) {
     return res.redirect('/')
