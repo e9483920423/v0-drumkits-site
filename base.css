@@ -276,12 +276,12 @@ main {
 
 .download-btn {
   display: block;
-  background-color: rgba(255, 255, 255, 0.07); 
+  background-color: rgba(15, 15, 15, 0.68); 
   color: #fff;
   padding: 0.35rem 0.75rem;
   text-decoration: none;
   border-radius: 5px;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -292,7 +292,8 @@ main {
 
 .download-btn:hover {
   background-color: var(--accent-red);
-  border-color: transparent;
+  border-color: #0000;
+  color: #000;
 }
 
 footer {
