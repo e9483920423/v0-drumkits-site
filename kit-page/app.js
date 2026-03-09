@@ -260,20 +260,6 @@ function renderRandomItems(currentSlug) {
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     imageLink.appendChild(img)
 
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const moveX = (x - 0.5) * 20; 
-      const moveY = (y - 0.5) * 20;
-
-      img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
-    });
-
-    card.addEventListener("mouseleave", () => {
-      img.style.transform = `scale(1) translate(0, 0)`;
-    });
-    
     const title = document.createElement("h3")
     title.className = "random-item-title"
     title.textContent = item.title
@@ -283,10 +269,14 @@ function renderRandomItems(currentSlug) {
     detailsLink.className = "random-item-link"
     detailsLink.textContent = "View Details"
     detailsLink.setAttribute("aria-label", `View details for ${escapeHtml(item.title)}`)
+
+    const contentOverlay = document.createElement("div")
+    contentOverlay.className = "random-item-content"
+    contentOverlay.appendChild(title)
+    contentOverlay.appendChild(detailsLink)
     
     card.appendChild(imageLink)
-    card.appendChild(title)
-    card.appendChild(detailsLink)
+    card.appendChild(contentOverlay)
     grid.appendChild(card)
   })
   
@@ -420,20 +410,6 @@ async function refreshRandomItemsSmoothly(currentSlug) {
 
     imageLink.appendChild(img);
 
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const moveX = (x - 0.5) * 20; 
-      const moveY = (y - 0.5) * 20;
-
-      img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
-    });
-
-    card.addEventListener("mouseleave", () => {
-      img.style.transform = `scale(1) translate(0, 0)`;
-    });
-    
     const title = document.createElement("h3");
     title.className = "random-item-title";
     title.textContent = item.title;
@@ -442,10 +418,14 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     detailsLink.href = `/${escapeHtml(item.slug)}`;
     detailsLink.className = "random-item-link";
     detailsLink.textContent = "View Details";
+
+    const contentOverlay = document.createElement("div");
+    contentOverlay.className = "random-item-content";
+    contentOverlay.appendChild(title);
+    contentOverlay.appendChild(detailsLink);
     
     card.appendChild(imageLink);
-    card.appendChild(title);
-    card.appendChild(detailsLink);
+    card.appendChild(contentOverlay);
     grid.appendChild(card);
   });
 
