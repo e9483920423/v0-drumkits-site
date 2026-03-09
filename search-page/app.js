@@ -103,20 +103,6 @@ function renderResults(results) {
     resolveItemImageUrl(item.id).then(url => img.src = url)
     imageWrap.appendChild(img)
 
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const moveX = (x - 0.5) * 20; 
-      const moveY = (y - 0.5) * 20;
-
-      img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
-    });
-
-    card.addEventListener("mouseleave", () => {
-      img.style.transform = `scale(1) translate(0, 0)`;
-    });
-
     const content = document.createElement("div")
     content.className = "item-content"
     content.innerHTML = `
