@@ -55,8 +55,8 @@
       "destination": "/api/:path*"
     },
     {
-      "source": "/(?<slug>[^/]+)",
-      "destination": "/api/kit-page?slug=$slug"
+      "source": "/:slug",
+      "destination": "/api/kit-page?slug=:slug"
     },
     {
       "source": "/(.*)",
