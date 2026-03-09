@@ -259,6 +259,20 @@ function renderRandomItems(currentSlug) {
     
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     imageLink.appendChild(img)
+
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const moveX = (x - 0.5) * 20; 
+      const moveY = (y - 0.5) * 20;
+
+      img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      img.style.transform = `scale(1) translate(0, 0)`;
+    });
     
     const title = document.createElement("h3")
     title.className = "random-item-title"
@@ -405,6 +419,20 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     imageLoadPromises.push(imgLoad);
 
     imageLink.appendChild(img);
+
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const moveX = (x - 0.5) * 20; 
+      const moveY = (y - 0.5) * 20;
+
+      img.style.transform = `scale(1.1) translate(${moveX}px, ${moveY}px)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      img.style.transform = `scale(1) translate(0, 0)`;
+    });
     
     const title = document.createElement("h3");
     title.className = "random-item-title";

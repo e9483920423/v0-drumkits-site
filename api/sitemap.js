@@ -6,7 +6,6 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  // Fetch all kits from Supabase
   const { data: kits, error } = await supabase
     .from('kits')
     .select('slug, created_at')
@@ -17,10 +16,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal Server Error' })
   }
 
-  // Base URL for your site
   const baseUrl = 'https://drumkits4.me'
 
-  // Generate the XML for the sitemap
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -50,7 +47,6 @@ export default async function handler(req, res) {
   }
 </urlset>`
 
-  // Send the response with the correct Content-Type for XML
   res.setHeader('Content-Type', 'text/xml')
   res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
   res.status(200).send(sitemap)
