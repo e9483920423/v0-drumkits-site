@@ -118,48 +118,29 @@ main {
   font-size: clamp(2rem, 4vw, 2.5rem);
   color: #ff0043;
   line-height: 1.2;
-  margin: 0;
-  padding-bottom: 0.25rem;
+  margin: -8px;
   text-align: center;
   text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
   letter-spacing: 0.02em;
-  position: relative;
-}
-
-.item-title::after {
-  content: '';
-  display: block;
-  width: auto;
-  height: 1px;
-  background: var(--primary-color);
-  margin: 1.0rem auto 0px;
-  border-radius: 2px;
 }
 
 .item-description {
   color: #b3b3b3;
-  font-size: 1.0rem;
-  line-height: 0.7;
-  margin: 0px;
+  font-size: 1.2rem;
+  line-height: 1.0;
+  margin: 0;
   width: 100%;
   white-space: pre-wrap;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   padding-right: var(--spacing-xs);
   display: block;
 }
 
-.item-description {
-  color: #b3b3b3;
-  font-size: 1.0rem;
-  line-height: 0.8;
-  margin: 0px;
-  width: 100%;
-  white-space: pre-wrap;
-  max-height: 300px; /* was 200px */
-  overflow-y: auto;
-  padding-right: var(--spacing-xs);
-  display: block;
+.item-description a {
+  color: #ff0043;
+  font-weight: 500;
+  transition: var(--transition);
 }
 
 .item-description a:hover {
@@ -188,7 +169,7 @@ main {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-md) var(--spacing-md) 0;
+  padding: 0 var(--spacing-md);
   margin: 0px;
   box-shadow: var(--card-shadow);
 }
