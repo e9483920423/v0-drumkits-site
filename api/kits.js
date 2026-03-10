@@ -26,6 +26,15 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
+  
+  const fetchSite = req.headers['sec-fetch-site'];
+  const referer = req.headers.referer || '';
+
+  const isAllowedOrigin = referer.includes('drumkits.site') || referer.includes('localhost');
+
+  if (fetchSite === 'none' || !isAllowedOrigin) {
+    return res.status(403).json({ error: "Forbidden: Direct access to this API is not allowed." });
+  }-
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return res.status(500).json({ error: "Supabase config missing on server." });
