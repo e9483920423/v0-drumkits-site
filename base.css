@@ -114,7 +114,8 @@ header {
 
 .main-nav {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
+  align-items: center;
   justify-self: end;
 }
 
@@ -219,6 +220,7 @@ main {
   text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
   
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -266,6 +268,7 @@ main {
   margin-bottom: 0;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -383,5 +386,82 @@ footer {
   .page-title h1 { font-size: 1.5rem; }
   .item-image img {
     object-position: center bottom;
+  }
+}
+
+/* Database Toggle Styles */
+.db-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.db-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.6rem;
+}
+
+.db-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.db-slider {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  background-color: var(--bg-tertiary);
+  border-radius: 34px;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.db-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-secondary);
+  border-radius: 50%;
+  transition: .4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.db-switch input:checked + .db-slider {
+  background-color: rgba(255, 0, 67, 0.2);
+  border-color: var(--accent-red);
+}
+
+.db-switch input:checked + .db-slider:before {
+  transform: translateX(20px);
+  background-color: var(--accent-red);
+}
+
+.db-switch input:focus + .db-slider {
+  box-shadow: 0 0 1px var(--accent-red);
+}
+
+.db-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  transition: color 0.3s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.db-switch input:checked ~ .db-label {
+  color: var(--accent-red);
+}
+
+@media (max-width: 600px) {
+  .db-label {
+    display: none;
   }
 }

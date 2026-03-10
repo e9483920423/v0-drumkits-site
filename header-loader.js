@@ -17,9 +17,57 @@ async function loadHeader() {
 
     const headerContent = await response.text()
     headerPlaceholder.innerHTML = headerContent
+    
   } catch (error) {
     console.error("Error loading header:", error)
   }
+}
+
+function setupDbToggle() {
+  let toggle = document.getElementById('dbToggle')
+  let label = document.getElementById('dbToggleLabel')
+
+  // If toggle doesn't exist in HTML, dynamically inject it into main-nav
+  if (!toggle) {
+    const nav = document.querySelector('.main-nav')
+    if (nav) {
+      nav.insertAdjacentHTML('afterbegin', `
+        <div class="db-toggle-container">
+          <label class="db-switch" title="Switch database source">
+            <input type="checkbox" id="dbToggle">
+            <span class="db-slider"></span>
+            <span class="db-label" id="dbToggleLabel">MAIN DB</span>
+          </label>
+        </div>
+      `)
+      toggle = document.getElementById('dbToggle')
+      label = document.getElementById('dbToggleLabel')
+    }
+  }
+
+  if (!toggle) return
+
+  // Check current cookie
+  const isKits4Beats = document.cookie.includes('db_source=kits4beats')
+  toggle.checked = isKits4Beats
+  if (label) {
+    label.textContent = isKits4Beats ? 'KITS4BEATS' : 'DRUM KITS'
+  }
+
+  toggle.addEventListener('change', (e) => {
+    const useKits4Beats = e.target.checked
+    const maxAge = 60 * 60 * 24 * 365 // 1 year
+    
+    // Update cookie
+    document.cookie = `db_source=${useKits4Beats ? 'kits4beats' : 'drum_kits'}; path=/; max-age=${maxAge}; samesite=lax`
+    
+    if (label) {
+      label.textContent = useKits4Beats ? 'KITS4BEATS' : 'DRUM KITS'
+    }
+    
+    // Reload to fetch initial data
+    window.location.reload()
+  })
 }
 
 function blockRightClick() {
@@ -28,7 +76,8 @@ function blockRightClick() {
   })
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   blockRightClick()
-  loadHeader()
+  await loadHeader() // Wait for dynamic header if applicable
+  setupDbToggle()    // Initialize or inject toggle globally
 })

@@ -3,6 +3,11 @@ const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
 const imageUrlCache = new Map()
 
 function resolveItemImageUrl(id) {
+  const isKits4Beats = document.cookie.includes('db_source=kits4beats')
+  if (isKits4Beats) {
+    return Promise.resolve("/errors/default.jpg")
+  }
+
   const key = String(id)
   const cached = imageUrlCache.get(key)
   if (cached) return Promise.resolve(cached)
