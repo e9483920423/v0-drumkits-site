@@ -3,7 +3,7 @@ class Pagination {
     this.containerId = options.containerId || 'paginationContainer';
     this.itemsPerPage = options.itemsPerPage || 6;
     this.paginationLimit = options.paginationLimit || 6;
-    this.onPageChange = options.onPageChange; // Required callback to handle slice rendering
+    this.onPageChange = options.onPageChange;
     this.totalItems = options.totalItems || 0;
     
     this.currentPage = 1;
@@ -65,8 +65,7 @@ class Pagination {
     this.currentPage = page;
     this.expandLeft = false;
     this.expandRight = false;
-
-    // Trigger external render and update our pagination UI
+    
     if (this.onPageChange) {
       this.onPageChange(this.currentPage);
     }
@@ -168,5 +167,4 @@ class Pagination {
   }
 }
 
-// Make globally available
 window.Pagination = Pagination;

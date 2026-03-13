@@ -1,9 +1,3 @@
-/**
- * Prefetch + Page Transitions
- * - Prefetches same-origin document links on hover/touchstart (adds <link rel="prefetch">)
- * - Intercepts internal navigation to play a quick fade-out / fade-in transition
- */
-
 ;(function () {
   "use strict"
 

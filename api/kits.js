@@ -15,8 +15,6 @@ function getSupabaseRestUrl(searchQuery, tableName = 'drum_kits') {
   let url = `${base}/rest/v1/${tableName}?select=*&order=id.desc`;
   
   if (searchQuery) {
-    // Replace spaces and special characters with Supabase wildcard '*'
-    // This allows "d rich" to match "D.Rich", "d-rich", etc.
     const flexSearch = searchQuery.trim().replace(/[\s\W_]+/g, '*');
     url += `&title=ilike.*${encodeURIComponent(flexSearch)}*`;
   }
@@ -30,13 +28,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Prevent direct browser access
   if (req.headers['x-internal-request'] !== 'true') {
-    return res.status(403).json({ error: "Direct access not allowed" });
+    return res.status(403).json({ error: "Direct access is not allowed, fuck you." });
   }
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return res.status(500).json({ error: "Supabase config missing on server." });
+    return res.status(500).json({ error: "Config missing on server." });
   }
 
   const searchQuery = req.query.q || req.query.search || "";

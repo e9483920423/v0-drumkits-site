@@ -55,8 +55,6 @@ export default async function handler(req, res) {
     .select('title, description, slug, id')
     .eq('slug', slug)
     .single()
-
-  // If not found, try the other table to keep old direct links working
   if (error || !kit) {
     const fallbackSource = dbSource === 'drum_kits' ? 'kits4beats_drumkits' : 'drum_kits';
     const fallbackRes = await supabase

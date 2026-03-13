@@ -27,7 +27,6 @@ function setupDbToggle() {
   let toggle = document.getElementById('dbToggle')
   let label = document.getElementById('dbToggleLabel')
 
-  // If toggle doesn't exist in HTML, dynamically inject it into main-nav
   if (!toggle) {
     const nav = document.querySelector('.main-nav')
     if (nav) {
@@ -47,7 +46,6 @@ function setupDbToggle() {
 
   if (!toggle) return
 
-  // Check current cookie
   const isKits4Beats = document.cookie.includes('db_source=kits4beats')
   toggle.checked = isKits4Beats
   if (label) {
@@ -56,16 +54,14 @@ function setupDbToggle() {
 
   toggle.addEventListener('change', (e) => {
     const useKits4Beats = e.target.checked
-    const maxAge = 60 * 60 * 24 * 365 // 1 year
+    const maxAge = 60 * 60 * 24 * 365
     
-    // Update cookie
     document.cookie = `db_source=${useKits4Beats ? 'kits4beats' : 'drum_kits'}; path=/; max-age=${maxAge}; samesite=lax`
     
     if (label) {
       label.textContent = useKits4Beats ? 'KITS4BEATS' : 'DRUM KITS'
     }
     
-    // Reload to fetch initial data
     window.location.reload()
   })
 }
@@ -78,6 +74,6 @@ function blockRightClick() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   blockRightClick()
-  await loadHeader() // Wait for dynamic header if applicable
-  setupDbToggle()    // Initialize or inject toggle globally
+  await loadHeader()
+  setupDbToggle()
 })

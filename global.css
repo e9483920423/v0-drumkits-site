@@ -1,4 +1,3 @@
-/* Global Overrides and Theme Variables */
 :root {
   --bg-primary: #000;
   --bg-secondary: #111;
@@ -15,7 +14,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
