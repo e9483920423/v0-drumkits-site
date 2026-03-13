@@ -30,6 +30,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Prevent direct browser access
+  if (req.headers['x-internal-request'] !== 'true') {
+    return res.status(403).json({ error: "Direct access not allowed" });
+  }
+
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return res.status(500).json({ error: "Supabase config missing on server." });
   }

@@ -81,7 +81,9 @@ function setListLoading(isLoading) {
 
 async function loadDownloads() {
   try {
-    const response = await fetch('/api/kits');
+    const response = await fetch('/api/kits', {
+      headers: { 'X-Internal-Request': 'true' }
+    });
     if (!response.ok) throw new Error('Network response was not ok');
     
     const { data } = await response.json();

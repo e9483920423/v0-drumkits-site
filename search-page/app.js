@@ -70,7 +70,9 @@ async function performSearch() {
   }
 
   try {
-    const response = await fetch(`/api/kits?search=${encodeURIComponent(searchQuery)}`)
+    const response = await fetch(`/api/kits?search=${encodeURIComponent(searchQuery)}`, {
+      headers: { 'X-Internal-Request': 'true' }
+    })
     if (!response.ok) throw new Error('Network response was not ok')
     
     const { data } = await response.json()
