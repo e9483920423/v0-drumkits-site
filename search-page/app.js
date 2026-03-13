@@ -158,3 +158,21 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
+function showNoResults() {
+  const list = document.getElementById("searchResultsList");
+  if (list) {
+    list.innerHTML = '<p class="loading">No results found.</p>';
+  }
+  const paginationContainer = document.getElementById("paginationContainer");
+  if (paginationContainer) paginationContainer.innerHTML = '';
+}
+
+function showError(message) {
+  const list = document.getElementById("searchResultsList");
+  if (list) {
+    list.innerHTML = `<p class="loading">${escapeHtml(message)}</p>`;
+  }
+  const paginationContainer = document.getElementById("paginationContainer");
+  if (paginationContainer) paginationContainer.innerHTML = '';
+}
+

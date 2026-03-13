@@ -15,7 +15,10 @@ function getSupabaseRestUrl(searchQuery, tableName = 'drum_kits') {
   let url = `${base}/rest/v1/${tableName}?select=*&order=id.desc`;
   
   if (searchQuery) {
-    url += `&title=ilike.*${encodeURIComponent(searchQuery)}*`;
+    // Replace spaces and special characters with Supabase wildcard '*'
+    // This allows "d rich" to match "D.Rich", "d-rich", etc.
+    const flexSearch = searchQuery.trim().replace(/[\s\W_]+/g, '*');
+    url += `&title=ilike.*${encodeURIComponent(flexSearch)}*`;
   }
   
   return url;

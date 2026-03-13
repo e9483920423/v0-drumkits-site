@@ -140,6 +140,19 @@ header {
 
 .search-btn:hover { background-color: var(--accent-red); color: #fff; }
 
+.search-results-title {
+  width: fit-content;
+  margin: 10px auto; 
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  text-align: center;
+}
+
 .main-nav {
   display: flex;
   gap: 1rem;
