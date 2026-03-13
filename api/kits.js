@@ -33,7 +33,6 @@ export default async function handler(req, res) {
 
   const searchQuery = req.query.q || req.query.search || "";
   
-  // Read cookie
   const cookies = (req.headers.cookie || '').split(';');
   let dbSource = 'drum_kits';
   for (const cookie of cookies) {

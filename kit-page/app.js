@@ -68,12 +68,8 @@ function createSmartItemImage(id, itemTitle, width = 800, height = 800) {
   img.width = width
   img.height = height
   img.src = "/errors/default.jpg"
-  resolveItemImageUrl(id).then((url) => { 
-    img.src = url;
-    if (itemTitle) {
-      img.alt = `${escapeHtml(itemTitle)} - Drum Kit`;
-    }
-  })
+  
+  resolveItemImageUrl(id).then((url) => { img.src = url })
   return img
 }
 

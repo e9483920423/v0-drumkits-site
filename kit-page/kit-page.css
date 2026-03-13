@@ -218,6 +218,21 @@ main {
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.action-buttons a,
+.action-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  flex: 1;
+  min-width: fit-content;
+  white-space: nowrap;
+  
+  padding: 0.8rem 1.5rem;
+  text-align: center;
 }
 
 .btn {

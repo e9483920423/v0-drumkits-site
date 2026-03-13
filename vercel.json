@@ -55,6 +55,10 @@
       "destination": "/api/:path*"
     },
     {
+      "source": "/shared/:path*",
+      "destination": "/shared/:path*"
+    },
+    {
       "source": "/:slug",
       "destination": "/api/kit-page?slug=:slug"
     },

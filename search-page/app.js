@@ -36,8 +36,16 @@ function resolveItemImageUrl(id) {
 
 const ITEMS_PER_PAGE = 6
 let searchResults = []
-let currentPage = 1
 let searchQuery = ""
+
+const pagination = new Pagination({
+  containerId: "paginationContainer",
+  itemsPerPage: ITEMS_PER_PAGE,
+  paginationLimit: 6,
+  onPageChange: (page) => {
+    renderCurrentPage(page);
+  }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   performSearch()
@@ -68,13 +76,12 @@ async function performSearch() {
     const { data } = await response.json()
 
     searchResults = data || []
-    currentPage = 1
-    
     if (searchResults.length === 0) {
       showNoResults()
     } else {
-      renderCurrentPage()
-      renderPagination()
+      pagination.setTotalItems(searchResults.length);
+      renderCurrentPage(pagination.currentPage);
+      pagination.render();
     }
   } catch (error) {
     console.error("Error performing search:", error)
@@ -82,8 +89,8 @@ async function performSearch() {
   }
 }
 
-function renderCurrentPage() {
-  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE
+function renderCurrentPage(page = 1) {
+  const startIdx = (page - 1) * ITEMS_PER_PAGE
   const endIdx = startIdx + ITEMS_PER_PAGE
   const pageItems = searchResults.slice(startIdx, endIdx)
   renderResults(pageItems)
@@ -134,69 +141,6 @@ function renderResults(results) {
     card.appendChild(content)
     list.appendChild(card)
   })
-}
-
-function escapeHtml(text) {
-  if (text == null) return ''
-  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }
-  return String(text).replace(/[&<>"']/g, (m) => map[m])
-}
-
-function renderPagination() {
-  const totalPages = Math.ceil(searchResults.length / ITEMS_PER_PAGE)
-  const container = document.getElementById("paginationContainer")
-
-  if (totalPages <= 1) {
-    container.innerHTML = ""
-    return
-  }
-
-  container.innerHTML = ""
-
-  const prevBtn = document.createElement("button")
-  prevBtn.className = "pagination-btn"
-  prevBtn.textContent = "← Previous"
-  prevBtn.disabled = currentPage === 1
-  prevBtn.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--
-      renderCurrentPage()
-      renderPagination()
-      saveScrollPosition();
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
-  }
-  container.appendChild(prevBtn)
-
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement("button")
-    btn.className = "pagination-btn"
-    if (i === currentPage) btn.classList.add("active")
-    btn.textContent = i
-    btn.onclick = () => {
-      currentPage = i
-      renderCurrentPage()
-      renderPagination()
-      saveScrollPosition();
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
-    container.appendChild(btn)
-  }
-
-  const nextBtn = document.createElement("button")
-  nextBtn.className = "pagination-btn"
-  nextBtn.textContent = "Next →"
-  nextBtn.disabled = currentPage === totalPages
-  nextBtn.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++
-      renderCurrentPage()
-      renderPagination()
-      saveScrollPosition();
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
-  }
-  container.appendChild(nextBtn)
 }
 
 function escapeHtml(text) {
