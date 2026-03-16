@@ -276,9 +276,9 @@ function renderRandomItems(currentSlug) {
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     imageLink.appendChild(img)
 
-    const title = document.createElement("h3")
-    title.className = "random-item-title"
-    title.textContent = item.title
+    const title = document.createElement("h2");
+    title.className = "random-item-title";
+    title.textContent = item.title;
     
     const detailsLink = document.createElement("a")
     detailsLink.href = `/${escapeHtml(item.slug)}`
@@ -426,9 +426,9 @@ async function refreshRandomItemsSmoothly(currentSlug) {
 
     imageLink.appendChild(img);
 
-    const title = document.createElement("h3");
-    title.className = "random-item-title";
-    title.textContent = item.title;
+    const title = document.createElement("h2")
+    title.className = "random-item-title"
+    title.textContent = item.title
     
     const detailsLink = document.createElement("a");
     detailsLink.href = `/${escapeHtml(item.slug)}`;
