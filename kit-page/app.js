@@ -198,7 +198,13 @@ function displayItem() {
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a class="btn download-btn" role="button" tabindex="0">Download Now</a>
+      <a class="btn download-btn" role="button" tabindex="0">
+        <div class="mouse-glow"></div>
+        <div class="dot-ring"></div>
+        <div class="dot-core"></div>
+        <div class="shimmer"></div>
+        <span class="btn-label">Download Now</span>
+      </a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -209,28 +215,23 @@ function displayItem() {
   
   const dlBtn = detailsDiv.querySelector('.download-btn');
   if (dlBtn) {
-    const glow = document.createElement('div');
-    glow.className = 'mouse-glow';
-    dlBtn.appendChild(glow);
-
-    dlBtn.addEventListener('mousemove', e => {
-      const rect = dlBtn.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      dlBtn.style.setProperty('--mouse-x', `${x}px`);
-      dlBtn.style.setProperty('--mouse-y', `${y}px`);
-
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = (y - centerY) / 7;
-      const rotateY = (centerX - x) / 7;
-
-      dlBtn.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+    dlBtn.addEventListener('mouseenter', () => {
+      dlBtn.classList.remove('is-leaving');
+      dlBtn.classList.add('is-hovered');
     });
 
     dlBtn.addEventListener('mouseleave', () => {
-      dlBtn.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
+      dlBtn.classList.remove('is-hovered');
+      dlBtn.classList.add('is-leaving');
+      setTimeout(() => dlBtn.classList.remove('is-leaving'), 350);
+    });
+
+    dlBtn.addEventListener('mousemove', e => {
+      const rect = dlBtn.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1) + '%';
+      const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1) + '%';
+      dlBtn.style.setProperty('--mouse-x', x);
+      dlBtn.style.setProperty('--mouse-y', y);
     });
   }
 
