@@ -362,6 +362,7 @@ main {
   pointer-events: none;
   z-index: 2; 
   transition: opacity 0.4s ease;
+  transform: translate3d(0, 0, 0);
 }
 
 /* ── Crisp white dot ── */
