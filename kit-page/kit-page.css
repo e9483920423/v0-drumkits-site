@@ -296,11 +296,16 @@ main {
   50%      { opacity: 1; }
 }
 
+/* Sweeping red gradient across dark base — mirrors the Tailwind animated-gradient-button pattern */
+@keyframes btn-gradient-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 500% 50%; }
+}
+
 /* ── Base ── */
 .download-btn {
   position: relative;
   overflow: hidden;
-  background-color: var(--primary-color);
   padding: 1rem 2rem;
   font-weight: 700;
   border-radius: var(--border-radius);
@@ -314,17 +319,19 @@ main {
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
 
-  /* Resting shadow + subtle inner highlight */
+  /* Dark base with the red color sweeping through — same technique as .animated-gradient-button */
+  background: linear-gradient( -45deg, #1a1a1a 0%, #1a1a1a 30%, #8a0721 42%, #ff0043 50%, #8a0721 58%, #1a1a1a 70%, #1a1a1a 100% ) 0% 50% / 500% 100%;
+  animation: btn-gradient-sweep 8s linear infinite;
+
+  /* Resting shadow — red tint kept subtle since it pulses in/out */
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 4px 16px rgba(255, 0, 67, 0.22),
-    0 1px 4px rgba(0, 0, 0, 0.4);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 18px rgba(0, 0, 0, 0.55),
+    0 1px 4px rgba(0, 0, 0, 0.5);
 
   transition:
-    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background-color 0.35s ease,
-    box-shadow 0.35s ease;
+    transform 1.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
 }
 
 /* ── Cursor-tracking radial glow ── */
@@ -414,9 +421,11 @@ main {
   animation: btn-border-glow 3s ease-in-out infinite;
 }
 
-/* ── Hover state ── */
+/* ── Hover state — freeze the sweep, snap to solid red ── */
 .download-btn:hover {
-  background-color: #ff1a4e;
+  animation-play-state: paused;
+  background: #ff0043;
+  background-size: 100% 100%;
   box-shadow:
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -627,6 +636,313 @@ main {
   outline: 2px solid var(--primary-color);
   outline-offset: 3px;
   box-shadow: 0 0 0 3px rgba(255, 0, 67, 0.1);
+}
+
+.random-item-card:focus-within {
+  border-color: var(--primary-color);
+}
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+.p-0 { padding: 0; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --card-lift: 3px;
+  }
+  
+  .item-hero {
+    gap: var(--spacing-lg);
+  }
+  
+  .random-items-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .item-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .item-hero {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-xs);
+  }
+
+  .item-title {
+    font-size: 1.75rem;
+  }
+  
+  .video-preview {
+    margin: var(--spacing-sm) 0;
+    border-radius: calc(var(--border-radius) - 2px);
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .random-items-section {
+    padding: 0 var(--spacing-xs);
+  }
+  
+  .random-items-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .random-item-card:hover {
+    transform: none !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+  }
+
+  .random-item-card:hover .random-item-image-wrap img {
+    transform: none !important;
+  }
+
+  .random-item-content {
+    margin: 6px;
+    padding: 0.6rem 0.65rem;
+  }
+
+  /* Disable heavy animations on touch/mobile */
+  .download-btn .dot-core,
+  .download-btn .dot-ring,
+  .download-btn .shimmer {
+    display: none;
+  }
+
+  .download-btn:hover {
+    transform: scale(1.02);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-xl: 2rem;
+    --spacing-lg: 1.5rem;
+    --spacing-md: 1rem;
+  }
+  
+  .random-items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .item-title {
+    font-size: 1.5rem;
+  }
+  
+  .item-description {
+    font-size: 1rem;
+  }
+
+  .video-preview {
+    margin: var(--spacing-xs) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-btn,
+  .download-btn .dot-core,
+  .download-btn .dot-ring,
+  .download-btn .shimmer,
+  .download-btn::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.back-btn {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.back-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.random-items-section {
+  padding: 0 var(--spacing-sm);
+}
+
+.random-items-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-lg);
+}
+
+.random-items-heading {
+  font-size: 1.6rem;
+  margin: 0 0 var(--spacing-lg);
+  text-align: center;
+  position: relative;
+}
+
+.random-items-heading::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--primary-color);
+  margin: var(--spacing-xs) auto 0;
+  border-radius: 2px;
+}
+
+.random-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.random-item-card {
+  position: relative;
+  background-color: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.2rem;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: transform 0.7s cubic-bezier(0.4, 2.2, 0, 1), border-color 0.7s, box-shadow 0.7s;
+  will-change: transform, box-shadow;
+}
+
+.random-item-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(255, 0, 67, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+.random-item-image-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+.random-item-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s ease-out;
+  will-change: transform;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimizespeed;
+}
+
+.random-item-card:hover .random-item-image-wrap img {
+  transform: none;
+}
+
+.random-item-content {
+  position: relative;
+  z-index: 2;
+  padding: 0.55rem 0.65rem;
+  margin: 8px;
+  border-radius: 0.75rem;
+  background: #04000145;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid #ff004324;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  gap: 0.4rem;
+}
+
+.random-item-title {
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.random-item-link {
+  display: block;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.4rem 0.75rem;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 1.0rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.random-item-link:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+  transform: none;
+}
+
+@keyframes pulse {
+  0% { opacity: 5.6; }
+  50% { opacity: 8.8; }
+  100% { opacity: 3.6; }
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.item-image-wrapper.loading {
+  background: var(--bg-tertiary);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading 10.5s infinite;
+}
+
+.btn:focus-visible,
+.random-item-link:focus-visible,
+.item-image-wrapper:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(255, 0, 67, 4.1);
 }
 
 .random-item-card:focus-within {
