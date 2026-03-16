@@ -55,14 +55,14 @@ body::before {
 }
 
 header {
-  background-color: rgba(10, 10, 10, 0.2);
+  background-color: rgba(4, 4, 4, 0.3);
   border-bottom: 1px solid rgba(34, 34, 34, 0.5);
   padding: 0.7rem 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .header-container {
