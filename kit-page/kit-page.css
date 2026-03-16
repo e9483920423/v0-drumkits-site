@@ -226,11 +226,9 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  
   flex: 1;
   min-width: fit-content;
   white-space: nowrap;
-  
   padding: 0.8rem 1.5rem;
   text-align: center;
 }
@@ -263,6 +261,42 @@ main {
   box-shadow: 0 1px 3px var(--shadow-color);
 }
 
+/* ============================================================
+   DOWNLOAD BUTTON — Polished
+   ============================================================ */
+
+/* ── Keyframes ── */
+@keyframes btn-dot-enter {
+  0%   { opacity: 0; transform: scale(0.15); }
+  45%  { opacity: 1; transform: scale(1.2); }
+  68%  { opacity: 1; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes btn-dot-exit {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.2); }
+}
+
+@keyframes btn-ring-pulse {
+  0%   { transform: scale(0.5); opacity: 0.55; }
+  65%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes btn-shimmer {
+  0%   { transform: translateX(-115%) skewX(-20deg); opacity: 0; }
+  12%  { opacity: 0.55; }
+  55%  { opacity: 0.28; }
+  100% { transform: translateX(210%) skewX(-20deg); opacity: 0; }
+}
+
+@keyframes btn-border-glow {
+  0%,100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+/* ── Base ── */
 .download-btn {
   position: relative;
   overflow: hidden;
@@ -271,69 +305,162 @@ main {
   font-weight: 700;
   border-radius: var(--border-radius);
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2); 
+  border: none;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.88rem;
   z-index: 1;
-  text-transform: uppercase; 
-  letter-spacing: 0.05em;
-  transition: transform 0.2s ease-out, background-color 0.4s, box-shadow 0.4s; 
   transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+
+  /* Resting shadow + subtle inner highlight */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 16px rgba(255, 0, 67, 0.22),
+    0 1px 4px rgba(0, 0, 0, 0.4);
+
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
+/* ── Cursor-tracking radial glow ── */
 .download-btn .mouse-glow {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle 80px at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-    rgba(255, 178, 198, 0.44), 
+    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 215, 225, 0.36),
     transparent 100%
   );
-  
   opacity: 0;
   border-radius: inherit;
-  transition: opacity 0.3s;
-  pointer-events: none; 
+  pointer-events: none;
   z-index: 2;
+  transition: opacity 0.4s ease;
 }
 
-.download-btn:hover {
-  background-color: #ff1a57;
-  background-image: linear-gradient(
-    115deg, 
-    transparent 0%, 
-    rgba(138, 7, 42, 0.7) 50%,
-    transparent 100%
+/* ── Crisp white dot ── */
+.download-btn .dot-core {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  /* layered glow: tight crisp ring + wider soft halo */
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.35),
+    0 0 10px 3px rgba(255, 255, 255, 0.55),
+    0 0 22px 6px rgba(255, 160, 180, 0.3);
+  left: calc(var(--mouse-x, 50%) - 3.5px);
+  top:  calc(var(--mouse-y, 50%) - 3.5px);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.15);
+  will-change: left, top, opacity, transform;
+  /* silky cursor tracking */
+  transition: left 0.055s linear, top 0.055s linear;
+}
+
+/* ── Expanding pulse ring ── */
+.download-btn .dot-ring {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* center on cursor: offset by half its own size */
+  left: calc(var(--mouse-x, 50%) - 16px);
+  top:  calc(var(--mouse-y, 50%) - 16px);
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transform: scale(0.5);
+  will-change: left, top, opacity, transform;
+  transition: left 0.055s linear, top 0.055s linear;
+}
+
+/* ── One-shot shimmer sweep ── */
+.download-btn .shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    92deg,
+    transparent    0%,
+    rgba(255, 255, 255, 0.18) 45%,
+    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.18) 55%,
+    transparent    100%
   );
-  
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4), 
-    0 8px 25px rgba(255, 0, 67, 0.3);
-  transform: scale(1.02);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transform: translateX(-115%) skewX(-20deg);
+}
+
+/* ── Animated border glow (always-on subtle pulse at rest) ── */
+.download-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 100, 130, 0.3);
+  pointer-events: none;
+  z-index: 6;
+  animation: btn-border-glow 3s ease-in-out infinite;
+}
+
+/* ── Hover state ── */
+.download-btn:hover {
+  background-color: #ff1a4e;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 0 3px rgba(255, 0, 67, 0.12),
+    0 8px 28px rgba(255, 0, 67, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: perspective(900px) scale(1.048) translateY(-1.5px);
 }
 
 .download-btn:hover .mouse-glow {
   opacity: 1;
 }
 
-.download-btn:hover {
-  background-color: #ff1a57; 
-  background-image: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y), 
-    transparent 10%, 
-    rgba(138, 7, 42, 0.5) 100%
-  );
-  
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4), 
-    0 10px 30px rgba(255, 0, 67, 0.1);
-  transform: perspective(1000px) scale(1.02);
+/* ── Active / press ── */
+.download-btn:active {
+  transform: perspective(900px) scale(0.972) translateY(1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 3px 10px rgba(255, 0, 67, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
 }
 
-.download-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* ── JS class: is-hovered ── */
+.download-btn.is-hovered .dot-core {
+  animation: btn-dot-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+.download-btn.is-hovered .dot-ring {
+  animation: btn-ring-pulse 0.85s ease-out forwards;
+}
+.download-btn.is-hovered .shimmer {
+  animation: btn-shimmer 0.58s ease-out 0.04s forwards;
+}
+
+/* ── JS class: is-leaving ── */
+.download-btn.is-leaving .dot-core {
+  animation: btn-dot-exit 0.28s ease-in forwards;
+}
+
+/* ============================================================
+   END DOWNLOAD BUTTON
+   ============================================================ */
 
 .back-btn {
   background-color: var(--bg-primary);
@@ -594,6 +721,17 @@ main {
     margin: 6px;
     padding: 0.6rem 0.65rem;
   }
+
+  /* Disable heavy animations on touch/mobile */
+  .download-btn .dot-core,
+  .download-btn .dot-ring,
+  .download-btn .shimmer {
+    display: none;
+  }
+
+  .download-btn:hover {
+    transform: scale(1.02);
+  }
 }
 
 @media (max-width: 480px) {
@@ -617,5 +755,16 @@ main {
 
   .video-preview {
     margin: var(--spacing-xs) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-btn,
+  .download-btn .dot-core,
+  .download-btn .dot-ring,
+  .download-btn .shimmer,
+  .download-btn::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
