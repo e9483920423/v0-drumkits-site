@@ -371,8 +371,9 @@ footer {
 }
 
 .pagination-btn.active {
-  background-color: var(--accent-red);
-  border-color: var(--accent-red);
+  background-color: #d10037;
+  border-color: #d10037;
+  color: #fff;
 }
 
 .pagination-btn:hover:not(:disabled) {
