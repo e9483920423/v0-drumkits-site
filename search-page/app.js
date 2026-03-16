@@ -134,7 +134,7 @@ function renderResults(results) {
     const content = document.createElement("div")
     content.className = "item-content"
     content.innerHTML = `
-      <h3 class="item-title">${escapeHtml(item.title)}</h3>
+      <h2 class="item-title">${escapeHtml(item.title)}</h2>
       ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
       <a href="/${item.slug}" class="download-btn">View Details</a>
     `
