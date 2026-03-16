@@ -626,15 +626,16 @@ main {
 
 .skeleton {
   background: linear-gradient(
-  -45deg,
-  #1a1a1a  0%,
-  #1a1a1a 44%,
-  rgba(138, 7, 33, 0.45) 47%,
-  rgba(255, 0, 67, 0.5)  50%,
-  rgba(138, 7, 33, 0.45) 53%,
-  #1a1a1a 56%,
-  #1a1a1a 100%
-) 0% 50% / 500% 100%;
+    -45deg,
+    #1a1a1a 0%,
+    #1a1a1a 48%, /* Pushed much closer to 50% */
+    rgba(138, 7, 33, 0.45) 49%, 
+    rgba(255, 0, 67, 0.5) 50%, /* Peak highlight stays centered */
+    rgba(138, 7, 33, 0.45) 51%,
+    #1a1a1a 52%, /* Pulled much closer to 50% */
+    #1a1a1a 100%
+  );
+  /* The size dictates how wide the gradient stretches across the element */
   background-size: 200% 100%;
   animation: loading 3.5s infinite;
 }
