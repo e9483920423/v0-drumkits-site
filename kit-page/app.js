@@ -416,6 +416,8 @@ async function refreshRandomItemsSmoothly(currentSlug) {
     imageLink.href = `/${escapeHtml(item.slug)}`;
     imageLink.className = "random-item-image-wrap";
     
+    imageLink.setAttribute("aria-label", `View ${escapeHtml(item.title)}`);
+    
     const img = createSmartItemImage(item.id, item.title, 320, 320);
     
     const imgLoad = new Promise((resolve) => {
@@ -426,14 +428,15 @@ async function refreshRandomItemsSmoothly(currentSlug) {
 
     imageLink.appendChild(img);
 
-    const title = document.createElement("h2")
-    title.className = "random-item-title"
-    title.textContent = item.title
+    const title = document.createElement("h2");
+    title.className = "random-item-title";
+    title.textContent = item.title;
     
     const detailsLink = document.createElement("a");
     detailsLink.href = `/${escapeHtml(item.slug)}`;
     detailsLink.className = "random-item-link";
     detailsLink.textContent = "View Details";
+    detailsLink.setAttribute("aria-label", `View details for ${escapeHtml(item.title)}`);
 
     const contentOverlay = document.createElement("div");
     contentOverlay.className = "random-item-content";
@@ -514,8 +517,6 @@ function updateMetaTags(title, description, url, imageUrl) {
   canonical.href = url;
 }
 
-// Called after the async image probe resolves with a better URL than the
-// initial fallback — updates only the image tags without re-running everything.
 function updateMetaImage(imageUrl) {
   const imageMap = {
     'meta[property="og:image"]':  imageUrl,
