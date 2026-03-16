@@ -625,9 +625,18 @@ main {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+  background: linear-gradient(
+  -45deg,
+  #1a1a1a  0%,
+  #1a1a1a 44%,
+  rgba(138, 7, 33, 0.45) 47%,
+  rgba(255, 0, 67, 0.5)  50%,
+  rgba(138, 7, 33, 0.45) 53%,
+  #1a1a1a 56%,
+  #1a1a1a 100%
+) 0% 50% / 500% 100%;
   background-size: 200% 100%;
-  animation: loading 1.5s infinite;
+  animation: loading 3.5s infinite;
 }
 
 .btn:focus-visible,
