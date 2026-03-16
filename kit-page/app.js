@@ -128,9 +128,17 @@ function displayItem() {
   const pageTitle = escapeHtml(item.title);
   const pageDescription = item.description ? escapeHtml(item.description) : `Download the ${pageTitle} high-quality drum kit.`;
   const pageUrl = `${window.location.origin}/${encodeURIComponent(item.slug)}`;
-  
+
+  // Set meta tags immediately with a fallback image so bots/crawlers that
+  // execute JS still get valid tags without waiting for the image probe.
+  const fallbackImageUrl = `${PUB_URL}/${item.id}.jpg`;
+  updateMetaTags(pageTitle, pageDescription, pageUrl, fallbackImageUrl);
+
+  // Once the real image URL is confirmed, update the image tags only.
   resolveItemImageUrl(item.id).then(imageUrl => {
-    updateMetaTags(pageTitle, pageDescription, pageUrl, imageUrl);
+    if (imageUrl !== fallbackImageUrl) {
+      updateMetaImage(imageUrl);
+    }
   });
   
   injectSchemaMarkup(item);
@@ -461,18 +469,30 @@ setInterval(() => {
 function updateMetaTags(title, description, url, imageUrl) {
   const cleanDescription = description.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;');
   document.title = `${title} | drumkits.site`;
-  
+
   const tags = [
-    { selector: 'meta[name="description"]', attr: 'name', value: 'description', content: cleanDescription },
-    { selector: 'meta[property="og:title"]', attr: 'property', value: 'og:title', content: title },
-    { selector: 'meta[property="og:description"]', attr: 'property', value: 'og:description', content: cleanDescription },
-    { selector: 'meta[property="og:image"]', attr: 'property', value: 'og:image', content: imageUrl },
-    { selector: 'meta[property="og:url"]', attr: 'property', value: 'og:url', content: url },
-    { selector: 'meta[property="og:site_name"]', attr: 'property', value: 'og:site_name', content: 'drumkits.site' },
-    { selector: 'meta[name="twitter:card"]', attr: 'name', value: 'twitter:card', content: 'summary_large_image' },
-    { selector: 'meta[name="twitter:title"]', attr: 'name', value: 'twitter:title', content: title },
+    // ── SEO ──────────────────────────────────────────────────────────────
+    { selector: 'meta[name="description"]',         attr: 'name',     value: 'description',         content: cleanDescription },
+
+    // ── Open Graph (Discord, Facebook, etc.) ─────────────────────────────
+    { selector: 'meta[property="og:type"]',         attr: 'property', value: 'og:type',         content: 'website' },
+    { selector: 'meta[property="og:site_name"]',    attr: 'property', value: 'og:site_name',    content: 'drumkits.site' },
+    { selector: 'meta[property="og:url"]',          attr: 'property', value: 'og:url',          content: url },
+    { selector: 'meta[property="og:title"]',        attr: 'property', value: 'og:title',        content: title },
+    { selector: 'meta[property="og:description"]',  attr: 'property', value: 'og:description',  content: cleanDescription },
+    { selector: 'meta[property="og:image"]',        attr: 'property', value: 'og:image',        content: imageUrl },
+    { selector: 'meta[property="og:image:width"]',  attr: 'property', value: 'og:image:width',  content: '800' },
+    { selector: 'meta[property="og:image:height"]', attr: 'property', value: 'og:image:height', content: '800' },
+    { selector: 'meta[property="og:image:alt"]',    attr: 'property', value: 'og:image:alt',    content: `${title} drum kit` },
+
+    // ── Discord accent colour ─────────────────────────────────────────────
+    { selector: 'meta[name="theme-color"]',         attr: 'name',     value: 'theme-color',     content: '#010101' },
+
+    // ── Twitter / X card ─────────────────────────────────────────────────
+    { selector: 'meta[name="twitter:card"]',        attr: 'name', value: 'twitter:card',        content: 'summary_large_image' },
+    { selector: 'meta[name="twitter:title"]',       attr: 'name', value: 'twitter:title',       content: title },
     { selector: 'meta[name="twitter:description"]', attr: 'name', value: 'twitter:description', content: cleanDescription },
-    { selector: 'meta[name="twitter:image"]', attr: 'name', value: 'twitter:image', content: imageUrl }
+    { selector: 'meta[name="twitter:image"]',       attr: 'name', value: 'twitter:image',       content: imageUrl },
   ];
 
   tags.forEach(tag => {
@@ -492,6 +512,19 @@ function updateMetaTags(title, description, url, imageUrl) {
     document.head.appendChild(canonical);
   }
   canonical.href = url;
+}
+
+// Called after the async image probe resolves with a better URL than the
+// initial fallback — updates only the image tags without re-running everything.
+function updateMetaImage(imageUrl) {
+  const imageMap = {
+    'meta[property="og:image"]':  imageUrl,
+    'meta[name="twitter:image"]': imageUrl,
+  };
+  for (const [selector, content] of Object.entries(imageMap)) {
+    const el = document.querySelector(selector);
+    if (el) el.content = content;
+  }
 }
 
 function injectSchemaMarkup(item) {
