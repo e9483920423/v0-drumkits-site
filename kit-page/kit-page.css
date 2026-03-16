@@ -302,12 +302,6 @@ main {
   100% { background-position: 500% 50%; }
 }
 
-/* Text sweep — white beam on dark text, perfectly in sync with background */
-@keyframes btn-text-sweep {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 500% 50%; }
-}
-
 /* ── Base ── */
 .download-btn {
   position: relative;
@@ -317,8 +311,7 @@ main {
   border-radius: var(--border-radius);
   cursor: pointer;
   border: none;
-  /* Text color is handled by the ::before gradient overlay */
-  color: transparent;
+  color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.88rem;
@@ -339,39 +332,6 @@ main {
 
   transition:
     transform 1.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
-}
-
-/* ── Text gradient sweep — white beam on dark letters ── */
-/* Uses a separate element so it can stack above the bg but below the mouse-glow layer */
-.download-btn .btn-label {
-  position: relative;
-  z-index: 7;
-  display: inline-block;
-  /* White→dark→white gradient sweeps in exact sync with the background */
-  background: linear-gradient(
-    -45deg,
-    #555  0%,
-    #555 44%,
-    #ccc 47%,
-    #fff 50%,
-    #ccc 53%,
-    #555 56%,
-    #555 100%
-  ) 0% 50% / 500% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: btn-text-sweep 8s linear infinite;
-  pointer-events: none;
-}
-
-/* On hover: freeze text sweep too, snap to solid white */
-.download-btn:hover .btn-label {
-  animation-play-state: paused;
-  background: #fff;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
 }
 
 /* ── Cursor-tracking radial glow ── */
