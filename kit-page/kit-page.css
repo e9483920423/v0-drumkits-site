@@ -320,8 +320,9 @@ main {
   will-change: transform, box-shadow;
 
   /* Dark base with the red color sweeping through — same technique as .animated-gradient-button */
-  background: linear-gradient( -45deg, #1a1a1a 0%, #1a1a1a 30%, #8a0721 42%, #ff0043 50%, #8a0721 58%, #1a1a1a 70%, #1a1a1a 100% ) 0% 50% / 500% 100%;
+  background: linear-gradient(-45deg, #0a0a0a 0%, #0a0a0a 30%, #6b0519 42%, #cc0036 54%, #6b0519 58%, #0a0a0a 70%, #0a0a0a 100%) 0% 50% / 500% 100%;
   animation: btn-gradient-sweep 8s linear infinite;
+  background-color: var(--bg-primary);
 
   /* Resting shadow — red tint kept subtle since it pulses in/out */
   box-shadow:
