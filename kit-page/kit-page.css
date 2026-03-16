@@ -340,9 +340,10 @@ main {
   inset: 0;
   background: radial-gradient(
     circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 215, 225, 0.36),
+    rgba(255, 215, 225, 0.12), /* Lowered from 0.36 for less opacity */
     transparent 100%
   );
+  filter: blur(10px); /* Blurs the edges of the glow tracking the mouse */
   opacity: 0;
   border-radius: inherit;
   pointer-events: none;
