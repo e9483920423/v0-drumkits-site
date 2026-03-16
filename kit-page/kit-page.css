@@ -302,6 +302,18 @@ main {
   100% { background-position: 500% 50%; }
 }
 
+/* Merged: dual slash sweep (fast) */
+@keyframes btn-slash-sweep {
+  0%   { background-position: 0% 50%, 50% 50%; }
+  100% { background-position: 100% 50%, 50% 50%; }
+}
+
+/* Merged: radial burst pulse (slow) */
+@keyframes btn-radial-pulse {
+  0%,100% { background-size: 600% 100%, 180% 180%; }
+  50%      { background-size: 600% 100%, 520% 520%; }
+}
+
 /* ── Base ── */
 .download-btn {
   position: relative;
@@ -319,10 +331,13 @@ main {
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
 
-  /* Dark base with the red color sweeping through — same technique as .animated-gradient-button */
-  background: linear-gradient(-45deg, #0a0a0a 0%, #0a0a0a 30%, #6b0519 42%, #cc0036 54%, #6b0519 58%, #0a0a0a 70%, #0a0a0a 100%) 0% 50% / 500% 100%;
-  animation: btn-gradient-sweep 8s linear infinite;
-  background-color: var(--bg-primary);
+  /* Merged: dual slash (fast sweep) layered over radial burst (slow pulse) via screen blend */
+  background:
+    linear-gradient(-45deg, #0a0a0a 0%, #0a0a0a 15%, #6b0519 24%, #cc0036 30%, #6b0519 36%, #0a0a0a 48%, #6b0519 60%, #cc0036 66%, #6b0519 72%, #0a0a0a 82%, #0a0a0a 100%), radial-gradient(ellipse at center, #cc003699 0%, #6b051988 16%, #0a0a0acc 45%, #0a0a0a 100%);
+  background-blend-mode: screen;
+  background-position: 0% 50%, 50% 50%;
+  background-size: 600% 100%, 200% 200%;
+  animation: btn-slash-sweep 4s linear infinite, btn-radial-pulse 9s ease-in-out infinite;
 
   /* Resting shadow — red tint kept subtle since it pulses in/out */
   box-shadow:
@@ -439,7 +454,7 @@ main {
 
 /* ── Hover state — freeze the sweep, snap to solid red ── */
 .download-btn:hover {
-  animation-play-state: paused;
+  animation: none;
   background: #ff0043;
   background-size: 100% 100%;
   box-shadow:
@@ -813,8 +828,6 @@ main {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
-
-.random-items-section {
   padding: 0 var(--spacing-sm);
 }
 
