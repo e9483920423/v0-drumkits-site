@@ -347,7 +347,6 @@ main {
 }
 
 .random-items-section {
-  /*! margin-top: var(--spacing-xl); */
   padding: 0 var(--spacing-sm);
 }
 
@@ -448,6 +447,7 @@ main {
   text-shadow: 0 0px 8px rgba(0, 0, 0, 0.34);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

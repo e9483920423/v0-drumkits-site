@@ -94,7 +94,7 @@ async function submitToDiscord(downloadLink, webhookUrl) {
         }
       ],
       footer: {
-        text: "Ready for manual review."
+        text: "Ready for review."
       }
     }]
   };
@@ -163,7 +163,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('API Error:', error);
     res.status(500).json({
-      error: 'Failed to submit.',
+      error: 'Failed to submit, contact admin.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

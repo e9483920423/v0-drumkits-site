@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   if (req.headers['x-internal-request'] !== 'true') {
-    return res.status(403).json({ error: "Direct access is not allowed, fuck you." });
+    return res.status(403).json({ error: "Fuck you." });
   }
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {

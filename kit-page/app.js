@@ -127,7 +127,12 @@ function displayItem() {
   
   const pageTitle = escapeHtml(item.title);
   const pageDescription = item.description ? escapeHtml(item.description) : `Download the ${pageTitle} high-quality drum kit.`;
-  updateMetaTags(pageTitle, pageDescription);
+  const pageUrl = `${window.location.origin}/${encodeURIComponent(item.slug)}`;
+  
+  resolveItemImageUrl(item.id).then(imageUrl => {
+    updateMetaTags(pageTitle, pageDescription, pageUrl, imageUrl);
+  });
+  
   injectSchemaMarkup(item);
 
   const { download, ...safeItem } = item
@@ -453,24 +458,40 @@ setInterval(() => {
   }
 }, 8000);
 
-function updateMetaTags(title, description) {
-  document.title = `${title} | drumkits4.me`;
+function updateMetaTags(title, description, url, imageUrl) {
+  const cleanDescription = description.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;');
+  document.title = `${title} | drumkits.site`;
   
-  let metaDescription = document.querySelector('meta[name="description"]');
-  if (!metaDescription) {
-    metaDescription = document.createElement('meta');
-    metaDescription.name = "description";
-    document.head.appendChild(metaDescription);
-  }
-  metaDescription.content = description;
+  const tags = [
+    { selector: 'meta[name="description"]', attr: 'name', value: 'description', content: cleanDescription },
+    { selector: 'meta[property="og:title"]', attr: 'property', value: 'og:title', content: title },
+    { selector: 'meta[property="og:description"]', attr: 'property', value: 'og:description', content: cleanDescription },
+    { selector: 'meta[property="og:image"]', attr: 'property', value: 'og:image', content: imageUrl },
+    { selector: 'meta[property="og:url"]', attr: 'property', value: 'og:url', content: url },
+    { selector: 'meta[property="og:site_name"]', attr: 'property', value: 'og:site_name', content: 'drumkits.site' },
+    { selector: 'meta[name="twitter:card"]', attr: 'name', value: 'twitter:card', content: 'summary_large_image' },
+    { selector: 'meta[name="twitter:title"]', attr: 'name', value: 'twitter:title', content: title },
+    { selector: 'meta[name="twitter:description"]', attr: 'name', value: 'twitter:description', content: cleanDescription },
+    { selector: 'meta[name="twitter:image"]', attr: 'name', value: 'twitter:image', content: imageUrl }
+  ];
 
-  let ogTitle = document.querySelector('meta[property="og:title"]');
-  if (!ogTitle) {
-    ogTitle = document.createElement('meta');
-    ogTitle.setAttribute('property', 'og:title');
-    document.head.appendChild(ogTitle);
+  tags.forEach(tag => {
+    let el = document.querySelector(tag.selector);
+    if (!el) {
+      el = document.createElement('meta');
+      el.setAttribute(tag.attr, tag.value);
+      document.head.appendChild(el);
+    }
+    el.content = tag.content;
+  });
+
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.appendChild(canonical);
   }
-  ogTitle.content = title;
+  canonical.href = url;
 }
 
 function injectSchemaMarkup(item) {
@@ -479,18 +500,18 @@ function injectSchemaMarkup(item) {
     existingSchema.remove();
   }
 
+  const cleanDescription = (item.description || `Download the ${item.title} drum kit.`)
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/"/g, '&quot;');
+
   const schema = {
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": item.title,
-    "description": item.description || `Download the ${item.title} drum kit.`,
+    "description": cleanDescription,
     "category": "Audio Files > Drum Kits",
-    "offers": {
-      "@type": "Offer",
-      "price": "0.00",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock"
-    }
+    "url": `${window.location.origin}/${encodeURIComponent(item.slug)}`,
+    "image": `${PUB_URL}/${item.id}.jpg`
   };
 
   const script = document.createElement('script');

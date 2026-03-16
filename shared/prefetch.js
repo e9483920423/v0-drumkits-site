@@ -1,10 +1,6 @@
 ;(function () {
   "use strict"
 
-  function getOverlay() {
-    return document.getElementById("pageTransitionOverlay")
-  }
-
   function prefersReducedMotion() {
     return !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
   }
@@ -17,9 +13,13 @@
   }
 
   function toCleanUrl(href) {
-    const url = new URL(href, window.location.href)
-    url.hash = ""
-    return url
+    try {
+      const url = new URL(href, window.location.href)
+      url.hash = ""
+      return url
+    } catch {
+      return null
+    }
   }
 
   function isHttpUrl(url) {
@@ -42,7 +42,9 @@
 
   function isSameDocumentIgnoringHash(aHref, bHref) {
     try {
-      return toCleanUrl(aHref).href === toCleanUrl(bHref).href
+      const a = toCleanUrl(aHref)
+      const b = toCleanUrl(bHref)
+      return a && b && a.href === b.href
     } catch {
       return false
     }
@@ -69,112 +71,40 @@
 
     if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
 
-    const cleanHref = toCleanUrl(anchor.href).href
-    prefetchUrl(cleanHref)
+    const clean = toCleanUrl(anchor.href)
+    if (clean) prefetchUrl(clean.href)
   }
 
+  function setupSpeculationRules() {
+    if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) return
+
+    const specScript = document.createElement('script')
+    specScript.type = 'speculationrules'
+    specScript.textContent = JSON.stringify({
+      prefetch: [
+        {
+          source: 'document',
+          where: {
+            and: [
+              { href_matches: '/*' },
+              { not: { href_matches: ['/logout', '/api/*', '/submit', '*/download'] } },
+              { not: { selector_matches: '.download-btn, .no-prerender' } }
+            ]
+          },
+          eagerness: 'moderate'
+        }
+      ]
+    })
+    document.head.appendChild(specScript)
+  }
+
+  // Initialize
   document.addEventListener("pointerover", onPointerOver, { capture: true, passive: true })
   document.addEventListener("touchstart", onPointerOver, { capture: true, passive: true })
 
-  const PENDING_KEY = "pt_overlay_pending"
-
-  function waitForTransition(overlay) {
-    if (prefersReducedMotion()) return Promise.resolve()
-
-    const fallbackMs = 300
-
-    return new Promise((resolve) => {
-      let done = false
-
-      function finish() {
-        if (done) return
-        done = true
-        overlay.removeEventListener("transitionend", onEnd)
-        clearTimeout(t)
-        resolve()
-      }
-
-      function onEnd(e) {
-        if (e.target === overlay) finish()
-      }
-
-      overlay.addEventListener("transitionend", onEnd)
-      const t = setTimeout(finish, fallbackMs)
-    })
-  }
-
-  function revealOnLoad() {
-    const overlay = getOverlay()
-    if (!overlay) return
-
-    const pending = sessionStorage.getItem(PENDING_KEY) === "1"
-    sessionStorage.removeItem(PENDING_KEY)
-
-    if (!pending) {
-      overlay.classList.remove("active")
-      return
-    }
-
-    if (prefersReducedMotion()) {
-      overlay.classList.remove("active")
-      return
-    }
-
-    overlay.classList.add("active")
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        overlay.classList.remove("active")
-      })
-    })
-  }
-
-  function onLinkClick(e) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-
-    const anchor = e.target.closest("a")
-    if (!anchor || !isInternalLink(anchor)) return
-
-    if (
-      anchor.classList.contains("download-btn") ||
-      anchor.classList.contains("random-item-link")
-    ) {
-      return
-    }
-
-    if (isSameDocumentIgnoringHash(anchor.href, window.location.href)) return
-
-    if (anchor.classList.contains("download-btn") && anchor.target === "_blank") return
-
-    const overlay = getOverlay()
-    if (!overlay) return 
-
-    sessionStorage.setItem(PENDING_KEY, "1")
-
-    if (prefersReducedMotion()) return
-
-    e.preventDefault()
-
-    const dest = toCleanUrl(anchor.href).href
-
-    overlay.classList.add("active")
-    waitForTransition(overlay).then(function () {
-      window.location.href = dest
-    })
-  }
-
-  document.addEventListener("click", onLinkClick, { capture: false })
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", revealOnLoad)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSpeculationRules)
   } else {
-    revealOnLoad()
+    setupSpeculationRules()
   }
-
-  window.addEventListener("pageshow", function (e) {
-    if (e.persisted) {
-      sessionStorage.removeItem(PENDING_KEY)
-      const overlay = getOverlay()
-      if (overlay) overlay.classList.remove("active")
-    }
-  })
 })()

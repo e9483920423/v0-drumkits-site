@@ -39,7 +39,6 @@ export default async function handler(req, res) {
     return res.redirect('/')
   }
 
-  // Read cookie
   const cookies = (req.headers.cookie || '').split(';');
   let dbSource = 'drum_kits';
   for (const cookie of cookies) {
@@ -75,38 +74,45 @@ export default async function handler(req, res) {
     ? kit.description.slice(0, 160)
     : `♫ Download ${title} here! ♫`
   const imageUrl = `https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev/${kit.id}.jpg`
-  const pageUrl = `https://drumkits4.me/${encodeURIComponent(kit.slug)}`
+  const pageUrl = `https://drumkits.site/${encodeURIComponent(kit.slug)}`
 
   const htmlPath = path.join(process.cwd(), 'kit-page', 'index.html')
-  let html = fs.readFileSync(htmlPath, 'utf8')
+  
+  if (!global._kitPageTemplate) {
+    try {
+      global._kitPageTemplate = fs.readFileSync(htmlPath, 'utf8')
+    } catch (e) {
+      console.error('Failed to read kit-page template:', e)
+      return res.redirect('/')
+    }
+  }
+  let html = global._kitPageTemplate
 
+  const cleanDescription = description.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;');
+  
   const metaTags = `
-    <title>${escapeHtml(title)} 𝄞 drumkits4.me</title>
+    <title>${escapeHtml(title)} 𝄞 drumkits.site</title>
     <link rel="canonical" href="${pageUrl}">
-    <meta name="description" content="${escapeHtml(description)}">
+    <meta name="description" content="${escapeHtml(cleanDescription)}">
     <meta property="og:title" content="${escapeHtml(title)}">
-    <meta property="og:description" content="${escapeHtml(description)}">
+    <meta property="og:description" content="${escapeHtml(cleanDescription)}">
     <meta property="og:image" content="${imageUrl}">
     <meta property="og:url" content="${pageUrl}">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="drumkits.site">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(title)}">
-    <meta name="twitter:description" content="${escapeHtml(description)}">
+    <meta name="twitter:description" content="${escapeHtml(cleanDescription)}">
+    <meta name="twitter:image" content="${imageUrl}">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org/",
       "@type": "Product",
       "name": "${escapeHtml(title)}",
-      "description": "${escapeHtml(description)}",
+      "description": "${escapeHtml(cleanDescription)}",
       "category": "Audio Files > Drum Kits",
       "url": "${pageUrl}",
-      "image": "${imageUrl}",
-      "offers": {
-        "@type": "Offer",
-        "price": "0.00",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
-      }
+      "image": "${imageUrl}"
     }
     </script>`
 
