@@ -292,15 +292,22 @@ main {
 }
 
 /* Rotating conic gradient for the edge border — spins around the perimeter */
-@keyframes btn-border-spin {
-  0%   { --border-angle: 0deg; }
-  100% { --border-angle: 360deg; }
+@keyframes btn-edge-spin {     
+  to { --border-angle: 360deg; }
 }
 
-/* Slow edge-color pulse at rest (opacity of the ::after border layer) */
-@keyframes btn-border-glow {
-  0%,100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+/* Fix — use background-size 200% and sweep 0→50% so it tiles cleanly */
+background-size: 200% 100%, 200% 200%;
+
+@keyframes btn-slash-sweep {
+  0%   { background-position: 0% 50%, 50% 50%; }
+  100% { background-position: 50% 50%, 50% 50%; }
+}
+
+@keyframes btn-sweep {
+  0%   { background-position: 0% 50%,  50% 50%; background-size: 200% 100%, 180% 180%; }
+  50%  { background-position: 25% 50%, 50% 50%; background-size: 200% 100%, 520% 520%; }
+  100% { background-position: 50% 50%, 50% 50%; background-size: 200% 100%, 180% 180%; }
 }
 
 /* Slash sweeps left→right */
@@ -349,6 +356,8 @@ main {
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
   isolation: isolate;
+  background-size: 200% 100%, 200% 200%;
+  animation: btn-sweep 8s ease-in-out infinite;
 
   /* Dual slash (fast) + radial burst (slow) — screen-blended */
   background:
@@ -523,9 +532,7 @@ main {
   background-blend-mode: screen;
   background-position: 50% 50%, 50% 50%;
   background-size: 200% 100%, 500% 500%;
-  animation:
-    btn-edge-spin 3s linear infinite,   /* border ring stays spinning, sped up */
-    btn-radial-pulse 4s ease-in-out infinite;  /* radial keeps pulsing */
+  animation: btn-edge-spin 3s linear infinite, btn-sweep 4s ease-in-out infinite;
   box-shadow:
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
