@@ -338,16 +338,29 @@ main {
 .download-btn .mouse-glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
+  
+  /* Background color removed completely */
+
+  /* Blurs the text sitting behind the cursor */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* Masks the blur so it only happens inside the tracking circle */
+  mask-image: radial-gradient(
     circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 215, 225, 0.12), /* Lowered from 0.36 for less opacity */
+    black,
     transparent 100%
   );
-  filter: blur(10px); /* Blurs the edges of the glow tracking the mouse */
+  -webkit-mask-image: radial-gradient(
+    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    black,
+    transparent 100%
+  );
+
   opacity: 0;
   border-radius: inherit;
   pointer-events: none;
-  z-index: 2;
+  z-index: 2; 
   transition: opacity 0.4s ease;
 }
 
