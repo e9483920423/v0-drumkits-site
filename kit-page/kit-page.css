@@ -628,16 +628,15 @@ main {
   background: linear-gradient(
     -45deg,
     #1a1a1a 0%,
-    #1a1a1a 48%, /* Pushed much closer to 50% */
-    rgba(138, 7, 33, 0.45) 49%, 
-    rgba(255, 0, 67, 0.5) 50%, /* Peak highlight stays centered */
-    rgba(138, 7, 33, 0.45) 51%,
-    #1a1a1a 52%, /* Pulled much closer to 50% */
+    #1a1a1a 48%,
+    rgba(138, 7, 33, 0.08) 49%,  /* Lowered from 0.45 */
+    rgba(255, 0, 67, 0.15) 50%,  /* Lowered from 0.5 */
+    rgba(138, 7, 33, 0.08) 51%,  /* Lowered from 0.45 */
+    #1a1a1a 52%,
     #1a1a1a 100%
   );
-  /* The size dictates how wide the gradient stretches across the element */
   background-size: 200% 100%;
-  animation: loading 3.5s infinite;
+  animation: loading 6.5s infinite;
 }
 
 .btn:focus-visible,
@@ -939,12 +938,6 @@ main {
 .item-image-wrapper.loading {
   background: var(--bg-tertiary);
   animation: pulse 3s ease-in-out infinite;
-}
-
-.skeleton {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
-  background-size: 200% 100%;
-  animation: loading 10.5s infinite;
 }
 
 .btn:focus-visible,
