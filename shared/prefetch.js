@@ -98,7 +98,6 @@
     document.head.appendChild(specScript)
   }
 
-  // Initialize
   document.addEventListener("pointerover", onPointerOver, { capture: true, passive: true })
   document.addEventListener("touchstart", onPointerOver, { capture: true, passive: true })
 
