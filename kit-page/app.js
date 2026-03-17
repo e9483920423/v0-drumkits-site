@@ -50,7 +50,6 @@ async function loadDownloads() {
     const timestamp = Date.now().toString();
     const signature = await DrumkitUtils.generateSignature(timestamp);
     
-    // 1. Fetch the specific item
     const itemResponse = await fetch(`/api/kits?slug=${encodeURIComponent(urlSlug)}`, {
       headers: { 
         'X-Request-Signature': signature,
@@ -68,7 +67,6 @@ async function loadDownloads() {
 
     const currentItem = itemData[0];
     
-    // 2. Fetch some random-ish items for the bottom section
     const randomResponse = await fetch(`/api/kits?limit=30`, {
       headers: { 
         'X-Request-Signature': signature,
@@ -137,12 +135,9 @@ function displayItem(item) {
   const pageDescription = item.description ? escapeHtml(item.description) : `Download the ${pageTitle} high-quality drum kit.`;
   const pageUrl = `${window.location.origin}/${encodeURIComponent(item.slug)}`;
 
-  // Set meta tags immediately with a fallback image so bots/crawlers that
-  // execute JS still get valid tags without waiting for the image probe.
   const fallbackImageUrl = `${PUB_URL}/${item.id}.jpg`;
   updateMetaTags(pageTitle, pageDescription, pageUrl, fallbackImageUrl);
 
-  // Once the real image URL is confirmed, update the image tags only.
   resolveItemImageUrl(item.id).then(imageUrl => {
     if (imageUrl !== fallbackImageUrl) {
       updateMetaImage(imageUrl);
