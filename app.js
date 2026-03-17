@@ -102,15 +102,13 @@ async function loadDownloads(page = 1) {
 
     allDownloads = data || [];
     
-    // We only clear the cache if data actually changed significantly or if we want fresh cards
-    // For now, let's keep it simple
     preloadedImageIds.clear();
     cardCache.clear();
     
     preloadPageImages(1);
     
     pagination.setTotalItems(total);
-    pagination.currentPage = page; // Sync current page
+    pagination.currentPage = page;
     
     renderDownloads(allDownloads);
     pagination.render();
