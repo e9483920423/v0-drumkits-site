@@ -43,7 +43,7 @@ const pagination = new Pagination({
   itemsPerPage: ITEMS_PER_PAGE,
   paginationLimit: 6,
   onPageChange: (page) => {
-    renderCurrentPage(page);
+    loadDownloads(page);
   }
 });
 
@@ -79,30 +79,49 @@ function setListLoading(isLoading) {
 
 
 
-async function loadDownloads() {
+async function loadDownloads(page = 1) {
   try {
-    const response = await fetch('/api/kits', {
-      headers: { 'X-Internal-Request': 'true' }
+    page = parseInt(page) || 1;
+    setListLoading(true);
+    const timestamp = Date.now().toString();
+    const signature = await DrumkitUtils.generateSignature(timestamp);
+    
+    const limit = ITEMS_PER_PAGE;
+    const offset = (page - 1) * limit;
+
+    const response = await fetch(`/api/kits?limit=${limit}&offset=${offset}`, {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      }
     });
+    
     if (!response.ok) throw new Error('Network response was not ok');
     
-    const { data } = await response.json();
+    const { data, total } = await response.json();
 
-    allDownloads = data || []
-    preloadedImageIds.clear()
-    cardCache.clear()
-    preloadPageImages(1)
-    preloadPageImages(2)
-    preloadPageImages(3)
-    pagination.setTotalItems(allDownloads.length);
-    renderCurrentPage(pagination.currentPage);
+    allDownloads = data || [];
+    
+    // We only clear the cache if data actually changed significantly or if we want fresh cards
+    // For now, let's keep it simple
+    preloadedImageIds.clear();
+    cardCache.clear();
+    
+    preloadPageImages(1);
+    
+    pagination.setTotalItems(total);
+    pagination.currentPage = page; // Sync current page
+    
+    renderDownloads(allDownloads);
     pagination.render();
   } catch (error) {
-    console.error("Error loading downloads:", error)
-    const list = document.getElementById("downloadsList")
+    console.error("Error loading downloads:", error);
+    const list = document.getElementById("downloadsList");
     if (list) {
-      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>'
+      list.innerHTML = '<p class="loading">Failed to load downloads. Please refresh the page.</p>';
     }
+  } finally {
+    setListLoading(false);
   }
 }
 

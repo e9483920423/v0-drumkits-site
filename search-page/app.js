@@ -43,7 +43,7 @@ const pagination = new Pagination({
   itemsPerPage: ITEMS_PER_PAGE,
   paginationLimit: 6,
   onPageChange: (page) => {
-    renderCurrentPage(page);
+    performSearch(page);
   }
 });
 
@@ -56,7 +56,8 @@ function getSearchQueryFromUrl() {
   return params.get("q") || ""
 }
 
-async function performSearch() {
+async function performSearch(page = 1) {
+  page = parseInt(page) || 1;
   searchQuery = getSearchQueryFromUrl()
   
   if (!searchQuery) {
@@ -66,23 +67,32 @@ async function performSearch() {
 
   const queryTitle = document.getElementById("searchQueryTitle")
   if (queryTitle) {
-    queryTitle.textContent = `Search Results for "${escapeHtml(searchQuery)}"`
+    queryTitle.textContent = `Search Results for "${DrumkitUtils.escapeHtml(searchQuery)}"`
   }
 
   try {
-    const response = await fetch(`/api/kits?search=${encodeURIComponent(searchQuery)}`, {
-      headers: { 'X-Internal-Request': 'true' }
+    const timestamp = Date.now().toString();
+    const signature = await DrumkitUtils.generateSignature(timestamp);
+    const limit = ITEMS_PER_PAGE;
+    const offset = (page - 1) * limit;
+
+    const response = await fetch(`/api/kits?search=${encodeURIComponent(searchQuery)}&limit=${limit}&offset=${offset}`, {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      }
     })
     if (!response.ok) throw new Error('Network response was not ok')
     
-    const { data } = await response.json()
+    const { data, total } = await response.json()
 
     searchResults = data || []
-    if (searchResults.length === 0) {
+    if (searchResults.length === 0 && page === 1) {
       showNoResults()
     } else {
-      pagination.setTotalItems(searchResults.length);
-      renderCurrentPage(pagination.currentPage);
+      pagination.setTotalItems(total);
+      pagination.currentPage = page;
+      renderCurrentPage(1); // Render the 1st (and only) chunk we fetched
       pagination.render();
     }
   } catch (error) {
@@ -91,11 +101,8 @@ async function performSearch() {
   }
 }
 
-function renderCurrentPage(page = 1) {
-  const startIdx = (page - 1) * ITEMS_PER_PAGE
-  const endIdx = startIdx + ITEMS_PER_PAGE
-  const pageItems = searchResults.slice(startIdx, endIdx)
-  renderResults(pageItems)
+function renderCurrentPage() {
+  renderResults(searchResults)
 }
 
 function renderResults(results) {

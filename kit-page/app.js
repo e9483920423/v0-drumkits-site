@@ -39,26 +39,50 @@ function resolveItemImageUrl(id) {
 }
 
 async function loadDownloads() {
+  const urlSlug = getSlugFromUrl() || new URLSearchParams(window.location.search).get("slug");
+  
+  if (!urlSlug) {
+    showError("No item specified. Please return to the home page.");
+    return;
+  }
+
   try {
-    const response = await fetch('/api/kits', {
-      headers: { 'X-Internal-Request': 'true' }
+    const timestamp = Date.now().toString();
+    const signature = await DrumkitUtils.generateSignature(timestamp);
+    
+    // 1. Fetch the specific item
+    const itemResponse = await fetch(`/api/kits?slug=${encodeURIComponent(urlSlug)}`, {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      }
     });
     
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    if (!itemResponse.ok) throw new Error('Failed to fetch item');
+    const { data: itemData } = await itemResponse.json();
+    
+    if (!itemData || itemData.length === 0) {
+      window.location.href = window.location.origin;
+      return;
     }
 
-    const { data } = await response.json();
-
-    allDownloads = data || []
-    if (allDownloads.length > 0) {
-      displayItem()
-    } else {
-      showError("No items available. Please try again later.")
-    }
+    const currentItem = itemData[0];
+    
+    // 2. Fetch some random-ish items for the bottom section
+    const randomResponse = await fetch(`/api/kits?limit=30`, {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      }
+    });
+    const { data: randomData } = await randomResponse.json();
+    
+    allDownloads = randomData || [];
+    
+    displayItem(currentItem);
   } catch (error) {
-    console.error("Error loading downloads:", error)
-    showError("Failed to load item data. Please try again.")
+    console.error("Error loading downloads:", error);
+    showError("Failed to load item data. Please try again.");
   }
 }
 
@@ -103,23 +127,7 @@ function getYouTubeEmbedUrl(url) {
     : null;
 }
 
-function displayItem() {
-  let slug = getSlugFromUrl()
-  if (!slug) {
-    const params = new URLSearchParams(window.location.search)
-    slug = params.get("slug")
-  }
-
-  if (!slug) {
-    showError("No item specified. Please return to the home page.")
-    return
-  }
-
-  const newUrl = `${window.location.origin}/${encodeURIComponent(slug)}`
-  window.history.replaceState({}, "", newUrl)
-
-  const item = allDownloads.find((d) => d.slug === slug)
-
+function displayItem(item) {
   if (!item) {
      window.location.href = window.location.origin
      return

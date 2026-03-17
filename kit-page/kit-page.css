@@ -296,41 +296,95 @@ main {
   to { --border-angle: 360deg; }
 }
 
-/* Fix — use background-size 200% and sweep 0→50% so it tiles cleanly */
-background-size: 200% 100%, 200% 200%;
-
-@keyframes btn-slash-sweep {
-  0%   { background-position: 0% 50%, 50% 50%; }
-  100% { background-position: 50% 50%, 50% 50%; }
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-@keyframes btn-sweep {
-  0%   { background-position: 0% 50%,  50% 50%; background-size: 200% 100%, 180% 180%; }
-  50%  { background-position: 25% 50%, 50% 50%; background-size: 200% 100%, 520% 520%; }
-  100% { background-position: 50% 50%, 50% 50%; background-size: 200% 100%, 180% 180%; }
+/* ── Base ── */
+.download-btn {
+  position: relative;
+  overflow: visible; /* Allow ::before to bleed outside */
+  padding: 1rem 2rem;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  border: none;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.88rem;
+  z-index: 1;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  isolation: isolate;
+  background-size: 200% 100%, 200% 200%;
+  animation: btn-sweep 8s ease-in-out infinite;
+
+  /* Dual slash (fast) + radial burst (slow) — screen-blended */
+  background:
+  linear-gradient(-45deg,
+    #cc0036 0%,  #6b0519 12%,
+    #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
+    #6b0519 85%, #cc0036 100%),
+  radial-gradient(ellipse at center,
+    #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%);
+  background-blend-mode: screen;
+  background-position: 0% 50%, 50% 50%;
+  background-size: 600% 100%, 200% 200%;
+  animation: btn-slash-sweep 4s linear infinite, btn-radial-pulse 9s ease-in-out infinite;
+
+  /* Clip the button face content — ::before lives outside this */
+  clip-path: inset(0 round var(--border-radius));
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 18px rgba(0, 0, 0, 0.55),
+    0 1px 4px rgba(0, 0, 0, 0.5);
+
+  transition:
+    transform 1.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.45s ease,
+    clip-path 0.45s ease;
 }
 
-/* Slash sweeps left→right */
-@keyframes btn-slash-sweep {
-  0%   { background-position: 0% 50%, 50% 50%; }
-  100% { background-position: 100% 50%, 50% 50%; }
-}
-
-/* Radial breathes in/out — out of phase with slash so they drift */
-@keyframes btn-radial-pulse {
-  0%,100% { background-size: 600% 100%, 180% 180%; }
-  50%      { background-size: 600% 100%, 520% 520%; }
-}
-
-/* Hover: gradient bleeds into the solid red instead of hard-cutting */
-@keyframes btn-hover-blend {
-  0%   { background-position: 0% 50%, 50% 50%; background-size: 600% 100%, 250% 250%; }
-  100% { background-position: 50% 50%, 50% 50%; background-size: 200% 100%, 600% 600%; }
-}
-
-/* ::before edge-ring: rotates the conic around the button perimeter */
-@keyframes btn-edge-spin {
-  to { --border-angle: 360deg; }
+/* ── ::before — spinning conic border ring that hugs the edges ──
+   Sits behind the button face, larger by 2px on all sides.
+   The conic gradient rotates so the hot red streak chases the perimeter.
+   clip-path on .download-btn reveals only the 2px outer ring. */
+.download-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--border-radius) + 2px);
+  background: conic-gradient(
+    from var(--border-angle),
+    #0a0a0a        0deg,
+    #0a0a0a        60deg,
+    #6b0519        100deg,
+    #cc0036        130deg,
+    #ff0043        150deg,
+    #cc0036        170deg,
+    #6b0519        210deg,
+    #0a0a0a        260deg,
+    #0a0a0a        360deg
+  );
+  z-index: -1;
+  animation: btn-edge-spin 6s linear infinite;
+  opacity: 0.9;
+  /* Mask: keep only the border ring, hide the center */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 2px;
+  pointer-events: none;
 }
 
 @property --border-angle {
@@ -416,6 +470,9 @@ background-size: 200% 100%, 200% 200%;
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
   padding: 2px;
   pointer-events: none;

@@ -86,8 +86,14 @@ async function fetchKitsFromLocalJsonFallback() {
 
 async function fetchKitsFromApi() {
   try {
-    const response = await fetch("/api/kits", {
-      headers: { Accept: "application/json" },
+    const timestamp = Date.now().toString();
+    const signature = await DrumkitUtils.generateSignature(timestamp);
+    
+    const response = await fetch("/api/kits?limit=100", {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      },
     });
 
     if (!response.ok) {
