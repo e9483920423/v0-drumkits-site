@@ -473,8 +473,21 @@ setInterval(() => {
 }, 8000);
 
 function updateMetaTags(title, description, url, imageUrl) {
+  const fullTitle = `${title} - Premium Drum Kits Download | drumkits.site`;
+  document.title = fullTitle;
+  
+  const metaUpdates = {
+    'og:title': title,
+    'og:description': ' ',
+    'og:url': url,
+    'og:image': 'https://drumkits.site/errors/apple-touch-icon.png',
+    'twitter:title': title,
+    'twitter:description': ' ',
+    'twitter:image': 'https://drumkits.site/errors/apple-touch-icon.png',
+    'description': description
+  };
+
   const cleanDescription = description.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;');
-  document.title = `${title} | drumkits.site`;
 
   const tags = [
     // ── SEO ──────────────────────────────────────────────────────────────

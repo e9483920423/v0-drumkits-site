@@ -91,14 +91,14 @@ export default async function handler(req, res) {
   const cleanDescription = description.replace(/<[^>]*>?/gm, '').replace(/"/g, '&quot;');
   
   const metaTags = `
-    <title>${escapeHtml(title)} 𝄞 drumkits.site</title>
+    <title>${escapeHtml(title)} - Premium Drum Kits Download | drumkits.site</title>
     <link rel="canonical" href="${pageUrl}">
-    <meta name="description" content="${escapeHtml(cleanDescription)}">
+    <meta name="description" content="${escapeHtml(description)}">
     
     <!-- Social Media Embeds (Discord, Twitter, etc.) -->
     <meta property="og:title" content="${escapeHtml(title)}">
     <meta property="og:description" content=" ">
-    <meta property="og:image" content="https://drumkits.site/errors/5f4f96a1224bed852e6e733b23280e7a.png">
+    <meta property="og:image" content="https://drumkits.site/errors/apple-touch-icon.png">
     <meta property="og:url" content="${pageUrl}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="drumkits.site">
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(title)}">
     <meta name="twitter:description" content=" ">
-    <meta name="twitter:image" content="https://drumkits.site/errors/5f4f96a1224bed852e6e733b23280e7a.png">
+    <meta name="twitter:image" content="https://drumkits.site/errors/apple-touch-icon.png">
 
     <script type="application/ld+json">
     {

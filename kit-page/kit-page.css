@@ -61,12 +61,12 @@ main {
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
-  align-items: center; 
+  align-items: center;
   padding: 0 var(--spacing-sm);
   margin: 2.4rem 0;
 }
 
-.item-hero > * {
+.item-hero>* {
   min-width: 0;
 }
 
@@ -93,8 +93,8 @@ main {
   box-shadow: var(--card-shadow-hover);
 }
 
-.item-image-wrapper img { 
-  max-width: 100%; 
+.item-image-wrapper img {
+  max-width: 100%;
   display: block;
   width: 100%;
   height: 100%;
@@ -267,33 +267,81 @@ main {
 
 /* ── Keyframes ── */
 @keyframes btn-dot-enter {
-  0%   { opacity: 0; transform: scale(0.15); }
-  45%  { opacity: 1; transform: scale(1.2); }
-  68%  { opacity: 1; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.15);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  68% {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes btn-dot-exit {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.2); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
 }
 
 @keyframes btn-ring-pulse {
-  0%   { transform: scale(0.5); opacity: 0.55; }
-  65%  { transform: scale(2.6); opacity: 0; }
-  100% { transform: scale(2.6); opacity: 0; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0.55;
+  }
+
+  65% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 @keyframes btn-shimmer {
-  0%   { transform: translateX(-115%) skewX(-20deg); opacity: 0; }
-  12%  { opacity: 0.55; }
-  55%  { opacity: 0.28; }
-  100% { transform: translateX(210%) skewX(-20deg); opacity: 0; }
+  0% {
+    transform: translateX(-115%) skewX(-20deg);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 0.55;
+  }
+
+  55% {
+    opacity: 0.28;
+  }
+
+  100% {
+    transform: translateX(210%) skewX(-20deg);
+    opacity: 0;
+  }
 }
 
 /* Rotating conic gradient for the edge border — spins around the perimeter */
-@keyframes btn-edge-spin {     
-  to { --border-angle: 360deg; }
+@keyframes btn-edge-spin {
+  to {
+    --border-angle: 360deg;
+  }
 }
 
 @property --border-angle {
@@ -305,7 +353,8 @@ main {
 /* ── Base ── */
 .download-btn {
   position: relative;
-  overflow: visible; /* Allow ::before to bleed outside */
+  overflow: visible;
+  /* Allow ::before to bleed outside */
   padding: 1rem 2rem;
   font-weight: 700;
   border-radius: var(--border-radius);
@@ -324,12 +373,12 @@ main {
 
   /* Dual slash (fast) + radial burst (slow) — screen-blended */
   background:
-  linear-gradient(-45deg,
-    #cc0036 0%,  #6b0519 12%,
-    #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
-    #6b0519 85%, #cc0036 100%),
-  radial-gradient(ellipse at center,
-    #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%);
+    linear-gradient(-45deg,
+      #cc0036 0%, #6b0519 12%,
+      #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
+      #6b0519 85%, #cc0036 100%),
+    radial-gradient(ellipse at center,
+      #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%);
   background-blend-mode: screen;
   background-position: 0% 50%, 50% 50%;
   background-size: 600% 100%, 200% 200%;
@@ -359,18 +408,16 @@ main {
   position: absolute;
   inset: -2px;
   border-radius: calc(var(--border-radius) + 2px);
-  background: conic-gradient(
-    from var(--border-angle),
-    #0a0a0a        0deg,
-    #0a0a0a        60deg,
-    #6b0519        100deg,
-    #cc0036        130deg,
-    #ff0043        150deg,
-    #cc0036        170deg,
-    #6b0519        210deg,
-    #0a0a0a        260deg,
-    #0a0a0a        360deg
-  );
+  background: conic-gradient(from var(--border-angle),
+      #0a0a0a 0deg,
+      #0a0a0a 60deg,
+      #6b0519 100deg,
+      #cc0036 130deg,
+      #ff0043 150deg,
+      #cc0036 170deg,
+      #6b0519 210deg,
+      #0a0a0a 260deg,
+      #0a0a0a 360deg);
   z-index: -1;
   animation: btn-edge-spin 6s linear infinite;
   opacity: 0.9;
@@ -396,7 +443,8 @@ main {
 /* ── Base ── */
 .download-btn {
   position: relative;
-  overflow: visible; /* Allow ::before to bleed outside */
+  overflow: visible;
+  /* Allow ::before to bleed outside */
   padding: 1rem 2rem;
   font-weight: 700;
   border-radius: var(--border-radius);
@@ -415,12 +463,12 @@ main {
 
   /* Dual slash (fast) + radial burst (slow) — screen-blended */
   background:
-  linear-gradient(-45deg,
-    #cc0036 0%,  #6b0519 12%,
-    #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
-    #6b0519 85%, #cc0036 100%),
-  radial-gradient(ellipse at center,
-    #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%);
+    linear-gradient(-45deg,
+      #cc0036 0%, #6b0519 12%,
+      #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
+      #6b0519 85%, #cc0036 100%),
+    radial-gradient(ellipse at center,
+      #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%);
   background-blend-mode: screen;
   background-position: 0% 50%, 50% 50%;
   background-size: 600% 100%, 200% 200%;
@@ -450,18 +498,16 @@ main {
   position: absolute;
   inset: -2px;
   border-radius: calc(var(--border-radius) + 2px);
-  background: conic-gradient(
-    from var(--border-angle),
-    #0a0a0a        0deg,
-    #0a0a0a        60deg,
-    #6b0519        100deg,
-    #cc0036        130deg,
-    #ff0043        150deg,
-    #cc0036        170deg,
-    #6b0519        210deg,
-    #0a0a0a        260deg,
-    #0a0a0a        360deg
-  );
+  background: conic-gradient(from var(--border-angle),
+      #0a0a0a 0deg,
+      #0a0a0a 60deg,
+      #6b0519 100deg,
+      #cc0036 130deg,
+      #ff0043 150deg,
+      #cc0036 170deg,
+      #6b0519 210deg,
+      #0a0a0a 260deg,
+      #0a0a0a 360deg);
   z-index: -1;
   animation: btn-edge-spin 6s linear infinite;
   opacity: 0.9;
@@ -501,16 +547,12 @@ main {
   inset: 0;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  mask-image: radial-gradient(
-    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black,
-    transparent 100%
-  );
-  -webkit-mask-image: radial-gradient(
-    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black,
-    transparent 100%
-  );
+  mask-image: radial-gradient(circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      black,
+      transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      black,
+      transparent 100%);
   opacity: 0;
   border-radius: inherit;
   pointer-events: none;
@@ -531,7 +573,7 @@ main {
     0 0 10px 3px rgba(255, 255, 255, 0.55),
     0 0 22px 6px rgba(255, 160, 180, 0.3);
   left: calc(var(--mouse-x, 50%) - 3.5px);
-  top:  calc(var(--mouse-y, 50%) - 3.5px);
+  top: calc(var(--mouse-y, 50%) - 3.5px);
   pointer-events: none;
   z-index: 6;
   opacity: 0;
@@ -548,7 +590,7 @@ main {
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.5);
   left: calc(var(--mouse-x, 50%) - 16px);
-  top:  calc(var(--mouse-y, 50%) - 16px);
+  top: calc(var(--mouse-y, 50%) - 16px);
   pointer-events: none;
   z-index: 5;
   opacity: 0;
@@ -561,14 +603,12 @@ main {
 .download-btn .shimmer {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    92deg,
-    transparent              0%,
-    rgba(255, 255, 255, 0.15) 45%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.15) 55%,
-    transparent              100%
-  );
+  background: linear-gradient(92deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.15) 45%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.15) 55%,
+      transparent 100%);
   pointer-events: none;
   z-index: 4;
   opacity: 0;
@@ -580,12 +620,12 @@ main {
   /* Keep the gradient layers but collapse the slash toward center + blow up radial
      so the button reads as "full red" without a jarring cut */
   background:
-  linear-gradient(-45deg,
-    #ff0043 0%,  #e8003d 15%,
-    #8a0721 30%, #3a0010 50%,
-    #8a0721 70%, #e8003d 85%, #ff0043 100%),
-  radial-gradient(ellipse at center,
-    #0a0a0a 0%, #6b051966 35%, #cc0036cc 70%, #ff004388 100%);
+    linear-gradient(-45deg,
+      #ff0043 0%, #e8003d 15%,
+      #8a0721 30%, #3a0010 50%,
+      #8a0721 70%, #e8003d 85%, #ff0043 100%),
+    radial-gradient(ellipse at center,
+      #0a0a0a 0%, #6b051966 35%, #cc0036cc 70%, #ff004388 100%);
   background-blend-mode: screen;
   background-position: 50% 50%, 50% 50%;
   background-size: 200% 100%, 500% 500%;
@@ -602,19 +642,17 @@ main {
 /* Border ring: brighter + faster on hover (handled by animation speed above) */
 .download-btn:hover::before {
   opacity: 1;
-  background: conic-gradient(
-    from var(--border-angle),
-    #0a0a0a        0deg,
-    #6b0519        40deg,
-    #cc0036        80deg,
-    #ff0043        110deg,
-    #ff6680        130deg,
-    #ff0043        150deg,
-    #cc0036        190deg,
-    #6b0519        240deg,
-    #0a0a0a        300deg,
-    #0a0a0a        360deg
-  );
+  background: conic-gradient(from var(--border-angle),
+      #0a0a0a 0deg,
+      #6b0519 40deg,
+      #cc0036 80deg,
+      #ff0043 110deg,
+      #ff6680 130deg,
+      #ff0043 150deg,
+      #cc0036 190deg,
+      #6b0519 240deg,
+      #0a0a0a 300deg,
+      #0a0a0a 360deg);
   padding: 2px;
 }
 
@@ -647,9 +685,11 @@ main {
 .download-btn.is-hovered .dot-core {
   animation: btn-dot-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
 .download-btn.is-hovered .dot-ring {
   animation: btn-ring-pulse 0.85s ease-out forwards;
 }
+
 .download-btn.is-hovered .shimmer {
   animation: btn-shimmer 0.58s ease-out 0.04s forwards;
 }
@@ -801,14 +841,27 @@ main {
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 0.8; }
-  100% { opacity: 0.6; }
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .item-image-wrapper.loading {
@@ -817,16 +870,17 @@ main {
 }
 
 .skeleton {
-  background: linear-gradient(
-    -45deg,
-    #1a1a1a 0%,
-    #1a1a1a 48%,
-    rgba(138, 7, 33, 0.08) 49%,  /* Lowered from 0.45 */
-    rgba(255, 0, 67, 0.15) 50%,  /* Lowered from 0.5 */
-    rgba(138, 7, 33, 0.08) 51%,  /* Lowered from 0.45 */
-    #1a1a1a 52%,
-    #1a1a1a 100%
-  );
+  background: linear-gradient(-45deg,
+      #1a1a1a 0%,
+      #1a1a1a 48%,
+      rgba(138, 7, 33, 0.08) 49%,
+      /* Lowered from 0.45 */
+      rgba(255, 0, 67, 0.15) 50%,
+      /* Lowered from 0.5 */
+      rgba(138, 7, 33, 0.08) 51%,
+      /* Lowered from 0.45 */
+      #1a1a1a 52%,
+      #1a1a1a 100%);
   background-size: 200% 100%;
   animation: loading 6.5s infinite;
 }
@@ -843,13 +897,29 @@ main {
   border-color: var(--primary-color);
 }
 
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+  text-align: center;
+}
 
-.mt-0 { margin-top: 0; }
-.mb-0 { margin-bottom: 0; }
-.p-0 { padding: 0; }
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.p-0 {
+  padding: 0;
+}
 
 .sr-only {
   position: absolute;
@@ -867,11 +937,11 @@ main {
   :root {
     --card-lift: 3px;
   }
-  
+
   .item-hero {
     gap: var(--spacing-lg);
   }
-  
+
   .random-items-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
@@ -893,7 +963,7 @@ main {
   .item-title {
     font-size: 1.75rem;
   }
-  
+
   .video-preview {
     margin: var(--spacing-sm) 0;
     border-radius: calc(var(--border-radius) - 2px);
@@ -911,7 +981,7 @@ main {
   .random-items-section {
     padding: 0 var(--spacing-xs);
   }
-  
+
   .random-items-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--spacing-sm);
@@ -950,15 +1020,15 @@ main {
     --spacing-lg: 1.5rem;
     --spacing-md: 1rem;
   }
-  
+
   .random-items-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .item-title {
     font-size: 1.5rem;
   }
-  
+
   .item-description {
     font-size: 1rem;
   }
@@ -969,6 +1039,7 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .download-btn,
   .download-btn::before,
   .download-btn::after,
@@ -989,8 +1060,6 @@ main {
 .back-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
-}
-  padding: 0 var(--spacing-sm);
 }
 
 .random-items-inner {
@@ -1116,14 +1185,27 @@ main {
 }
 
 @keyframes pulse {
-  0% { opacity: 5.6; }
-  50% { opacity: 8.8; }
-  100% { opacity: 3.6; }
+  0% {
+    opacity: 5.6;
+  }
+
+  50% {
+    opacity: 8.8;
+  }
+
+  100% {
+    opacity: 3.6;
+  }
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .item-image-wrapper.loading {
@@ -1143,13 +1225,29 @@ main {
   border-color: var(--primary-color);
 }
 
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+  text-align: center;
+}
 
-.mt-0 { margin-top: 0; }
-.mb-0 { margin-bottom: 0; }
-.p-0 { padding: 0; }
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.p-0 {
+  padding: 0;
+}
 
 .sr-only {
   position: absolute;
@@ -1167,11 +1265,11 @@ main {
   :root {
     --card-lift: 3px;
   }
-  
+
   .item-hero {
     gap: var(--spacing-lg);
   }
-  
+
   .random-items-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
@@ -1193,7 +1291,7 @@ main {
   .item-title {
     font-size: 1.75rem;
   }
-  
+
   .video-preview {
     margin: var(--spacing-sm) 0;
     border-radius: calc(var(--border-radius) - 2px);
@@ -1211,7 +1309,7 @@ main {
   .random-items-section {
     padding: 0 var(--spacing-xs);
   }
-  
+
   .random-items-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--spacing-sm);
@@ -1250,15 +1348,15 @@ main {
     --spacing-lg: 1.5rem;
     --spacing-md: 1rem;
   }
-  
+
   .random-items-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .item-title {
     font-size: 1.5rem;
   }
-  
+
   .item-description {
     font-size: 1rem;
   }
@@ -1269,6 +1367,7 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .download-btn,
   .download-btn::before,
   .download-btn::after,
