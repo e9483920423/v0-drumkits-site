@@ -2,22 +2,29 @@
 
   // ─── Config ───────────────────────────────────────────────────────────────
   const STORAGE_KEY      = 'donationPopupDismissed';
-  const COOLDOWN_DAYS    = 1;          // re-show after this many days
+  const VISIT_KEY        = 'donationPopupVisitCount';
+  const SHOW_EVERY       = 3;          // show once every N page loads (3 or 4)
   const EXIT_THRESHOLD_Y = 10;         // px from top to trigger exit intent
   const SCROLL_THRESHOLD = 40;         // % of page scrolled before fallback timer fires
-  const FALLBACK_DELAY   = 45_000;     // ms — show after 45 s if exit intent never fired
+  const FALLBACK_DELAY   = 30_000;     // ms — show after 30 s if exit intent never fired
   // ──────────────────────────────────────────────────────────────────────────
 
-  // Check cooldown: dismissed within COOLDOWN_DAYS? bail out.
-  function isDismissedRecently() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const ts = parseInt(raw, 10);
-    if (isNaN(ts)) return false;
-    return Date.now() - ts < COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+  // Increment visit counter and check if we should show this load
+  function shouldShowThisLoad() {
+    const count = parseInt(localStorage.getItem(VISIT_KEY) || '0', 10);
+    const next  = count + 1;
+    localStorage.setItem(VISIT_KEY, String(next));
+
+    // Show on load 1, then every SHOW_EVERY loads after that
+    return next === 1 || next % SHOW_EVERY === 0;
   }
 
-  if (isDismissedRecently()) return;
+  // If dismissed this session, still respect a short cooldown (same tab reloads)
+  function isDismissedThisSession() {
+    return sessionStorage.getItem(STORAGE_KEY) === 'true';
+  }
+
+  if (isDismissedThisSession() || !shouldShowThisLoad()) return;
 
   // ─── Inject styles ────────────────────────────────────────────────────────
   const style = document.createElement('style');
@@ -51,7 +58,6 @@
       pointer-events: auto;
     }
 
-    /* Inner layout mirrors .item-content card style */
     .dp-inner {
       padding: 1rem;
       display: flex;
@@ -59,7 +65,6 @@
       gap: 0.75rem;
     }
 
-    /* Header row: label + close button */
     .dp-header {
       display: flex;
       justify-content: space-between;
@@ -110,7 +115,6 @@
       margin: 0;
     }
 
-    /* Mirrors .download-btn */
     .dp-donate-btn {
       display: block;
       background-color: var(--bg-tertiary, #222);
@@ -134,7 +138,6 @@
       color: #fff;
     }
 
-    /* Cooldown hint */
     .dp-footer {
       font-size: 0.68rem;
       color: var(--text-muted, #666);
@@ -173,7 +176,6 @@
     if (shown) return;
     shown = true;
     popup.classList.add('visible');
-    // Clean up all triggers once shown
     document.removeEventListener('mouseout', onMouseLeave);
     window.removeEventListener('scroll', onScroll);
     clearTimeout(fallbackTimer);
@@ -181,8 +183,8 @@
 
   function hidePopup() {
     popup.classList.remove('visible');
-    // Record dismissal timestamp so cooldown kicks in
-    localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    // Only suppress for the rest of this session (tab), not across reloads
+    sessionStorage.setItem(STORAGE_KEY, 'true');
   }
 
   document.getElementById('close-donation-popup')
