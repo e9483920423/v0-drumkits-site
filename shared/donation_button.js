@@ -2,7 +2,7 @@
 
   // ─── Config ───────────────────────────────────────────────────────────────
   const STORAGE_KEY      = 'donationPopupDismissed';
-  const COOLDOWN_DAYS    = 3;          // re-show after this many days
+  const COOLDOWN_DAYS    = 1;          // re-show after this many days
   const EXIT_THRESHOLD_Y = 10;         // px from top to trigger exit intent
   const SCROLL_THRESHOLD = 40;         // % of page scrolled before fallback timer fires
   const FALLBACK_DELAY   = 45_000;     // ms — show after 45 s if exit intent never fired
