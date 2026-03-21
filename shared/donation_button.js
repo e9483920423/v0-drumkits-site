@@ -1,27 +1,48 @@
-(function() {
+(function () {
+
+  // ─── Config ───────────────────────────────────────────────────────────────
+  const STORAGE_KEY      = 'donationPopupDismissed';
+  const COOLDOWN_DAYS    = 3;          // re-show after this many days
+  const EXIT_THRESHOLD_Y = 10;         // px from top to trigger exit intent
+  const SCROLL_THRESHOLD = 40;         // % of page scrolled before fallback timer fires
+  const FALLBACK_DELAY   = 45_000;     // ms — show after 45 s if exit intent never fired
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Check cooldown: dismissed within COOLDOWN_DAYS? bail out.
+  function isDismissedRecently() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const ts = parseInt(raw, 10);
+    if (isNaN(ts)) return false;
+    return Date.now() - ts < COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+  }
+
+  if (isDismissedRecently()) return;
+
+  // ─── Inject styles ────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
     #exit-donation-popup {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 320px;
-      background: var(--bg-secondary, rgba(17,17,17,0.85));
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      width: 300px;
+      background-color: var(--bg-secondary, #111);
       border: 1px solid var(--border-color, #222);
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-top: 1px solid rgba(255,255,255,0.14);
       border-radius: var(--border-radius, 6px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       z-index: 10000;
       font-family: "JetBrains Mono", monospace;
       color: var(--text-primary, #fff);
-      
-      /* Hidden state */
-      transform: translateY(150%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+
+      transform: translateY(calc(100% + 30px));
       opacity: 0;
       pointer-events: none;
-      transition: transform 0.5s cubic-bezier(0.4, 2.2, 0, 1), opacity 0.4s ease;
+      transition: transform 0.5s cubic-bezier(0.4, 2.2, 0, 1),
+                  opacity  0.4s ease;
     }
 
     #exit-donation-popup.visible {
@@ -30,110 +51,161 @@
       pointer-events: auto;
     }
 
-    .popup-inner {
-      padding: 1.2rem;
-      padding-bottom: 2.2rem; /* Extra padding at the bottom to make room for the X */
-      position: relative;
+    /* Inner layout mirrors .item-content card style */
+    .dp-inner {
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.75rem;
     }
 
-    .donation-text {
-      font-size: 0.85rem;
-      line-height: 1.4;
+    /* Header row: label + close button */
+    .dp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dp-label {
+      font-size: 0.62rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #666);
+    }
+
+    #close-donation-popup {
+      background: transparent;
+      border: 1px solid var(--border-color, #222);
+      border-radius: var(--border-radius, 6px);
+      color: var(--text-secondary, #aaa);
+      font-size: 0.7rem;
+      font-family: "JetBrains Mono", monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      transition: var(--transition, all 0.3s ease);
+      line-height: 1;
+    }
+
+    #close-donation-popup:hover {
+      background-color: var(--accent-red, #ff0043);
+      border-color: var(--accent-red, #ff0043);
+      color: #fff;
+    }
+
+    .dp-divider {
+      border: 0;
+      height: 1px;
+      background: var(--border-color, #222);
       margin: 0;
     }
 
-    .donate-btn {
+    .dp-text {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-secondary, #aaa);
+      margin: 0;
+    }
+
+    /* Mirrors .download-btn */
+    .dp-donate-btn {
       display: block;
       background-color: var(--bg-tertiary, #222);
       color: var(--text-primary, #fff);
-      padding: 0.5rem;
+      padding: 0.45rem 0.75rem;
       text-decoration: none;
       border-radius: var(--border-radius, 6px);
       font-size: 0.85rem;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.06em;
       text-align: center;
       border: 1px solid var(--border-color, #222);
-      transition: all 0.3s ease;
+      font-family: "JetBrains Mono", monospace;
+      transition: var(--transition, all 0.3s ease);
     }
 
-    .donate-btn:hover {
+    .dp-donate-btn:hover {
       background-color: var(--accent-red, #ff0043);
       border-color: transparent;
       color: #fff;
     }
 
-    .popup-divider {
-      border: 0;
-      height: 1px;
-      background: var(--border-color, #222);
-      margin: 0.2rem 0;
-    }
-
-    .admin-message {
-      font-size: 0.75rem;
+    /* Cooldown hint */
+    .dp-footer {
+      font-size: 0.68rem;
       color: var(--text-muted, #666);
       font-style: italic;
       margin: 0;
-    }
-
-    /* X positioned at the bottom right */
-    #close-donation-popup {
-      position: absolute;
-      bottom: 8px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary, #aaa);
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: color 0.3s ease;
-      line-height: 1;
-      font-family: monospace;
-      padding: 4px;
-    }
-
-    #close-donation-popup:hover {
-      color: var(--accent-red, #ff0043);
+      text-align: right;
     }
   `;
   document.head.appendChild(style);
+
+  // ─── Build popup ──────────────────────────────────────────────────────────
   const popup = document.createElement('div');
   popup.id = 'exit-donation-popup';
+  popup.setAttribute('role', 'dialog');
+  popup.setAttribute('aria-label', 'Support us');
   popup.innerHTML = `
-    <div class="popup-inner">
-      <p class="donation-text">if you've gotten value out of the files we share, please consider donating here:</p>
-      <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" class="donate-btn">BUYMEACOFFEE</a>
-      <hr class="popup-divider">
-      <p class="admin-message">Fuck you kits4beats</p>
-      <button id="close-donation-popup" aria-label="Close">X</button>
+    <div class="dp-inner">
+      <div class="dp-header">
+        <span class="dp-label">Support the site</span>
+        <button id="close-donation-popup" aria-label="Close">[ X ]</button>
+      </div>
+      <hr class="dp-divider">
+      <p class="dp-text">If you've gotten value out of the files we share, consider buying us a coffee.</p>
+      <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" rel="noopener" class="dp-donate-btn">
+        ☕ Buy me a coffee
+      </a>
+      <p class="dp-footer">Won't show again for ${COOLDOWN_DAYS} days.</p>
     </div>
   `;
-  const closeBtn = document.getElementById('close-donation-popup');
-  
-  let pageLoads = parseInt(sessionStorage.getItem('donationPageLoads') || '0');
-  pageLoads++;
-  sessionStorage.setItem('donationPageLoads', pageLoads);
+  document.body.appendChild(popup);
 
-  // Set to 1 for EVERY reload, 3 for every third reload, etc.
-  const showEveryXReloads = 3; 
+  // ─── Show / hide helpers ──────────────────────────────────────────────────
+  let shown = false;
 
-  let canShowThisTime = (pageLoads % showEveryXReloads === 0);
+  function showPopup() {
+    if (shown) return;
+    shown = true;
+    popup.classList.add('visible');
+    // Clean up all triggers once shown
+    document.removeEventListener('mouseout', onMouseLeave);
+    window.removeEventListener('scroll', onScroll);
+    clearTimeout(fallbackTimer);
+  }
 
-  const onMouseLeave = (e) => {
-    if (e.clientY < 10 && canShowThisTime) {
-      popup.classList.add('visible');
-      canShowThisTime = false; 
-    }
-  };
-
-  closeBtn.addEventListener('click', () => {
+  function hidePopup() {
     popup.classList.remove('visible');
-  });
+    // Record dismissal timestamp so cooldown kicks in
+    localStorage.setItem(STORAGE_KEY, String(Date.now()));
+  }
 
+  document.getElementById('close-donation-popup')
+    .addEventListener('click', hidePopup);
+
+  // ─── Trigger 1: exit intent (desktop) ────────────────────────────────────
+  function onMouseLeave(e) {
+    if (e.clientY < EXIT_THRESHOLD_Y && e.relatedTarget === null) {
+      showPopup();
+    }
+  }
   document.addEventListener('mouseout', onMouseLeave);
+
+  // ─── Trigger 2: scroll depth fallback (mobile + non-exit users) ──────────
+  function onScroll() {
+    const scrolled = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    if (scrolled >= SCROLL_THRESHOLD) {
+      showPopup();
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // ─── Trigger 3: time-based fallback ──────────────────────────────────────
+  const fallbackTimer = setTimeout(showPopup, FALLBACK_DELAY);
 
 })();
