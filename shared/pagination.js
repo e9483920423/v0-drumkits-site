@@ -1,6 +1,7 @@
 class Pagination {
   constructor(options) {
     this.containerId = options.containerId || 'paginationContainer';
+    this.contentContainerId = options.contentContainerId;
     this.itemsPerPage = options.itemsPerPage || 6;
     this.paginationLimit = options.paginationLimit || 6;
     this.onPageChange = options.onPageChange;
@@ -56,9 +57,17 @@ class Pagination {
     };
   }
 
-  goToPage(page) {
+  async goToPage(page) {
     if (page < 1 || page > this.totalPages) return;
     
+    const contentContainer = this.contentContainerId ? document.getElementById(this.contentContainerId) : null;
+    
+    if (contentContainer) {
+      contentContainer.classList.remove('wipe-in');
+      contentContainer.classList.add('wipe-up');
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
     const containerEl = document.getElementById(this.containerId);
     const y = containerEl ? (containerEl.getBoundingClientRect().top + window.scrollY) : window.scrollY;
 
@@ -67,13 +76,24 @@ class Pagination {
     this.expandRight = false;
     
     if (this.onPageChange) {
-      this.onPageChange(this.currentPage);
+      const result = this.onPageChange(this.currentPage);
+      if (result instanceof Promise) {
+        await result;
+      }
     }
     this.render();
 
     requestAnimationFrame(() => {
       window.scrollTo({ top: y, behavior: "auto" });
     });
+
+    if (contentContainer) {
+      contentContainer.classList.remove('wipe-up');
+      contentContainer.classList.add('wipe-in');
+      setTimeout(() => {
+        contentContainer.classList.remove('wipe-in');
+      }, 300);
+    }
   }
 
   render() {
@@ -92,7 +112,11 @@ class Pagination {
       const btn = document.createElement("button");
       btn.className = "pagination-btn";
       if (active) btn.classList.add("active");
-      btn.textContent = label;
+      if (label.startsWith("<")) {
+        btn.innerHTML = label;
+      } else {
+        btn.textContent = label;
+      }
       btn.disabled = disabled;
       btn.onclick = () => this.goToPage(page);
       return btn;
@@ -116,7 +140,7 @@ class Pagination {
     };
 
     container.appendChild(
-      makeBtn("← Previous", this.currentPage - 1, { disabled: this.currentPage === 1 })
+      makeBtn('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M17 11H9.41l3.3-3.29a1 1 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33a1 1 0 0 0 0 .76a1 1 0 0 0 .21.33l5 5a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42L9.41 13H17a1 1 0 0 0 0-2"/></svg>', this.currentPage - 1, { disabled: this.currentPage === 1 })
     );
 
     const range = this.getPaginationRange();
@@ -162,7 +186,7 @@ class Pagination {
     }
     
     container.appendChild(
-      makeBtn("Next →", this.currentPage + 1, { disabled: this.currentPage === this.totalPages })
+      makeBtn('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M17.92 11.62a1 1 0 0 0-.21-.33l-5-5a1 1 0 0 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1 1 0 0 0 0 1.42a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .21-.33a1 1 0 0 0 0-.76"/></svg>', this.currentPage + 1, { disabled: this.currentPage === this.totalPages })
     );
   }
 }

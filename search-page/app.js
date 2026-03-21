@@ -40,11 +40,10 @@ let searchQuery = ""
 
 const pagination = new Pagination({
   containerId: "paginationContainer",
+  contentContainerId: "searchResultsList",
   itemsPerPage: ITEMS_PER_PAGE,
   paginationLimit: 6,
-  onPageChange: (page) => {
-    performSearch(page);
-  }
+  onPageChange: (page) => performSearch(page)
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -110,9 +109,10 @@ function renderResults(results) {
   if (!list) return
   list.innerHTML = ""
 
-  results.forEach((item) => {
+  results.forEach((item, index) => {
     const card = document.createElement("div")
-    card.className = "download-item"
+    card.className = "download-item reveal"
+    card.style.animationDelay = `${index * 0.05}s`
 
     const imageWrap = document.createElement("div")
     imageWrap.className = "item-image"
@@ -120,8 +120,15 @@ function renderResults(results) {
     const img = document.createElement("img")
     img.alt = ""
     img.loading = "lazy"
+    img.className = "smart-image"
     img.src = "/errors/default.jpg"
-    resolveItemImageUrl(item.id).then(url => img.src = url)
+    
+    resolveItemImageUrl(item.id).then(url => {
+      img.src = url
+      img.onload = () => img.classList.add("loaded")
+      if (img.complete) img.classList.add("loaded")
+    })
+    
     imageWrap.appendChild(img)
 
     card.addEventListener("mousemove", (e) => {

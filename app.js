@@ -40,11 +40,10 @@ let allDownloads = []
 
 const pagination = new Pagination({
   containerId: "paginationContainer",
+  contentContainerId: "downloadsList",
   itemsPerPage: ITEMS_PER_PAGE,
   paginationLimit: 6,
-  onPageChange: (page) => {
-    loadDownloads(page);
-  }
+  onPageChange: (page) => loadDownloads(page)
 });
 
 const preloadedImageIds = new Set()
@@ -155,15 +154,20 @@ function createSmartImage(id) {
   img.decoding = "async"
   img.width = 320
   img.height = 320
+  img.className = "smart-image"
   img.src = "/errors/default.jpg"
 
-  resolveItemImageUrl(id).then((url) => { img.src = url })
+  resolveItemImageUrl(id).then((url) => { 
+    img.src = url
+    img.onload = () => img.classList.add("loaded")
+    if (img.complete) img.classList.add("loaded")
+  })
   return img
 }
 
 function buildCard(item) {
   const card = document.createElement("div")
-  card.className = "download-item"
+  card.className = "download-item reveal" // Added reveal
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
   const img = createSmartImage(item.id)
@@ -215,11 +219,20 @@ function renderDownloads(downloads) {
 
   const frag = document.createDocumentFragment()
 
-  downloads.forEach((item) => {
-    if (!cardCache.has(item.id)) {
-      cardCache.set(item.id, buildCard(item))
+  downloads.forEach((item, index) => {
+    let card = cardCache.get(item.id);
+    if (!card) {
+      card = buildCard(item);
+      cardCache.set(item.id, card);
     }
-    frag.appendChild(cardCache.get(item.id))
+    
+    // Refresh reveal class and add stagger delay
+    card.classList.remove('reveal');
+    void card.offsetWidth; // Force reflow
+    card.classList.add('reveal');
+    card.style.animationDelay = `${index * 0.05}s`;
+    
+    frag.appendChild(card)
   })
 
   list.replaceChildren(frag)
