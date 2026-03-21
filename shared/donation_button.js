@@ -112,16 +112,21 @@
       <button id="close-donation-popup" aria-label="Close">X</button>
     </div>
   `;
-  document.body.appendChild(popup);
-
   const closeBtn = document.getElementById('close-donation-popup');
-  let hasShown = sessionStorage.getItem('donationPopupShown');
+  
+  let pageLoads = parseInt(sessionStorage.getItem('donationPageLoads') || '0');
+  pageLoads++;
+  sessionStorage.setItem('donationPageLoads', pageLoads);
+
+  // Set to 1 for EVERY reload, 3 for every third reload, etc.
+  const showEveryXReloads = 3; 
+
+  let canShowThisTime = (pageLoads % showEveryXReloads === 0);
 
   const onMouseLeave = (e) => {
-    if (e.clientY < 10 && !hasShown) {
+    if (e.clientY < 10 && canShowThisTime) {
       popup.classList.add('visible');
-      sessionStorage.setItem('donationPopupShown', 'true');
-      hasShown = true;
+      canShowThisTime = false; 
     }
   };
 
