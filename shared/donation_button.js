@@ -159,9 +159,9 @@
       <hr class="dp-divider">
       <p class="dp-text">If you've gotten value out of the files we share, consider buying us a coffee.</p>
       <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" rel="noopener" class="dp-donate-btn">
-        ☕ Buy me a coffee
+        Buy Me a Coffee
       </a>
-      <p class="dp-footer">Won't show again for ${COOLDOWN_DAYS} days.</p>
+      <p class="dp-footer">Fuck kits4beats</p>
     </div>
   `;
   document.body.appendChild(popup);
