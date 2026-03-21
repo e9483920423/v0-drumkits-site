@@ -106,9 +106,9 @@
   popup.innerHTML = `
     <div class="popup-inner">
       <p class="donation-text">if you've gotten value out of the files we share, please consider donating here:</p>
-      <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" class="donate-btn">☕ BUYMEACOFFEE</a>
+      <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" class="donate-btn">BUYMEACOFFEE</a>
       <hr class="popup-divider">
-      <p class="admin-message">(admin message)</p>
+      <p class="admin-message">Fuck you kits4beats</p>
       <button id="close-donation-popup" aria-label="Close">X</button>
     </div>
   `;
