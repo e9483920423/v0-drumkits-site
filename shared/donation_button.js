@@ -157,7 +157,7 @@
         <button id="close-donation-popup" aria-label="Close">[ X ]</button>
       </div>
       <hr class="dp-divider">
-      <p class="dp-text">If you've gotten value out of the files we share, consider buying us a coffee.</p>
+      <p class="dp-text">If you've gotten any value out of the stuff we share, please consider donating your support will help us keep the site running and the downloads active & at some point move away from ads.</p>
       <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" rel="noopener" class="dp-donate-btn">
         Buy Me a Coffee
       </a>
