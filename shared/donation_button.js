@@ -3,7 +3,7 @@
   // ─── Config ───────────────────────────────────────────────────────────────
   const STORAGE_KEY      = 'donationPopupDismissed';
   const VISIT_KEY        = 'donationPopupVisitCount';
-  const SHOW_EVERY       = 3;          // show once every N page loads (3 or 4)
+  const SHOW_EVERY       = 4;          // show once every N page loads (3 or 4)
   const EXIT_THRESHOLD_Y = 10;         // px from top to trigger exit intent
   const SCROLL_THRESHOLD = 40;         // % of page scrolled before fallback timer fires
   const FALLBACK_DELAY   = 30_000;     // ms — show after 30 s if exit intent never fired
@@ -160,7 +160,7 @@
         <button id="close-donation-popup" aria-label="Close">[ X ]</button>
       </div>
       <hr class="dp-divider">
-      <p class="dp-text">If you've gotten any value out of the stuff we share, please consider donating your support will help us keep the site running and the downloads active & at some point move away from ads.</p>
+      <p class="dp-text">If you've gotten any value out of the stuff we share, please consider donating your support will help us keep the site running and the downloads active.</p>
       <a href="https://buymeacoffee.com/kits4leaksp" target="_blank" rel="noopener" class="dp-donate-btn">
         Buy Me a Coffee
       </a>
@@ -183,7 +183,6 @@
 
   function hidePopup() {
     popup.classList.remove('visible');
-    // Only suppress for the rest of this session (tab), not across reloads
     sessionStorage.setItem(STORAGE_KEY, 'true');
   }
 
