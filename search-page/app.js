@@ -91,7 +91,7 @@ async function performSearch(page = 1) {
     } else {
       pagination.setTotalItems(total);
       pagination.currentPage = page;
-      renderCurrentPage(5); // Render the 5st (and only) chunk we fetched
+      renderCurrentPage(1); 
       pagination.render();
     }
   } catch (error) {
