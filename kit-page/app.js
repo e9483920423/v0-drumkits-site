@@ -4,7 +4,27 @@ let currentItemSlug = null;
 
 const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
 const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
+const STORAGE_KEY = 'image_url_cache_v1'
 const imageUrlCache = new Map()
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored) {
+    const parsed = JSON.parse(stored)
+    Object.entries(parsed).forEach(([k, v]) => imageUrlCache.set(k, v))
+  }
+} catch (e) {
+  console.warn("Failed to load image cache:", e)
+}
+
+function saveImageCache() {
+  try {
+    const obj = Object.fromEntries(imageUrlCache.entries())
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj))
+  } catch (e) {
+    console.warn("Failed to save image cache:", e)
+  }
+}
 
 function resolveItemImageUrl(id) {
   const isKits4Beats = document.cookie.includes('db_source=kits4beats')
@@ -29,11 +49,13 @@ function resolveItemImageUrl(id) {
   return Promise.any(promises)
     .then(validUrl => {
       imageUrlCache.set(key, validUrl)
+      saveImageCache()
       return validUrl
     })
     .catch(() => {
       const fallback = "/errors/default.jpg"
       imageUrlCache.set(key, fallback)
+      saveImageCache()
       return fallback
     })
 }
@@ -76,6 +98,11 @@ async function loadDownloads() {
     const { data: randomData } = await randomResponse.json();
     
     allDownloads = randomData || [];
+    
+    // Pre-resolve URLs for the first 12 random items to ensure smooth rotation
+    allDownloads.slice(0, 12).forEach(item => {
+      if (item && item.id) resolveItemImageUrl(item.id)
+    })
     
     displayItem(currentItem);
   } catch (error) {

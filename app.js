@@ -1,6 +1,26 @@
 const PUB_URL = "https://pub-f33f60358a234f7f8555b2ef8b758e15.r2.dev"
 const IMAGE_EXTENSIONS = ["jpg", "png", "webp", "avif", "jpeg", "gif"]
+const STORAGE_KEY = 'image_url_cache_v1'
 const imageUrlCache = new Map()
+
+try {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored) {
+    const parsed = JSON.parse(stored)
+    Object.entries(parsed).forEach(([k, v]) => imageUrlCache.set(k, v))
+  }
+} catch (e) {
+  console.warn("Failed to load image cache:", e)
+}
+
+function saveImageCache() {
+  try {
+    const obj = Object.fromEntries(imageUrlCache.entries())
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj))
+  } catch (e) {
+    console.warn("Failed to save image cache:", e)
+  }
+}
 
 function resolveItemImageUrl(id) {
   const isKits4Beats = document.cookie.includes('db_source=kits4beats')
@@ -25,18 +45,23 @@ function resolveItemImageUrl(id) {
   return Promise.any(promises)
     .then(validUrl => {
       imageUrlCache.set(key, validUrl)
+      saveImageCache()
       return validUrl
     })
     .catch(() => {
       const fallback = "/errors/default.jpg"
       imageUrlCache.set(key, fallback)
+      saveImageCache()
       return fallback
     })
 }
 
 const ITEMS_PER_PAGE = 6
+const ITEMS_PER_CHUNK = 30
 
 let allDownloads = []
+let totalItemsCount = 0
+const fetchedOffsets = new Set()
 
 const pagination = new Pagination({
   containerId: "paginationContainer",
@@ -50,21 +75,23 @@ const preloadedImageIds = new Set()
 const cardCache = new Map()
 
 function preloadPageImages(page) {
-  const totalPages = Math.ceil(allDownloads.length / ITEMS_PER_PAGE)
-  if (!Number.isFinite(page) || page < 1 || page > totalPages) return
+  if (!totalItemsCount) return;
+  const totalPages = Math.ceil(totalItemsCount / ITEMS_PER_PAGE);
+  if (!Number.isFinite(page) || page < 1 || page > totalPages) return;
 
-  const startIdx = (page - 1) * ITEMS_PER_PAGE
-  const endIdx = startIdx + ITEMS_PER_PAGE
-  const items = allDownloads.slice(startIdx, endIdx)
+  const startIdx = (page - 1) * ITEMS_PER_PAGE;
+  const endIdx = startIdx + ITEMS_PER_PAGE;
+  
+  const items = allDownloads.slice(startIdx, endIdx);
 
   for (const item of items) {
-    if (!item || item.id == null) continue
-    const id = String(item.id)
-    if (preloadedImageIds.has(id)) continue
-    preloadedImageIds.add(id)
+    if (!item || item.id == null) continue;
+    const id = String(item.id);
+    if (preloadedImageIds.has(id)) continue;
+    preloadedImageIds.add(id);
 
     if (!cardCache.has(item.id)) {
-      cardCache.set(item.id, buildCard(item))
+      cardCache.set(item.id, buildCard(item));
     }
   }
 }
@@ -81,36 +108,47 @@ function setListLoading(isLoading) {
 async function loadDownloads(page = 1) {
   try {
     page = parseInt(page) || 1;
-    setListLoading(true);
-    const timestamp = Date.now().toString();
-    const signature = await DrumkitUtils.generateSignature(timestamp);
     
-    const limit = ITEMS_PER_PAGE;
-    const offset = (page - 1) * limit;
+    const chunkIndex = Math.floor((page - 1) * ITEMS_PER_PAGE / ITEMS_PER_CHUNK);
+    const offset = chunkIndex * ITEMS_PER_CHUNK;
+    
+    if (!fetchedOffsets.has(offset)) {
+      setListLoading(true);
+      const timestamp = Date.now().toString();
+      const signature = await DrumkitUtils.generateSignature(timestamp);
+      
+      const response = await fetch(`/api/kits?limit=${ITEMS_PER_CHUNK}&offset=${offset}`, {
+        headers: { 
+          'X-Request-Signature': signature,
+          'X-Request-Timestamp': timestamp
+        }
+      });
+      
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const { data, total } = await response.json();
+      totalItemsCount = total;
+      
+      data.forEach((item, index) => {
+        allDownloads[offset + index] = item;
+      });
+      
+      fetchedOffsets.add(offset);
+      pagination.setTotalItems(total);
+    }
 
-    const response = await fetch(`/api/kits?limit=${limit}&offset=${offset}`, {
-      headers: { 
-        'X-Request-Signature': signature,
-        'X-Request-Timestamp': timestamp
-      }
-    });
-    
-    if (!response.ok) throw new Error('Network response was not ok');
-    
-    const { data, total } = await response.json();
-
-    allDownloads = data || [];
-    
-    preloadedImageIds.clear();
-    cardCache.clear();
-    
-    preloadPageImages(1);
-    
-    pagination.setTotalItems(total);
     pagination.currentPage = page;
+    renderCurrentPage(page);
+    pagination.render(); 
     
-    renderDownloads(allDownloads);
-    pagination.render();
+    const pageInChunk = ((page - 1) * ITEMS_PER_PAGE % ITEMS_PER_CHUNK) / ITEMS_PER_PAGE;
+    if (pageInChunk >= 4) {
+      const nextOffset = offset + ITEMS_PER_CHUNK;
+      if (nextOffset < totalItemsCount && !fetchedOffsets.has(nextOffset)) {
+        loadChunkInBackground(nextOffset);
+      }
+    }
+
   } catch (error) {
     console.error("Error loading downloads:", error);
     const list = document.getElementById("downloadsList");
@@ -119,6 +157,30 @@ async function loadDownloads(page = 1) {
     }
   } finally {
     setListLoading(false);
+  }
+}
+
+async function loadChunkInBackground(offset) {
+  if (fetchedOffsets.has(offset)) return;
+  try {
+    const timestamp = Date.now().toString();
+    const signature = await DrumkitUtils.generateSignature(timestamp);
+    const response = await fetch(`/api/kits?limit=${ITEMS_PER_CHUNK}&offset=${offset}`, {
+      headers: { 
+        'X-Request-Signature': signature,
+        'X-Request-Timestamp': timestamp
+      }
+    });
+    if (response.ok) {
+      const { data } = await response.json();
+      data.forEach((item, index) => {
+        allDownloads[offset + index] = item;
+      });
+      fetchedOffsets.add(offset);
+      preloadPageImages(Math.floor(offset / ITEMS_PER_PAGE) + 1);
+    }
+  } catch (e) {
+    console.warn("Background fetch failed:", e);
   }
 }
 
@@ -140,6 +202,8 @@ function renderCurrentPage(page = 1) {
   renderDownloads(pageItems)
 
   preloadPageImages(page + 1)
+  preloadPageImages(page + 2)
+  preloadPageImages(page + 3)
 
   requestAnimationFrame(() => {
     setListLoading(false)
@@ -167,7 +231,7 @@ function createSmartImage(id) {
 
 function buildCard(item) {
   const card = document.createElement("div")
-  card.className = "download-item reveal" // Added reveal
+  card.className = "download-item reveal"
   const imageWrap = document.createElement("div")
   imageWrap.className = "item-image"
   const img = createSmartImage(item.id)
@@ -226,9 +290,8 @@ function renderDownloads(downloads) {
       cardCache.set(item.id, card);
     }
     
-    // Refresh reveal class and add stagger delay
     card.classList.remove('reveal');
-    void card.offsetWidth; // Force reflow
+    void card.offsetWidth;
     card.classList.add('reveal');
     card.style.animationDelay = `${index * 0.05}s`;
     
