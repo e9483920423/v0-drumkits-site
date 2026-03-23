@@ -228,7 +228,7 @@ function displayItem(item) {
       ` : ''}
     </div>
     <div class="action-buttons">
-      <a class="btn download-btn" role="button" tabindex="0">Download Now</a>
+      <a class="btn download-btn" role="button" tabindex="0"><span class="btn-text">Download Now</span></a>
       <a href="/" class="btn back-btn">← Back to Collection</a>
     </div>
   `
@@ -243,23 +243,78 @@ function displayItem(item) {
     glow.className = 'mouse-glow';
     dlBtn.appendChild(glow);
 
-    dlBtn.addEventListener('mousemove', e => {
+    // New layer for dynamic background to prevent "disappearing" flicker
+    const hoverBg = document.createElement('div');
+    hoverBg.className = 'btn-hover-bg';
+    dlBtn.appendChild(hoverBg);
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+    let rafId = null;
+    let startTime = Date.now();
+
+    const updateGlow = () => {
+      // ── Slower smoothed follow (Inertia) ──
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+
+      const elapsed = (Date.now() - startTime) / 1000;
+      
+      // ── Constant Ambient Movement ──
+      const ambientX = Math.sin(elapsed * 1.5) * 8;
+      const ambientY = Math.cos(elapsed * 1.2) * 8;
+      
+      // ── Constant Content Pulsation ──
+      const pulseRadius = 95 + Math.sin(elapsed * 2.5) * 10;
+      const pulseIntensity = 0.18 + Math.sin(elapsed * 2) * 0.04;
+      
+      // ── Color Stability (#ff0043) ──
+      const colorCenter = '#ff0043'; 
+
+      const displayX = currentX + ambientX;
+      const displayY = currentY + ambientY;
+
+      dlBtn.style.setProperty('--mouse-x', `${displayX}px`);
+      dlBtn.style.setProperty('--mouse-y', `${displayY}px`);
+
+      // ── Blur Spotlight ──
+      const mask = `radial-gradient(circle ${pulseRadius}px at ${displayX}px ${displayY}px, black 0%, transparent 100%)`;
+      glow.style.webkitMaskImage = mask;
+      glow.style.maskImage = mask;
+      glow.style.background = `radial-gradient(circle ${pulseRadius * 1.3}px at ${displayX}px ${displayY}px, rgba(255, 0, 67, ${pulseIntensity}) 0%, transparent 100%)`;
+
+      // ── Dynamic Background Layer (Lighter blending) ──
+      // Multi-stop gradient for a premium, well-blended look without pure black
+      const colorMid = '#cc0035'; 
+      const colorEdge = '#800021'; 
+      hoverBg.style.background = `radial-gradient(circle at ${displayX}px ${displayY}px, ${colorCenter} 0%, ${colorMid} 45%, ${colorEdge} 100%)`;
+
       const rect = dlBtn.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      dlBtn.style.setProperty('--mouse-x', `${x}px`);
-      dlBtn.style.setProperty('--mouse-y', `${y}px`);
-
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const rotateX = (y - centerY) / 7;
-      const rotateY = (centerX - x) / 7;
+      const rotateX = (displayY - centerY) / 10;
+      const rotateY = (centerX - displayX) / 10;
 
       dlBtn.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+
+      rafId = requestAnimationFrame(updateGlow);
+    };
+
+    dlBtn.addEventListener('mousemove', e => {
+      const rect = dlBtn.getBoundingClientRect();
+      targetX = e.clientX - rect.left;
+      targetY = e.clientY - rect.top;
+      
+      if (!rafId) {
+        currentX = targetX;
+        currentY = targetY;
+        rafId = requestAnimationFrame(updateGlow);
+      }
     });
 
     dlBtn.addEventListener('mouseleave', () => {
+      cancelAnimationFrame(rafId);
+      rafId = null;
       dlBtn.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
     });
   }
@@ -357,7 +412,12 @@ let hilltopReadyAt = 0;
 const HILLTOP_DELAY_MS = 5000;
 
 function updateDownloadButtonText(button, message) {
-  button.textContent = message;
+  const textEl = button.querySelector('.btn-text');
+  if (textEl) {
+    textEl.textContent = message;
+  } else {
+    button.textContent = message;
+  }
   button.setAttribute("aria-disabled", "true");
   button.style.opacity = "0.7";
   button.style.cursor = "not-allowed";
@@ -365,7 +425,12 @@ function updateDownloadButtonText(button, message) {
 }
 
 function resetDownloadButton(button) {
-  button.textContent = "Download Now";
+  const textEl = button.querySelector('.btn-text');
+  if (textEl) {
+    textEl.textContent = "Download Now";
+  } else {
+    button.textContent = "Download Now";
+  }
   button.removeAttribute("aria-disabled");
   button.style.opacity = "";
   button.style.cursor = "";

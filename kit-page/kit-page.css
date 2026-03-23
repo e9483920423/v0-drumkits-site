@@ -265,47 +265,8 @@ main {
    DOWNLOAD BUTTON
    ============================================================ */
 
-/* ── Registered custom property for animatable conic angle ── */
-@property --border-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
 
 /* ── Keyframes ── */
-@keyframes btn-edge-spin {
-  to {
-    --border-angle: 360deg;
-  }
-}
-
-@keyframes btn-slash-sweep {
-  0% {
-    background-position: 0% 50%, 50% 50%;
-  }
-  100% {
-    background-position: 600% 50%, 50% 50%;
-  }
-}
-
-@keyframes btn-radial-pulse {
-  0%, 100% {
-    background-size: 600% 100%, 200% 200%;
-  }
-  50% {
-    background-size: 600% 100%, 350% 350%;
-  }
-}
-
-@keyframes btn-sweep {
-  0%, 100% {
-    background-position: 0% 50%, 50% 50%;
-  }
-  50% {
-    background-position: 100% 50%, 50% 50%;
-  }
-}
-
 @keyframes btn-border-glow {
   0%, 100% {
     box-shadow:
@@ -401,24 +362,11 @@ main {
   will-change: transform, box-shadow;
   isolation: isolate;
 
-  /* Dual slash (fast) + radial burst (slow) — screen-blended */
-  background:
-    linear-gradient(
-      -45deg,
-      #cc0036 0%, #6b0519 12%,
-      #0a0a0a 25%, #0a0a0a 48%, #0a0a0a 72%,
-      #6b0519 85%, #cc0036 100%
-    ),
-    radial-gradient(
-      ellipse at center,
-      #0a0a0a 0%, #0a0a0a 30%, #6b051988 58%, #cc003699 80%, #cc003699 100%
-    );
-  background-blend-mode: screen;
-  background-position: 0% 50%, 50% 50%;
-  background-size: 600% 100%, 200% 200%;
-  animation: btn-slash-sweep 4s linear infinite, btn-radial-pulse 9s ease-in-out infinite;
+  /* Solid background - #ff0043 */
+  background: #ff0043;
+  overflow: hidden;
 
-  /* Clip button face — ::before lives outside */
+  /* Clip button face — ::after glow lives inside */
   clip-path: inset(0 round var(--border-radius));
 
   box-shadow:
@@ -430,40 +378,8 @@ main {
   transition:
     transform 1.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.45s ease,
+    background-color 0.45s ease,
     clip-path 0.45s ease;
-}
-
-/* ── ::before — spinning conic border ring ── */
-.download-btn::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: calc(var(--border-radius) + 2px);
-  background: conic-gradient(
-    from var(--border-angle),
-    #0a0a0a  0deg,
-    #0a0a0a  60deg,
-    #6b0519  100deg,
-    #cc0036  130deg,
-    #ff0043  150deg,
-    #cc0036  170deg,
-    #6b0519  210deg,
-    #0a0a0a  260deg,
-    #0a0a0a  360deg
-  );
-  z-index: -1;
-  animation: btn-edge-spin 6s linear infinite;
-  opacity: 0.9;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  padding: 2px;
-  pointer-events: none;
 }
 
 /* ── ::after — inner edge glow ── */
@@ -482,28 +398,40 @@ main {
   transition: box-shadow 0.45s ease;
 }
 
+.download-btn .btn-text,
+.download-btn svg {
+  position: relative;
+  z-index: 2; /* Still below mouse-glow (z-index: 3) so it gets blurred */
+}
+
 /* ── Cursor-tracking radial glow ── */
 .download-btn .mouse-glow {
   position: absolute;
   inset: 0;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  mask-image: radial-gradient(
-    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black,
-    transparent 100%
-  );
-  -webkit-mask-image: radial-gradient(
-    circle 95px at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black,
-    transparent 100%
-  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   opacity: 0;
   border-radius: inherit;
   pointer-events: none;
   z-index: 3;
   transition: opacity 0.4s ease;
   transform: translate3d(0, 0, 0);
+  will-change: mask-image, background;
+}
+
+/* Layered dynamic background to prevent flickering */
+.download-btn .btn-hover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+  will-change: background;
+}
+
+.download-btn:hover .btn-hover-bg {
+  opacity: 1;
 }
 
 /* ── Crisp white dot ── */
@@ -564,21 +492,7 @@ main {
 
 /* ── Hover ── */
 .download-btn:hover {
-  background:
-    linear-gradient(
-      -45deg,
-      #ff0043 0%, #e8003d 15%,
-      #8a0721 30%, #3a0010 50%,
-      #8a0721 70%, #e8003d 85%, #ff0043 100%
-    ),
-    radial-gradient(
-      ellipse at center,
-      #0a0a0a 0%, #6b051966 35%, #cc0036cc 70%, #ff004388 100%
-    );
-  background-blend-mode: screen;
-  background-position: 50% 50%, 50% 50%;
-  background-size: 200% 100%, 500% 500%;
-  animation: btn-edge-spin 3s linear infinite, btn-sweep 4s ease-in-out infinite;
+  color: #fff;
   box-shadow:
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -586,25 +500,6 @@ main {
     0 8px 28px rgba(255, 0, 67, 0.5),
     0 2px 8px rgba(0, 0, 0, 0.5);
   transform: perspective(900px) scale(1.048) translateY(-1.5px);
-}
-
-/* Border ring: brighter + faster on hover */
-.download-btn:hover::before {
-  opacity: 1;
-  background: conic-gradient(
-    from var(--border-angle),
-    #0a0a0a  0deg,
-    #6b0519  40deg,
-    #cc0036  80deg,
-    #ff0043  110deg,
-    #ff6680  130deg,
-    #ff0043  150deg,
-    #cc0036  190deg,
-    #6b0519  240deg,
-    #0a0a0a  300deg,
-    #0a0a0a  360deg
-  );
-  padding: 2px;
 }
 
 /* Inner edge glow brightens on hover */

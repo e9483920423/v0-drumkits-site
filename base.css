@@ -359,7 +359,7 @@ main {
 .download-btn:hover {
   background-color: var(--accent-red);
   border-color: #0000;
-  color: #000;
+  color: #fff;
 }
 
 footer {
