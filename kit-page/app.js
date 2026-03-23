@@ -277,11 +277,8 @@ function displayItem(item) {
       dlBtn.style.setProperty('--mouse-x', `${displayX}px`);
       dlBtn.style.setProperty('--mouse-y', `${displayY}px`);
 
-      // ── Blur Spotlight ──
-      const mask = `radial-gradient(circle ${pulseRadius}px at ${displayX}px ${displayY}px, black 0%, transparent 100%)`;
-      glow.style.webkitMaskImage = mask;
-      glow.style.maskImage = mask;
-      glow.style.background = `radial-gradient(circle ${pulseRadius * 1.3}px at ${displayX}px ${displayY}px, rgba(255, 0, 67, ${pulseIntensity}) 0%, transparent 100%)`;
+      // ── Spotlight Glow (No Blur) ──
+      glow.style.background = `radial-gradient(circle ${pulseRadius}px at ${displayX}px ${displayY}px, rgba(255, 0, 67, ${pulseIntensity * 0.4}) 0%, transparent 100%)`;
 
       // ── Dynamic Background Layer (Lighter blending) ──
       // Multi-stop gradient for a premium, well-blended look without pure black
